@@ -81,7 +81,13 @@ Hello {"world".upcase}
 Inside tags:
 
 ```jsx
-<p>{"hello world".upcase}
+<p>{"hello world".upcase}</p>
+```
+
+As attributes:
+
+```jsx
+<p class={@dynamic_class}>Hello world</p>
 ```
 
 #### Execution Context
