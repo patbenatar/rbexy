@@ -56,6 +56,7 @@ module Rbexy
             tokens << [:OPEN_TAG_END]
             stack.push(:tag_end)
           elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:expression)
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
@@ -78,6 +79,7 @@ module Rbexy
         when :expression
           if scanner.scan(Patterns.close_expression)
             tokens << [:EXPRESSION, curr_expr]
+            tokens << [:CLOSE_EXPRESSION]
             self.curr_expr = ""
             stack.pop
           elsif scanner.scan(Patterns.open_expression)
@@ -169,6 +171,7 @@ module Rbexy
             tokens << [:ATTR_NAME, scanner.matched.strip]
           elsif scanner.scan(Patterns.open_attr_splat)
             tokens << [:OPEN_ATTR_SPLAT]
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:tag_attr_splat, :expression)
           else
             raise SyntaxError, self
@@ -177,6 +180,7 @@ module Rbexy
           if scanner.scan(Patterns.double_quote)
             stack.push(:quoted_text)
           elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:expression)
           elsif scanner.scan(Patterns.whitespace) || scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTR_VALUE]

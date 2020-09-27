@@ -7,7 +7,11 @@ RSpec.describe Rbexy::Parser do
   end
 
   it "parses expressions" do
-    subject = Rbexy::Parser.new([[:EXPRESSION, "thing = 'bar'"]])
+    subject = Rbexy::Parser.new([
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "thing = 'bar'"],
+      [:CLOSE_EXPRESSION],
+    ])
     result = subject.parse.children
     expect(result.first).to be_a Rbexy::Nodes::Expression
     expect(result.first.content).to eq "thing = 'bar'"
@@ -57,7 +61,9 @@ RSpec.describe Rbexy::Parser do
       [:CLOSE_ATTR_VALUE],
       [:ATTR_NAME, "thing"],
       [:OPEN_ATTR_VALUE],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "exprValue"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
@@ -94,7 +100,9 @@ RSpec.describe Rbexy::Parser do
       [:TAG_NAME, "div"],
       [:OPEN_ATTRS],
       [:OPEN_ATTR_SPLAT],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "{ attr1: 'val1', attr2: 'val2' }"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_SPLAT],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
@@ -224,7 +232,9 @@ RSpec.describe Rbexy::Parser do
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_DEF],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "thing = 'foo'"],
+      [:CLOSE_EXPRESSION],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_END]

@@ -34,13 +34,15 @@ module Rbexy
     end
 
     def parse_expression
-      return unless token = take(:EXPRESSION)
+      return unless take(:OPEN_EXPRESSION)
+      token = take!(:EXPRESSION)
+      take!(:CLOSE_EXPRESSION)
       Nodes::Expression.new(token[1])
     end
 
     def parse_expression!
-      return unless token = take!(:EXPRESSION)
-      Nodes::Expression.new(token[1])
+      peek!(:OPEN_EXPRESSION)
+      parse_expression
     end
 
     def parse_tag
@@ -122,6 +124,10 @@ module Rbexy
       if (token = tokens[position]) && token[0] == token_name
         token
       end
+    end
+
+    def peek!(token_name)
+      peek(token_name) || raise(ParseError, "Expected token #{token_name}, got #{tokens[position]} instead.")
     end
 
     def eventually!(token_name)

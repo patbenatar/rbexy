@@ -88,7 +88,9 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_DEF],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "aVar"],
+      [:CLOSE_EXPRESSION],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_END]
@@ -98,8 +100,12 @@ RSpec.describe Rbexy::Lexer do
   it "tokenizes two expressions next to one another" do
     subject = Rbexy::Lexer.new("{aVar}{anotherVar}")
     expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "aVar"],
+      [:CLOSE_EXPRESSION],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "anotherVar"],
+      [:CLOSE_EXPRESSION],
     ]
   end
 
@@ -110,7 +116,9 @@ RSpec.describe Rbexy::Lexer do
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_DEF],
       [:TEXT, "Hello "],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "aVar"],
+      [:CLOSE_EXPRESSION],
       [:TEXT, "!"],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
@@ -128,21 +136,27 @@ RSpec.describe Rbexy::Lexer do
   it "allows for { ... } to exist within an expression (e.g. a Ruby hash)" do
     subject = Rbexy::Lexer.new('{thing = { hashKey: "value" }; moreCode}')
     expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, 'thing = { hashKey: "value" }; moreCode'],
+      [:CLOSE_EXPRESSION],
     ]
   end
 
   it "allows for expressions to have arbitrary brackets inside quoted strings" do
     subject = Rbexy::Lexer.new('{something "quoted {bracket}" \'{}\' "\'{\'" more}')
     expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, 'something "quoted {bracket}" \'{}\' "\'{\'" more'],
+      [:CLOSE_EXPRESSION],
     ]
   end
 
   it "doesn't consider escaped quotes to end an expression quoted string" do
     subject = Rbexy::Lexer.new('{"he said \"hello {there}\" loudly"}')
     expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, '"he said \"hello {there}\" loudly"'],
+      [:CLOSE_EXPRESSION],
     ]
   end
 
@@ -196,7 +210,9 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_ATTRS],
       [:ATTR_NAME, "value"],
       [:OPEN_ATTR_VALUE],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "aVar"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF]
@@ -216,7 +232,9 @@ RSpec.describe Rbexy::Lexer do
       [:CLOSE_ATTR_VALUE],
       [:ATTR_NAME, "thing"],
       [:OPEN_ATTR_VALUE],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "exprValue"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF]
@@ -230,7 +248,9 @@ RSpec.describe Rbexy::Lexer do
       [:TAG_NAME, "div"],
       [:OPEN_ATTRS],
       [:OPEN_ATTR_SPLAT],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "the_attrs"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_SPLAT],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF]
@@ -287,7 +307,9 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_ATTRS],
       [:ATTR_NAME, "id"],
       [:OPEN_ATTR_VALUE],
+      [:OPEN_EXPRESSION],
       [:EXPRESSION, "dynamicId"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:ATTR_NAME, "class"],
       [:OPEN_ATTR_VALUE],
