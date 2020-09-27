@@ -3,30 +3,18 @@ Bundler.require
 require "active_support/inflector"
 require "active_support/core_ext/string/strip"
 
-require_relative "lib/rbexy"
-
 template_string = <<-RBX.strip_heredoc.strip
   <div foo bar="baz" thing={["hey", "you"].join()}>
-    <h1 {**splat_attrs}>Hello world</h1>
+    <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
+    <div {**{ class: "myClass" }}></div>
     Some words
     <p>Lorem ipsum</p>
-    <input type="submit" value={@ivar_val} />
+    <input type="submit" value={@ivar_val} disabled />
     <Button>the content</Button>
     <Forms.TextField />
   </div>
 RBX
 
-puts "### Tokenizing..."
-tokens = Rbexy::Lexer.new(template_string).tokenize
-tokens.each do |token|
-  puts token.join(": ")
-end
-
-puts "### Parsing..."
-template = Rbexy::Parser.new(tokens).parse
-puts template
-
-puts "### Compiling..."
 class CompileContext
   def initialize
     @ivar_val = "ivar value"
@@ -40,22 +28,24 @@ class CompileContext
   end
 end
 
-class Button
-  def initialize(**attrs)
-  end
-
-  def render
-    "<button class='myCustomButton'>#{yield.join("")}</button>"
-  end
-end
-
-module Forms
-  class TextField
+module Components
+  class ButtonComponent
     def initialize(**attrs)
     end
 
     def render
-      "<input type='text' />"
+      "<button class=\"myCustomButton\">#{yield.join("")}</button>"
+    end
+  end
+
+  module Forms
+    class TextFieldComponent
+      def initialize(**attrs)
+      end
+
+      def render
+        "<input type=\"text\" />"
+      end
     end
   end
 end
@@ -70,7 +60,7 @@ class ComponentProvider
   end
 
   def find(name)
-    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+    ActiveSupport::Inflector.constantize("Components::#{name.gsub(".", "::")}Component")
   rescue NameError => e
     nil
   end
@@ -78,4 +68,4 @@ end
 
 # html_compiler = Rbexy::HtmlCompiler.new(CompileContext.new)
 component_compiler = Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
-puts template.compile(component_compiler)
+puts Rbexy.compile(template_string, component_compiler)

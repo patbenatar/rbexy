@@ -10,7 +10,7 @@ _But what about Javascript and client-side behavior?_ You probably don't need as
 
 Use your custom Ruby class components from `.rbx` templates just like you would React components in JSX:
 
-```rbx
+```jsx
 <body>
   <Hero size="fullscreen" {**splat_some_attributes}>
     <h1>Hello {@name}</h1>
@@ -37,6 +37,186 @@ end
 ```
 
 with their accompying template files (also can be `.rbx`!), scoped scss files, JS and other assets (not shown).
+
+## Template Syntax
+
+### Text
+
+You can put arbitrary strings anywhere.
+
+At the root:
+
+```jsx
+Hello world
+```
+
+Inside tags:
+
+```jsx
+<p>Hello world</p>
+```
+
+As attributes:
+
+```jsx
+<div class="myClass"></div>
+```
+
+### Expressions
+
+You can put ruby code anywhere that you would put text, just wrap it in `{ ... }`
+
+At the root:
+
+```jsx
+{"hello world".upcase}
+```
+
+Inside a sentence:
+
+```jsx
+Hello {"world".upcase}
+```
+
+Inside tags:
+
+```jsx
+<p>{"hello world".upcase}
+```
+
+#### Execution Context
+
+You can control the context in which your ruby expressions are evaluated by the rbexy compiler, allowing you to make ivars, methods, etc available to your template expressions:
+
+```ruby
+class CompileContext
+  def initialize
+    @an_ivar = "Ivar value"
+  end
+
+  def a_method
+    "Method value"
+  end
+end
+
+Rbexy.compile(
+  "<p class={a_method}>{@an_ivar}</p>",
+  Rbexy::HtmlCompiler.new(CompileContext.new)
+)
+```
+
+### Tags
+
+You can put standard HTML tags anywhere.
+
+At the root:
+
+```jsx
+<h1>Hello world</h1>
+```
+
+As children:
+
+```jsx
+<div>
+  <h1>Hello world</h1>
+</div>
+```
+
+As siblings with other tags:
+
+```jsx
+<div>
+  <h1>Hello world</h1>
+  <p>Welcome to rbexy</p>
+</div>
+```
+
+As siblings with text and expressions:
+
+```jsx
+<h1>Hello world</h1>
+{an_expression}
+Some arbitrary text
+```
+
+Self-closing tags:
+
+```jsx
+<input type="text" />
+```
+
+#### Attributes
+
+Text and expressions can be provides as attributes:
+
+```jsx
+<div class="myClass" id={dynamic_id}></div>
+```
+
+Value-less attributes are allowed:
+
+```jsx
+<input type="submit" disabled>
+```
+
+You can splat a hash into attributes:
+
+```jsx
+<div {**{ class: "myClass" }} {**@more_attrs}></div>
+```
+
+#### Custom components
+
+Use the `Rbexy::ComponentCompiler` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them during the compile.
+
+```ruby
+module Components
+  class ButtonComponent < ViewComponent::Base
+    def initialize(**attrs)
+    end
+
+    def render
+      # Render it yourself, call one of Rails view helpers (link_to,
+      # content_tag, etc), or use a template file. Be sure to render children
+      # by yielding to the given block.
+      "<button class=\"myCustomButton\">#{yield.join("")}</button>"
+    end
+  end
+
+  module Forms
+    class TextFieldComponent < ViewComponent::Base
+      def initialize(**attrs)
+      end
+
+      def render
+        "<input type=\"text\" />"
+      end
+    end
+  end
+end
+
+class ComponentProvider
+  def match?(name)
+    find(name) != nil
+  end
+
+  def render(name, attrs, &block)
+    find(name).new(**attrs).render(&block)
+  end
+
+  def find(name)
+    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+  rescue NameError => e
+    nil
+  end
+end
+
+Rbexy.compile(
+  "<Forms.TextField /><Button>Submit</Button>",
+  Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
+)
+```
 
 ## Installation
 
