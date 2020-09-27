@@ -1,0 +1,12 @@
+version: '3'
+
+volumes:
+  bundle:
+
+services:
+  rbexy:
+    build: .
+    volumes:
+      - .:/app
+      - bundle:/usr/local/bundle
+    working_dir: /app
