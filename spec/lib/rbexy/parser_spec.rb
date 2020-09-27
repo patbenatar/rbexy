@@ -72,7 +72,8 @@ RSpec.describe Rbexy::Parser do
     attrFoo = div.attrs[0]
     expect(attrFoo).to be_a Rbexy::Nodes::XmlAttr
     expect(attrFoo.name).to eq "foo"
-    expect(attrFoo.value).to eq nil
+    expect(attrFoo.value).to be_a Rbexy::Nodes::Text
+    expect(attrFoo.value.content).to eq ""
 
     attrBar = div.attrs[1]
     expect(attrBar).to be_a Rbexy::Nodes::XmlAttr
