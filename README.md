@@ -38,15 +38,6 @@ end
 
 with their accompying template files (also can be `.rbx`!), scoped scss files, JS and other assets (not shown).
 
-## TODO
-
-* Strip whitespace at the start, in-between, and end of tags.
-* Remove Hashie::Mash dependency
-* Package as a gem
-* Add an example ComponentCompiler < HtmlCompiler
-* VS Code syntax highlighter
-* Conditional rendering RBX inside an expression, like `boolVar && <Component />` and `boolVar ? <Component1 /> : <Component2 />`
-
 ## Installation
 
 Add this line to your application's Gemfile:
