@@ -86,6 +86,8 @@ module Rbexy
         value = parse_text || parse_expression
         raise ParseError, "Missing attribute value" unless value
         take(:CLOSE_ATTR_VALUE)
+      else
+        value = default_empty_attr_value
       end
 
       Nodes::XmlAttr.new(name, value)
@@ -125,6 +127,10 @@ module Rbexy
     def eventually!(token_name)
       tokens[position..-1].first { |t| t[0] == token_name } ||
         raise(ParseError, "Expected to find a #{token_name} but never did")
+    end
+
+    def default_empty_attr_value
+      Nodes::Text.new("")
     end
   end
 end
