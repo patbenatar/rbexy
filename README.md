@@ -90,7 +90,9 @@ As attributes:
 <p class={@dynamic_class}>Hello world</p>
 ```
 
-You can use tags within expressions to conditionalize your template:
+#### Tags within expressions
+
+To conditionalize your template:
 
 ```jsx
 <div>
@@ -99,7 +101,7 @@ You can use tags within expressions to conditionalize your template:
 </div>
 ```
 
-Or for loops:
+For loops:
 
 ```jsx
 <ul>
@@ -107,7 +109,21 @@ Or for loops:
 </ul>
 ```
 
-_Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional rendering and loops as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
+As an attribute:
+
+```jsx
+<Hero title={<h1>Hello World</h1>}>
+  Content here...
+</Hero>
+```
+
+Pass a lambda to a prop, that when called returns a tag:
+
+```jsx
+<Hero title={-> { <h1>Hello World</h1> }}>
+  Content here...
+</Hero>
+```
 
 ### Tags
 

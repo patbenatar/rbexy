@@ -160,6 +160,23 @@ RSpec.describe Rbexy::Lexer do
     ]
   end
 
+  it "tokenizes an expression that starts with a tag" do
+    subject = Rbexy::Lexer.new("{<h1>Title</h1>}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, ""],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Title"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
   it "tokenizes tags within a boolean expression" do
     subject = Rbexy::Lexer.new("{true && <h1>Is true</h1>}")
     expect(subject.tokenize).to eq [

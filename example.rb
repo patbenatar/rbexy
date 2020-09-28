@@ -17,7 +17,7 @@ template_string = <<-RBX
   {false && <p>Is false</p>}
   {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
   <Button prop1="val1" prop2={true && "val2"}>the content</Button>
-  <Forms.TextField />
+  <Forms.TextField label={->(n) { <label id={n}>Something</label> }} note={<p>the note</p>} />
   <ul>
     {["hi", "there", "nick"].map { |val| <li>{val}</li> }}
   </ul>
@@ -41,11 +41,13 @@ module Components
 
   module Forms
     class TextFieldComponent
-      def initialize(**attrs)
+      def initialize(label:, note:, **attrs)
+        @label = label
+        @note = note
       end
 
       def render
-        "<input type=\"text\" />"
+        "#{@label.call(2)} <input type=\"text\" />#{@note}"
       end
     end
   end
