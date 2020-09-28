@@ -164,24 +164,28 @@ You can splat a hash into attributes:
 
 #### Custom components
 
-Use the `Rbexy::ComponentCompiler` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them during the compile.
+Use the `Rbexy::ComponentRuntime` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them while evaluating your template.
+
+_See "Execution Context" below for more details._
 
 ```ruby
 module Components
-  class ButtonComponent < ViewComponent::Base
-    def initialize(**attrs)
+  class ButtonComponent
+    def initialize(prop1:, prop2:)
+      @prop1 = prop1
+      @prop2 = prop2
     end
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
       # content_tag, etc), or use a template file. Be sure to render
       # children by yielding to the given block.
-      "<button class=\"myCustomButton\">#{yield}</button>"
+      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
     end
   end
 
   module Forms
-    class TextFieldComponent < ViewComponent::Base
+    class TextFieldComponent
       def initialize(**attrs)
       end
 
@@ -202,15 +206,30 @@ class ComponentProvider
   end
 
   def find(name)
-    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+    ActiveSupport::Inflector.constantize("Components::#{name}Component")
   rescue NameError => e
+    raise e unless e.message =~ /constant/
     nil
   end
 end
 
-Rbexy.compile(
-  "<Forms.TextField /><Button>Submit</Button>",
-  Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
+class MyRuntime < Rbexy::ComponentRuntime
+  def initialize(component_provider)
+    super(component_provider)
+    @ivar_val = "ivar value"
+  end
+
+  def splat_attrs
+    {
+      key1: "val1",
+      key2: "val2"
+    }
+  end
+end
+
+Rbexy.evaluate(
+  "<Forms.TextField /><Button prop1=\"val1\" prop2={true && \"val2\">Submit</Button>",
+  MyRuntime.new(ComponentProvider.new)
 )
 ```
 
