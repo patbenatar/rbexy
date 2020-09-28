@@ -12,6 +12,9 @@ template_string = <<-RBX.strip_heredoc.strip
     <input type="submit" value={@ivar_val} disabled />
     <Button>the content</Button>
     <Forms.TextField />
+    {true && <p>Is true</p>}
+    {false && <p>Is false</p>}
+    {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
   </div>
 RBX
 

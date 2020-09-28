@@ -79,7 +79,7 @@ module Rbexy
           end
         when :expression
           if scanner.scan(Patterns.close_expression)
-            tokens << [:EXPRESSION, curr_expr]
+            tokens << [:EXPRESSION_BODY, curr_expr]
             tokens << [:CLOSE_EXPRESSION]
             self.curr_expr = ""
             stack.pop
@@ -94,7 +94,7 @@ module Rbexy
             stack.push(:expression_inner_single_quote)
           elsif scanner.scan(Patterns.open_tag_def)
             if self.curr_expr =~ Patterns.expression_internal_tag_prefixes
-              tokens << [:EXPRESSION, curr_expr]
+              tokens << [:EXPRESSION_BODY, curr_expr]
               self.curr_expr = ""
               tokens << [:OPEN_TAG_DEF]
               stack.push(:expression_inner_tag, :tag_def)

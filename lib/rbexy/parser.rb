@@ -35,14 +35,25 @@ module Rbexy
 
     def parse_expression
       return unless take(:OPEN_EXPRESSION)
-      token = take!(:EXPRESSION)
-      take!(:CLOSE_EXPRESSION)
-      Nodes::Expression.new([token[1]])
+
+      statements = []
+
+      eventually!(:CLOSE_EXPRESSION)
+      until take(:CLOSE_EXPRESSION)
+        statements << (parse_expression_body || parse_tag)
+      end
+
+      Nodes::ExpressionGroup.new(statements)
     end
 
     def parse_expression!
       peek!(:OPEN_EXPRESSION)
       parse_expression
+    end
+
+    def parse_expression_body
+      return unless token = take(:EXPRESSION_BODY)
+      Nodes::Expression.new(token[1])
     end
 
     def parse_tag

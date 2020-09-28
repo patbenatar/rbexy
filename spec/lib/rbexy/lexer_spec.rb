@@ -89,7 +89,7 @@ RSpec.describe Rbexy::Lexer do
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_DEF],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "aVar"],
+      [:EXPRESSION_BODY, "aVar"],
       [:CLOSE_EXPRESSION],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
@@ -101,10 +101,10 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new("{aVar}{anotherVar}")
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "aVar"],
+      [:EXPRESSION_BODY, "aVar"],
       [:CLOSE_EXPRESSION],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "anotherVar"],
+      [:EXPRESSION_BODY, "anotherVar"],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -117,7 +117,7 @@ RSpec.describe Rbexy::Lexer do
       [:CLOSE_TAG_DEF],
       [:TEXT, "Hello "],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "aVar"],
+      [:EXPRESSION_BODY, "aVar"],
       [:CLOSE_EXPRESSION],
       [:TEXT, "!"],
       [:OPEN_TAG_END],
@@ -137,7 +137,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new('{thing = { hashKey: "value" }; moreCode}')
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, 'thing = { hashKey: "value" }; moreCode'],
+      [:EXPRESSION_BODY, 'thing = { hashKey: "value" }; moreCode'],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -146,7 +146,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new('{something "quoted {bracket}" \'{}\' "\'{\'" more}')
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, 'something "quoted {bracket}" \'{}\' "\'{\'" more'],
+      [:EXPRESSION_BODY, 'something "quoted {bracket}" \'{}\' "\'{\'" more'],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -155,7 +155,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new('{"he said \"hello {there}\" loudly"}')
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, '"he said \"hello {there}\" loudly"'],
+      [:EXPRESSION_BODY, '"he said \"hello {there}\" loudly"'],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -164,7 +164,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new("{true && <h1>Is true</h1>}")
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "true && "],
+      [:EXPRESSION_BODY, "true && "],
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_DEF],
@@ -172,7 +172,7 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_TAG_END],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_END],
-      [:EXPRESSION, ""],
+      [:EXPRESSION_BODY, ""],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -181,7 +181,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new("{true && 'hey'}")
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "true && 'hey'"],
+      [:EXPRESSION_BODY, "true && 'hey'"],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -190,18 +190,18 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new("{true && <h1>Is {'hello'.upcase}</h1>}")
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "true && "],
+      [:EXPRESSION_BODY, "true && "],
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_DEF],
       [:TEXT, "Is "],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "'hello'.upcase"],
+      [:EXPRESSION_BODY, "'hello'.upcase"],
       [:CLOSE_EXPRESSION],
       [:OPEN_TAG_END],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_END],
-      [:EXPRESSION, ""],
+      [:EXPRESSION_BODY, ""],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -210,7 +210,7 @@ RSpec.describe Rbexy::Lexer do
     subject = Rbexy::Lexer.new("{true ? <h1>Yes</h1> : <h2>No</h2>}")
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "true ? "],
+      [:EXPRESSION_BODY, "true ? "],
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_DEF],
@@ -218,7 +218,7 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_TAG_END],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_END],
-      [:EXPRESSION, " : "],
+      [:EXPRESSION_BODY, " : "],
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "h2"],
       [:CLOSE_TAG_DEF],
@@ -226,7 +226,7 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_TAG_END],
       [:TAG_NAME, "h2"],
       [:CLOSE_TAG_END],
-      [:EXPRESSION, ""],
+      [:EXPRESSION_BODY, ""],
       [:CLOSE_EXPRESSION],
     ]
   end
@@ -282,7 +282,7 @@ RSpec.describe Rbexy::Lexer do
       [:ATTR_NAME, "value"],
       [:OPEN_ATTR_VALUE],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "aVar"],
+      [:EXPRESSION_BODY, "aVar"],
       [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
@@ -304,7 +304,7 @@ RSpec.describe Rbexy::Lexer do
       [:ATTR_NAME, "thing"],
       [:OPEN_ATTR_VALUE],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "exprValue"],
+      [:EXPRESSION_BODY, "exprValue"],
       [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
@@ -320,7 +320,7 @@ RSpec.describe Rbexy::Lexer do
       [:OPEN_ATTRS],
       [:OPEN_ATTR_SPLAT],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "the_attrs"],
+      [:EXPRESSION_BODY, "the_attrs"],
       [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_SPLAT],
       [:CLOSE_ATTRS],
@@ -379,7 +379,7 @@ RSpec.describe Rbexy::Lexer do
       [:ATTR_NAME, "id"],
       [:OPEN_ATTR_VALUE],
       [:OPEN_EXPRESSION],
-      [:EXPRESSION, "dynamicId"],
+      [:EXPRESSION_BODY, "dynamicId"],
       [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:ATTR_NAME, "class"],
