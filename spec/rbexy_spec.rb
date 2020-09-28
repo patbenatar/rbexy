@@ -131,4 +131,22 @@ RSpec.describe Rbexy do
 
     expect(result).to eq expected
   end
+
+  it "handles loops with blocks" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <ul>
+        {["Hello", "world"].map { |v| <li>{v}</li> }}
+      </ul>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::HtmlRuntime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <ul>
+        <li>Hello</li><li>world</li>
+      </ul>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
 end

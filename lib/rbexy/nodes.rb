@@ -28,8 +28,14 @@ module Rbexy
 
       def compile
         <<-CODE
-"".tap do |output|
-#{children.map(&:compile).map { |c| "output << ((#{c}) || \"\")"}.join("\n")}
+class OutputBuffer < String
+  def <<(content)
+    value = content.is_a?(Array) ? content.join : content
+    super(value || "")
+  end
+end
+OutputBuffer.new.tap do |output|
+#{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
 end
         CODE
       end
@@ -86,8 +92,8 @@ end
         if children.length > 0
 <<-CODE
 #{tag} do
-  "".tap do |output|
-    #{children.map(&:compile).map { |c| "output << ((#{c}) || \"\")"}.join("\n")}
+  OutputBuffer.new.tap do |output|
+    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
   end.html_safe
 end
 CODE
