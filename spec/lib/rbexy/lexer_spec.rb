@@ -160,6 +160,77 @@ RSpec.describe Rbexy::Lexer do
     ]
   end
 
+  it "tokenizes tags within a boolean expression" do
+    subject = Rbexy::Lexer.new("{true && <h1>Is true</h1>}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Is true"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "does not specially tokenize boolean expressions that aren't followed by a tag" do
+    subject = Rbexy::Lexer.new("{true && 'hey'}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "true && 'hey'"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "allows for sub-expressions within a boolean expression tag" do
+    subject = Rbexy::Lexer.new("{true && <h1>Is {'hello'.upcase}</h1>}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Is "],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "'hello'.upcase"],
+      [:CLOSE_EXPRESSION],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a ternary expression" do
+    subject = Rbexy::Lexer.new("{true ? <h1>Yes</h1> : <h2>No</h2>}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "true ? "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Yes"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION, " : "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h2"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "No"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h2"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
   it "tokenizes value-less attributes" do
     subject = Rbexy::Lexer.new("<button disabled>")
     expect(subject.tokenize).to eq [
