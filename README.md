@@ -99,6 +99,14 @@ You can use tags within expressions to conditionalize your template:
 </div>
 ```
 
+Or for loops:
+
+```jsx
+<ul>
+  {[1, 2, 3].map { |n| <li>{n}</li> }}
+</ul>
+```
+
 _Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional templates as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
 
 ### Tags

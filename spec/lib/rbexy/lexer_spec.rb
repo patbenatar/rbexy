@@ -231,6 +231,84 @@ RSpec.describe Rbexy::Lexer do
     ]
   end
 
+  it "tokenizes tags within a do..end block" do
+    template = <<-RBX.strip
+{3.times do
+  <p>Hello</p>
+end}
+RBX
+    subject = Rbexy::Lexer.new(template)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times do\n  "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, "\nend"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a do |var|..end block" do
+    template = <<-RBX.strip
+{3.times do |n|
+  <p>Hello</p>
+end}
+RBX
+    subject = Rbexy::Lexer.new(template)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times do |n|\n  "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, "\nend"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a {..} block" do
+    subject = Rbexy::Lexer.new("{3.times { <p>Hello</p> }}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times { "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, " }"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a {|var|..} block" do
+    subject = Rbexy::Lexer.new("{3.times { |n| <p>Hello</p> }}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times { |n| "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, " }"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
   it "tokenizes value-less attributes" do
     subject = Rbexy::Lexer.new("<button disabled>")
     expect(subject.tokenize).to eq [
