@@ -154,7 +154,7 @@ Self-closing tags:
 
 #### Attributes
 
-Text and expressions can be provides as attributes:
+Text and expressions can be provided as attributes:
 
 ```jsx
 <div class="myClass" id={dynamic_id}></div>
