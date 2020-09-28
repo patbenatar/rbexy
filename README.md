@@ -1,5 +1,7 @@
 # A Ruby template language inspired by JSX
 
+[![Build Status](https://travis-ci.org/patbenatar/rbexy.svg?branch=master)](https://travis-ci.org/patbenatar/rbexy)
+
 Love JSX and component-based frontends, but sick of paying the costs of SPA development? Rbexy brings the elegance of JSX—operating on HTML elements and custom components with an interchangeable syntax—to the world of Rails server-rendered apps.
 
 Combine this with a component library like Github's view_component and build CSS Modules into your Webpacker PostCSS pipeline—you'll have a first-class frontend development experience while maintaining the development efficiency of Rails.
