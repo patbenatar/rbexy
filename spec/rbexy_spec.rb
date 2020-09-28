@@ -41,7 +41,7 @@ RSpec.describe Rbexy do
         end
 
         def render
-          "<button class=\"myCustomButton\">#{yield.join("")}</button>"
+          "<button class=\"myCustomButton\">#{yield}</button>"
         end
       end
 

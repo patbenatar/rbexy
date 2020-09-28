@@ -189,9 +189,9 @@ module Components
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
-      # content_tag, etc), or use a template file. Be sure to render children
-      # by yielding to the given block.
-      "<button class=\"myCustomButton\">#{yield.join("")}</button>"
+      # content_tag, etc), or use a template file. Be sure to render
+      # children by yielding to the given block.
+      "<button class=\"myCustomButton\">#{yield}</button>"
     end
   end
 

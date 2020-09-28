@@ -5,6 +5,7 @@ module Rbexy
         children
           .map { |c| c.compile(compiler) }
           .reject { |v| !v }
+          .join("")
       end
     end
 
@@ -18,7 +19,7 @@ module Rbexy
       end
 
       def compile(compiler)
-        compile_children(compiler).join("")
+        compile_children(compiler)
       end
     end
 
