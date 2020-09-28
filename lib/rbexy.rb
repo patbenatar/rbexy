@@ -8,9 +8,9 @@ module Rbexy
   autoload :ComponentCompiler, "rbexy/component_compiler"
   autoload :HashMash, "rbexy/hash_mash"
 
-  def self.compile(template_string, compiler)
+  def self.compile(template_string)
     tokens = Rbexy::Lexer.new(template_string).tokenize
     template = Rbexy::Parser.new(tokens).parse
-    template.compile(compiler)
+    template.compile
   end
 end

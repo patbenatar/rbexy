@@ -1,25 +1,29 @@
+# New approach for compiler:
+#
+# Build a big string of ruby code, with our literals as strings and our expressions
+# interpolated within it, then eval the whole thing at once.
+# * At the top we use Context#instance_eval
+# * Sub-expressions just use #eval so they have access to whatever scope they're in
+
 module Rbexy
   module Nodes
-    module ChildrenCompiler
-      def compile_children(compiler)
-        children
-          .map { |c| c.compile(compiler) }
-          .reject { |v| !v }
-          .join("")
-      end
-    end
-
     class Template
-      include ChildrenCompiler
-
       attr_reader :children
 
       def initialize(children)
         @children = children
       end
 
-      def compile(compiler)
-        compile_children(compiler)
+      def compile
+        <<-CODE
+output = ""
+#{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+output
+        CODE
+        # ["output = \"\""]
+        #   .concat(children.map(&:compile))
+        #   .concat(["output"])
+        #   .join("\n")
       end
     end
 
@@ -30,8 +34,8 @@ module Rbexy
         @content = content
       end
 
-      def compile(compiler)
-        content
+      def compile
+        "\"#{content.gsub('"', '\\"')}\""
       end
     end
 
@@ -42,22 +46,8 @@ module Rbexy
         @statements = statements
       end
 
-      def compile(compiler)
-        compiler.eval(combined_expression(compiler))
-      end
-
-      def combined_expression(compiler)
-        statements.map { |s| prepare_to_combine(s, compiler) }.join("")
-      end
-
-      def prepare_to_combine(statement, compiler)
-        if statement.is_a?(Expression)
-          # Collect sub-statements as code strings and wait to eval them
-          # until we have the whole combined_expression in a code string
-          statement.content
-        else
-          "\"#{statement.compile(compiler).gsub('"', '\\"')}\""
-        end
+      def compile
+        statements.map(&:compile).join
       end
     end
 
@@ -68,14 +58,12 @@ module Rbexy
         @content = content
       end
 
-      def compile(compiler)
-        compiler.eval(content)
+      def compile
+        content
       end
     end
 
     class XmlNode
-      include ChildrenCompiler
-
       attr_reader :name, :attrs, :children
 
       def initialize(name, attrs, children)
@@ -84,22 +72,8 @@ module Rbexy
         @children = children
       end
 
-      def compile(compiler)
-        compiler.tag(name, compile_attrs(compiler)) do
-          compile_children(compiler)
-        end
-      end
+      def compile
 
-      def compile_attrs(compiler)
-        attrs.each_with_object({}) do |attr, memo|
-          if attr.is_a? ExpressionGroup
-            unsplatted = attr.compile(compiler)
-            memo.merge!(unsplatted)
-          else
-            compiled = attr.compile(compiler)
-            memo[compiled[0]] = compiled[1]
-          end
-        end
       end
     end
 
@@ -109,13 +83,6 @@ module Rbexy
       def initialize(name, value)
         @name = name
         @value = value
-      end
-
-      def compile(compiler)
-        [
-          name,
-          value&.compile(compiler)
-        ]
       end
     end
   end

@@ -3,6 +3,22 @@ Bundler.require
 require "active_support/inflector"
 require "active_support/core_ext/string/strip"
 
+code_string = <<-RBCODE
+puts "Hello #{@name}"
+local_var = "Joe"
+eval("puts [@name, local_var].join(' ')")
+RBCODE
+
+class MyContext
+  def initialize
+    @name = "Nick"
+  end
+end
+
+MyContext.new.instance_eval(code_string)
+
+exit
+
 template_string = <<-RBX.strip_heredoc.strip
   <div foo bar="baz" thing={["hey", "you"].join()}>
     <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
