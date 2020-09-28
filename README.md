@@ -107,7 +107,7 @@ Or for loops:
 </ul>
 ```
 
-_Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional templates as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
+_Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional rendering and loops as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
 
 ### Tags
 
