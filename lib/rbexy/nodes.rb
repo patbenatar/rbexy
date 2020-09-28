@@ -1,6 +1,17 @@
 module Rbexy
   module Nodes
+    module ChildrenCompiler
+      def compile_children(compiler)
+        children
+          .map { |c| c.compile(compiler) }
+          .reject { |v| !v }
+          .join("")
+      end
+    end
+
     class Template
+      include ChildrenCompiler
+
       attr_reader :children
 
       def initialize(children)
@@ -8,7 +19,7 @@ module Rbexy
       end
 
       def compile(compiler)
-        children.map { |c| c.compile(compiler) }
+        compile_children(compiler)
       end
     end
 
@@ -21,6 +32,32 @@ module Rbexy
 
       def compile(compiler)
         content
+      end
+    end
+
+    class ExpressionGroup
+      attr_reader :statements
+
+      def initialize(statements)
+        @statements = statements
+      end
+
+      def compile(compiler)
+        compiler.eval(combined_expression(compiler))
+      end
+
+      def combined_expression(compiler)
+        statements.map { |s| prepare_to_combine(s, compiler) }.join("")
+      end
+
+      def prepare_to_combine(statement, compiler)
+        if statement.is_a?(Expression)
+          # Collect sub-statements as code strings and wait to eval them
+          # until we have the whole combined_expression in a code string
+          statement.content
+        else
+          "\"#{statement.compile(compiler).gsub('"', '\\"')}\""
+        end
       end
     end
 
@@ -37,6 +74,8 @@ module Rbexy
     end
 
     class XmlNode
+      include ChildrenCompiler
+
       attr_reader :name, :attrs, :children
 
       def initialize(name, attrs, children)
@@ -53,7 +92,7 @@ module Rbexy
 
       def compile_attrs(compiler)
         attrs.each_with_object({}) do |attr, memo|
-          if attr.is_a? Expression
+          if attr.is_a? ExpressionGroup
             unsplatted = attr.compile(compiler)
             memo.merge!(unsplatted)
           else
@@ -61,10 +100,6 @@ module Rbexy
             memo[compiled[0]] = compiled[1]
           end
         end
-      end
-
-      def compile_children(compiler)
-        children.map { |c| c.compile(compiler) }
       end
     end
 

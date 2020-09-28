@@ -13,7 +13,7 @@ module Rbexy
     Patterns = HashMash.new(
       open_expression: /{/,
       close_expression: /}/,
-      expression_content: /[^}{"']+/,
+      expression_content: /[^}{"'<]+/,
       open_tag_def: /<(?!\/)/,
       open_tag_end: /<\//,
       close_tag: /\s*\/?>/,
@@ -27,7 +27,8 @@ module Rbexy
       double_quote: /"/,
       single_quote: /'/,
       double_quoted_text_content: /[^"]+/,
-      single_quoted_text_content: /[^']+/
+      single_quoted_text_content: /[^']+/,
+      expression_internal_tag_prefixes: /\s+(&&|\?|:)\s+\z/
     )
 
     attr_reader :stack, :tokens, :scanner, :curr_expr_quote_levels
@@ -56,6 +57,7 @@ module Rbexy
             tokens << [:OPEN_TAG_END]
             stack.push(:tag_end)
           elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:expression)
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
@@ -77,7 +79,8 @@ module Rbexy
           end
         when :expression
           if scanner.scan(Patterns.close_expression)
-            tokens << [:EXPRESSION, curr_expr]
+            tokens << [:EXPRESSION_BODY, curr_expr]
+            tokens << [:CLOSE_EXPRESSION]
             self.curr_expr = ""
             stack.pop
           elsif scanner.scan(Patterns.open_expression)
@@ -89,8 +92,31 @@ module Rbexy
           elsif scanner.scan(Patterns.single_quote)
             self.curr_expr += scanner.matched
             stack.push(:expression_inner_single_quote)
+          elsif scanner.scan(Patterns.open_tag_def)
+            if self.curr_expr =~ Patterns.expression_internal_tag_prefixes
+              tokens << [:EXPRESSION_BODY, curr_expr]
+              self.curr_expr = ""
+              tokens << [:OPEN_TAG_DEF]
+              stack.push(:expression_inner_tag, :tag_def)
+            else
+              self.curr_expr += scanner.matched
+            end
+          # elsif scanner.scan(Patterns.open_ternary_tag_expression)
           elsif scanner.scan(Patterns.expression_content)
             self.curr_expr += scanner.matched
+          else
+            raise SyntaxError, self
+          end
+        when :expression_inner_tag
+          if scanner.scan(Patterns.open_tag_end)
+            tokens << [:OPEN_TAG_END]
+            stack.pop
+            stack.push(:tag_end)
+          elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
+            stack.push(:expression)
+          elsif scanner.check(Patterns.text_content)
+            stack.push(:default_text)
           else
             raise SyntaxError, self
           end
@@ -169,6 +195,7 @@ module Rbexy
             tokens << [:ATTR_NAME, scanner.matched.strip]
           elsif scanner.scan(Patterns.open_attr_splat)
             tokens << [:OPEN_ATTR_SPLAT]
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:tag_attr_splat, :expression)
           else
             raise SyntaxError, self
@@ -177,6 +204,7 @@ module Rbexy
           if scanner.scan(Patterns.double_quote)
             stack.push(:quoted_text)
           elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
             stack.push(:expression)
           elsif scanner.scan(Patterns.whitespace) || scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTR_VALUE]

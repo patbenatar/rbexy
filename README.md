@@ -90,6 +90,17 @@ As attributes:
 <p class={@dynamic_class}>Hello world</p>
 ```
 
+You can use tags within expressions to conditionalize your template:
+
+```jsx
+<div>
+  {some_boolean && <h1>Welcome</h1>}
+  {another_boolean ? <p>Option One</p> : <p>Option Two</p>}
+</div>
+```
+
+_Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional templates as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into a view component._
+
 #### Execution Context
 
 You can control the context in which your ruby expressions are evaluated by the rbexy compiler, allowing you to make ivars, methods, etc available to your template expressions:
@@ -184,9 +195,9 @@ module Components
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
-      # content_tag, etc), or use a template file. Be sure to render children
-      # by yielding to the given block.
-      "<button class=\"myCustomButton\">#{yield.join("")}</button>"
+      # content_tag, etc), or use a template file. Be sure to render
+      # children by yielding to the given block.
+      "<button class=\"myCustomButton\">#{yield}</button>"
     end
   end
 

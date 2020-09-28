@@ -21,7 +21,7 @@ module Rbexy
     def tag(name, attrs, &block)
       children = block.call
       if children.length > 0
-        content_tag(name, **attrs) { children.join("").html_safe }
+        content_tag(name, **attrs) { children.html_safe }
       else
         super(name, **attrs)
       end

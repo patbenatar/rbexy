@@ -7,10 +7,52 @@ RSpec.describe Rbexy::Parser do
   end
 
   it "parses expressions" do
-    subject = Rbexy::Parser.new([[:EXPRESSION, "thing = 'bar'"]])
+    subject = Rbexy::Parser.new([
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "thing = 'bar'"],
+      [:CLOSE_EXPRESSION],
+    ])
     result = subject.parse.children
-    expect(result.first).to be_a Rbexy::Nodes::Expression
-    expect(result.first.content).to eq "thing = 'bar'"
+    expect(result.first).to be_a Rbexy::Nodes::ExpressionGroup
+    group = result.first
+    expect(group.statements.first).to be_a Rbexy::Nodes::Expression
+    expect(group.statements.first.content).to eq "thing = 'bar'"
+  end
+
+  it "parses tags within expressions" do
+    subject = Rbexy::Parser.new([
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Is "],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "'hello'.upcase"],
+      [:CLOSE_EXPRESSION],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION],
+    ])
+    result = subject.parse.children
+
+    expect(result.first).to be_a Rbexy::Nodes::ExpressionGroup
+    group = result.first
+
+    expect(group.statements[0]).to be_a Rbexy::Nodes::Expression
+    expect(group.statements[0].content).to eq "true && "
+
+    expect(group.statements[1]).to be_a Rbexy::Nodes::XmlNode
+    expect(group.statements[1].name).to eq "h1"
+    expect(group.statements[1].children[0]).to be_a Rbexy::Nodes::Text
+    expect(group.statements[1].children[0].content).to eq "Is "
+    expect(group.statements[1].children[1]).to be_a Rbexy::Nodes::ExpressionGroup
+    expect(group.statements[1].children[1].statements[0].content).to eq "'hello'.upcase"
+
+    expect(group.statements[2]).to be_a Rbexy::Nodes::Expression
+    expect(group.statements[2].content).to eq ""
   end
 
   it "parses named tags" do
@@ -57,7 +99,9 @@ RSpec.describe Rbexy::Parser do
       [:CLOSE_ATTR_VALUE],
       [:ATTR_NAME, "thing"],
       [:OPEN_ATTR_VALUE],
-      [:EXPRESSION, "exprValue"],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "exprValue"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_VALUE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
@@ -84,8 +128,8 @@ RSpec.describe Rbexy::Parser do
     attrThing = div.attrs[2]
     expect(attrThing).to be_a Rbexy::Nodes::XmlAttr
     expect(attrThing.name).to eq "thing"
-    expect(attrThing.value).to be_a Rbexy::Nodes::Expression
-    expect(attrThing.value.content).to eq "exprValue"
+    expect(attrThing.value).to be_a Rbexy::Nodes::ExpressionGroup
+    expect(attrThing.value.statements.first.content).to eq "exprValue"
   end
 
   it "parses splat attributes" do
@@ -94,7 +138,9 @@ RSpec.describe Rbexy::Parser do
       [:TAG_NAME, "div"],
       [:OPEN_ATTRS],
       [:OPEN_ATTR_SPLAT],
-      [:EXPRESSION, "{ attr1: 'val1', attr2: 'val2' }"],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "{ attr1: 'val1', attr2: 'val2' }"],
+      [:CLOSE_EXPRESSION],
       [:CLOSE_ATTR_SPLAT],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
@@ -107,8 +153,8 @@ RSpec.describe Rbexy::Parser do
     expect(div.attrs.length).to eq 1
 
     attrFoo = div.attrs[0]
-    expect(attrFoo).to be_a Rbexy::Nodes::Expression
-    expect(attrFoo.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
+    expect(attrFoo).to be_a Rbexy::Nodes::ExpressionGroup
+    expect(attrFoo.statements.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
   end
 
   it "finds no children for self-closing tags" do
@@ -224,7 +270,9 @@ RSpec.describe Rbexy::Parser do
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_DEF],
-      [:EXPRESSION, "thing = 'foo'"],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "thing = 'foo'"],
+      [:CLOSE_EXPRESSION],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_END]
@@ -232,7 +280,7 @@ RSpec.describe Rbexy::Parser do
 
     div = subject.parse.children.first
     expr = div.children.first
-    expect(expr).to be_a Rbexy::Nodes::Expression
-    expect(expr.content).to eq "thing = 'foo'"
+    expect(expr).to be_a Rbexy::Nodes::ExpressionGroup
+    expect(expr.statements.first.content).to eq "thing = 'foo'"
   end
 end
