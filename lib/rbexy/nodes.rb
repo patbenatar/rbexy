@@ -25,7 +25,7 @@ module Rbexy
       def compile
         <<-CODE
 "".tap do |output|
-#{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+#{children.map(&:compile).map { |c| "output << ((#{c}) || \"\")"}.join("\n")}
 end
         CODE
       end
@@ -63,7 +63,7 @@ end
       end
 
       def compile
-        content.strip
+        content
       end
     end
 
@@ -83,7 +83,7 @@ end
 <<-CODE
 #{tag} do
   "".tap do |output|
-    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+    #{children.map(&:compile).map { |c| "output << ((#{c}) || \"\")"}.join("\n")}
   end.html_safe
 end
 CODE
@@ -94,12 +94,7 @@ CODE
 
       def compile_attrs
         attrs.map do |attr|
-          if attr.is_a? ExpressionGroup
-            # TODO
-          else
-            compiled = attr.compile
-            "#{ActiveSupport::Inflector.underscore(compiled[0])}: #{compiled[1]}"
-          end
+          attr.is_a?(ExpressionGroup) ? "**#{attr.compile}" : attr.compile
         end.join(",")
       end
     end
@@ -113,10 +108,7 @@ CODE
       end
 
       def compile
-        [
-          name,
-          value.compile
-        ]
+        "#{ActiveSupport::Inflector.underscore(name)}: #{value.compile}"
       end
     end
   end

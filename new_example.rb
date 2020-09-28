@@ -8,12 +8,16 @@ require "action_view/context"
 require "action_view/buffers"
 
 template_string = <<-RBX
-Hello "World"
-{true ? "is true" : "is false"}
-<div>
-  <h1 class="myClass">Content</h1>
+<div foo bar="baz" thing={["hey", "you"].join()}>
+  <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
+  <div {**{ class: "myClass" }}></div>
+  Some words
+  <p>Lorem ipsum</p>
+  <input type="submit" value={@ivar_val} disabled />
+  {true && <p>Is true</p>}
+  {false && <p>Is false</p>}
+  {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
 </div>
-<br />
 RBX
 
 # Now we need a Runtime as well, that exposes some methods to the template ruby
@@ -24,8 +28,15 @@ class Runtime
   include ActionView::Context
   include ActionView::Helpers::TagHelper
 
-  def run(code)
+  def evaluate(code)
     instance_eval(code)
+  end
+
+  def splat_attrs
+    {
+      key1: "val1",
+      key2: "val2"
+    }
   end
 end
 
@@ -34,4 +45,4 @@ code = Rbexy.compile(template_string)
 puts code
 
 puts "=============== Result of eval ==============="
-puts Runtime.new.run(code)
+puts Runtime.new.evaluate(code)
