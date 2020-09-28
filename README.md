@@ -101,27 +101,6 @@ You can use tags within expressions to conditionalize your template:
 
 _Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional templates as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
 
-#### Execution Context
-
-You can control the context in which your ruby expressions are evaluated by the rbexy compiler, allowing you to make ivars, methods, etc available to your template expressions:
-
-```ruby
-class CompileContext
-  def initialize
-    @an_ivar = "Ivar value"
-  end
-
-  def a_method
-    "Method value"
-  end
-end
-
-Rbexy.compile(
-  "<p class={a_method}>{@an_ivar}</p>",
-  Rbexy::HtmlCompiler.new(CompileContext.new)
-)
-```
-
 ### Tags
 
 You can put standard HTML tags anywhere.
@@ -185,24 +164,28 @@ You can splat a hash into attributes:
 
 #### Custom components
 
-Use the `Rbexy::ComponentCompiler` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them during the compile.
+Use the `Rbexy::ComponentRuntime` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them while evaluating your template.
+
+_See "Execution Context" below for more details._
 
 ```ruby
 module Components
-  class ButtonComponent < ViewComponent::Base
-    def initialize(**attrs)
+  class ButtonComponent
+    def initialize(prop1:, prop2:)
+      @prop1 = prop1
+      @prop2 = prop2
     end
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
       # content_tag, etc), or use a template file. Be sure to render
       # children by yielding to the given block.
-      "<button class=\"myCustomButton\">#{yield}</button>"
+      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
     end
   end
 
   module Forms
-    class TextFieldComponent < ViewComponent::Base
+    class TextFieldComponent
       def initialize(**attrs)
       end
 
@@ -223,17 +206,60 @@ class ComponentProvider
   end
 
   def find(name)
-    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+    ActiveSupport::Inflector.constantize("Components::#{name}Component")
   rescue NameError => e
+    raise e unless e.message =~ /constant/
     nil
   end
 end
 
-Rbexy.compile(
-  "<Forms.TextField /><Button>Submit</Button>",
-  Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
+class MyRuntime < Rbexy::ComponentRuntime
+  def initialize(component_provider)
+    super(component_provider)
+    @ivar_val = "ivar value"
+  end
+
+  def splat_attrs
+    {
+      key1: "val1",
+      key2: "val2"
+    }
+  end
+end
+
+Rbexy.evaluate(
+  "<Forms.TextField /><Button prop1=\"val1\" prop2={true && \"val2\">Submit</Button>",
+  MyRuntime.new(ComponentProvider.new)
 )
 ```
+
+## Execution Context
+
+Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#tag`. We provide a couple built-in runtimes that you can extend from or build your own:
+
+* `Rbexy::HtmlRuntime` leverages ActionView's helpers to render templates that include only valid HTML tags as an HTML document.
+* `Rbexy::ComponentRuntime` allows you to render your custom components in addition to HTML.
+
+Subclass one of these to add methods and instance variables that you'd like to make available to your template.
+
+```ruby
+class MyRuntime < Rbexy::HtmlRuntime
+  def initialize
+    @an_ivar = "Ivar value"
+  end
+
+  def a_method
+    "Method value"
+  end
+end
+
+Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
+```
+
+Or implement your own runtime, so long as it conforms to the API:
+
+* `#tag` that returns a tag builder conforming to the API of `ActionView::Helpers::TagHelpers::TagBuilder`
+* `#evaluate(code)` that evals the given string of ruby code
 
 ## Installation
 

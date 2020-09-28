@@ -1,43 +1,31 @@
 require "bundler"
 Bundler.require
-require "active_support/inflector"
-require "active_support/core_ext/string/strip"
 
-template_string = <<-RBX.strip_heredoc.strip
-  <div foo bar="baz" thing={["hey", "you"].join()}>
-    <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
-    <div {**{ class: "myClass" }}></div>
-    Some words
-    <p>Lorem ipsum</p>
-    <input type="submit" value={@ivar_val} disabled />
-    <Button>the content</Button>
-    <Forms.TextField />
-    {true && <p>Is true</p>}
-    {false && <p>Is false</p>}
-    {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
-  </div>
+require "active_support/all"
+require "action_view/helpers"
+require "action_view/context"
+require "action_view/buffers"
+
+template_string = <<-RBX
+<div>
+  <h1>Hello world</h1>
+  <Button prop1="val1" prop2={true && "val2"}>the content</Button>
+  <Forms.TextField />
+</div>
 RBX
-
-class CompileContext
-  def initialize
-    @ivar_val = "ivar value"
-  end
-
-  def splat_attrs
-    {
-      attr1: "val1",
-      attr2: "val2"
-    }
-  end
-end
 
 module Components
   class ButtonComponent
-    def initialize(**attrs)
+    def initialize(prop1:, prop2:)
+      @prop1 = prop1
+      @prop2 = prop2
     end
 
     def render
-      "<button class=\"myCustomButton\">#{yield}</button>"
+      # Render it yourself, call one of Rails view helpers (link_to,
+      # content_tag, etc), or use a template file. Be sure to render
+      # children by yielding to the given block.
+      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
     end
   end
 
@@ -63,12 +51,30 @@ class ComponentProvider
   end
 
   def find(name)
-    ActiveSupport::Inflector.constantize("Components::#{name.gsub(".", "::")}Component")
+    ActiveSupport::Inflector.constantize("Components::#{name}Component")
   rescue NameError => e
+    raise e unless e.message =~ /constant/
     nil
   end
 end
 
-# html_compiler = Rbexy::HtmlCompiler.new(CompileContext.new)
-component_compiler = Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
-puts Rbexy.compile(template_string, component_compiler)
+class MyRuntime < Rbexy::ComponentRuntime
+  def initialize(component_provider)
+    super(component_provider)
+    @ivar_val = "ivar value"
+  end
+
+  def splat_attrs
+    {
+      key1: "val1",
+      key2: "val2"
+    }
+  end
+end
+
+puts "=============== Compiled ruby code ==============="
+code = Rbexy.compile(template_string)
+puts code
+
+puts "=============== Result of eval ==============="
+puts MyRuntime.new(ComponentProvider.new).evaluate(code)
