@@ -4,7 +4,9 @@ module Rbexy
   autoload :Lexer, "rbexy/lexer"
   autoload :Parser, "rbexy/parser"
   autoload :Nodes, "rbexy/nodes"
+  autoload :Runtime, "rbexy/runtime"
   autoload :HtmlRuntime, "rbexy/html_runtime"
+  autoload :ComponentRuntime, "rbexy/component_runtime"
   autoload :HashMash, "rbexy/hash_mash"
 
   def self.compile(template_string)

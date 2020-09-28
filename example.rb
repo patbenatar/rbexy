@@ -19,7 +19,52 @@ template_string = <<-RBX
 </div>
 RBX
 
-class MyRuntime < Rbexy::HtmlRuntime
+module Components
+  class ButtonComponent < ViewComponent::Base
+    def initialize(**attrs)
+    end
+
+    def render
+      # Render it yourself, call one of Rails view helpers (link_to,
+      # content_tag, etc), or use a template file. Be sure to render
+      # children by yielding to the given block.
+      "<button class=\"myCustomButton\">#{yield}</button>"
+    end
+  end
+
+  module Forms
+    class TextFieldComponent < ViewComponent::Base
+      def initialize(**attrs)
+      end
+
+      def render
+        "<input type=\"text\" />"
+      end
+    end
+  end
+end
+
+class ComponentProvider
+  def match?(name)
+    find(name) != nil
+  end
+
+  def render(name, attrs, &block)
+    find(name).new(**attrs).render(&block)
+  end
+
+  def find(name)
+    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+  rescue NameError => e
+    nil
+  end
+end
+
+class MyRuntime < Rbexy::ComponentRuntime
+  def initialize
+    @ivar_val = "ivar value"
+  end
+
   def splat_attrs
     {
       key1: "val1",
@@ -33,4 +78,4 @@ code = Rbexy.compile(template_string)
 puts code
 
 puts "=============== Result of eval ==============="
-puts MyRuntime.new.evaluate(code)
+puts MyRuntime.new(ComponentProvider.new).evaluate(code)

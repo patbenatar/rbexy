@@ -101,26 +101,6 @@ You can use tags within expressions to conditionalize your template:
 
 _Note: rbexy has limited support for tags within expressions. It's really only there to enable conditional templates as shown above. You can't just use tags like you would any other ruby literal. If you find yourself needing more from rbexy here, consider if you can refactor your template to not require it—maybe move that complex logic into the component._
 
-#### Execution Context
-
-Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#tag`. We provide a built-in `Rbexy::HtmlRuntime` that leverages ActionView's helpers to render your template as HTML.
-
-Subclass it to add methods and instance variables that you'd like to make available to your template.
-
-```ruby
-class MyRuntime < Rbexy::HtmlRuntime
-  def initialize
-    @an_ivar = "Ivar value"
-  end
-
-  def a_method
-    "Method value"
-  end
-end
-
-Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
-```
-
 ### Tags
 
 You can put standard HTML tags anywhere.
@@ -233,6 +213,34 @@ Rbexy.compile(
   Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
 )
 ```
+
+## Execution Context
+
+Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#tag`. We provide a couple built-in runtimes that you can extend from or build your own:
+
+* `Rbexy::HtmlRuntime` leverages ActionView's helpers to render templates that include only valid HTML tags as an HTML document.
+* `Rbexy::ComponentRuntime` allows you to render your custom components in addition to HTML.
+
+Subclass one of these to add methods and instance variables that you'd like to make available to your template.
+
+```ruby
+class MyRuntime < Rbexy::HtmlRuntime
+  def initialize
+    @an_ivar = "Ivar value"
+  end
+
+  def a_method
+    "Method value"
+  end
+end
+
+Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
+```
+
+Or implement your own runtime, so long as it conforms to the API:
+
+* `#tag` that returns a tag builder conforming to the API of `ActionView::Helpers::TagHelpers::TagBuilder`
+* `#evaluate(code)` that evals the given string of ruby code
 
 ## Installation
 

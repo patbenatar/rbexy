@@ -23,16 +23,9 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    class Runtime
-      include ActionView::Context
-      include ActionView::Helpers::TagHelper
-
+    class Runtime < Rbexy::HtmlRuntime
       def initialize
         @ivar_val = "ivar value"
-      end
-
-      def evaluate(code)
-        instance_eval(code)
       end
 
       def splat_attrs
@@ -43,8 +36,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    code = Rbexy.compile(template_string)
-    result = Runtime.new.evaluate(code)
+    result = Rbexy.evaluate(template_string, Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div foo="" bar="baz" thing="heyyou">
