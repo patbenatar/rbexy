@@ -1,3 +1,5 @@
+require "active_support/inflector"
+
 # New approach for compiler:
 #
 # Build a big string of ruby code, with our literals as strings and our expressions
@@ -7,6 +9,12 @@
 
 module Rbexy
   module Nodes
+    module Util
+      def self.safe_string(str)
+        str.gsub('"', '\\"')
+      end
+    end
+
     class Template
       attr_reader :children
 
@@ -16,14 +24,10 @@ module Rbexy
 
       def compile
         <<-CODE
-output = ""
+"".tap do |output|
 #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-output
+end
         CODE
-        # ["output = \"\""]
-        #   .concat(children.map(&:compile))
-        #   .concat(["output"])
-        #   .join("\n")
       end
     end
 
@@ -35,7 +39,7 @@ output
       end
 
       def compile
-        "\"#{content.gsub('"', '\\"')}\""
+        "\"#{Util.safe_string(content)}\""
       end
     end
 
@@ -59,7 +63,7 @@ output
       end
 
       def compile
-        content
+        content.strip
       end
     end
 
@@ -73,7 +77,30 @@ output
       end
 
       def compile
+        tag = "tag.#{name}(#{compile_attrs})"
 
+        if children.length > 0
+<<-CODE
+#{tag} do
+  "".tap do |output|
+    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+  end.html_safe
+end
+CODE
+        else
+          tag
+        end
+      end
+
+      def compile_attrs
+        attrs.map do |attr|
+          if attr.is_a? ExpressionGroup
+            # TODO
+          else
+            compiled = attr.compile
+            "#{ActiveSupport::Inflector.underscore(compiled[0])}: #{compiled[1]}"
+          end
+        end.join(",")
       end
     end
 
@@ -83,6 +110,13 @@ output
       def initialize(name, value)
         @name = name
         @value = value
+      end
+
+      def compile
+        [
+          name,
+          value.compile
+        ]
       end
     end
   end
