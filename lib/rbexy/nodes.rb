@@ -13,6 +13,10 @@ module Rbexy
       def self.safe_string(str)
         str.gsub('"', '\\"')
       end
+
+      def self.safe_tag_name(name)
+        name.gsub(".", "__")
+      end
     end
 
     class Template
@@ -77,7 +81,7 @@ end
       end
 
       def compile
-        tag = "tag.#{name}(#{compile_attrs})"
+        tag = "tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
 
         if children.length > 0
 <<-CODE

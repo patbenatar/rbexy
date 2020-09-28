@@ -7,33 +7,30 @@ require "action_view/context"
 require "action_view/buffers"
 
 template_string = <<-RBX
-<div foo bar="baz" thing={["hey", "you"].join()}>
-  <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
-  <div {**{ class: "myClass" }}></div>
-  Some words
-  <p>Lorem ipsum</p>
-  <input type="submit" value={@ivar_val} disabled />
-  {true && <p>Is true</p>}
-  {false && <p>Is false</p>}
-  {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
+<div>
+  <h1>Hello world</h1>
+  <Button prop1="val1" prop2={true && "val2"}>the content</Button>
+  <Forms.TextField />
 </div>
 RBX
 
 module Components
-  class ButtonComponent < ViewComponent::Base
-    def initialize(**attrs)
+  class ButtonComponent
+    def initialize(prop1:, prop2:)
+      @prop1 = prop1
+      @prop2 = prop2
     end
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
       # content_tag, etc), or use a template file. Be sure to render
       # children by yielding to the given block.
-      "<button class=\"myCustomButton\">#{yield}</button>"
+      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
     end
   end
 
   module Forms
-    class TextFieldComponent < ViewComponent::Base
+    class TextFieldComponent
       def initialize(**attrs)
       end
 
@@ -54,14 +51,16 @@ class ComponentProvider
   end
 
   def find(name)
-    ActiveSupport::Inflector.constantize(name.gsub(".", "::"))
+    ActiveSupport::Inflector.constantize("Components::#{name}Component")
   rescue NameError => e
+    raise e unless e.message =~ /constant/
     nil
   end
 end
 
 class MyRuntime < Rbexy::ComponentRuntime
-  def initialize
+  def initialize(component_provider)
+    super(component_provider)
     @ivar_val = "ivar value"
   end
 

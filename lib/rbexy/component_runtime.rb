@@ -21,8 +21,9 @@ module Rbexy
       end
 
       def method_missing(called, *args, **attrs, &block)
-        if component_provider.match?(name)
-          component_provider.render(name, attrs, &block)
+        component_name = called.to_s.gsub("__", "::")
+        if component_provider.match?(component_name)
+          component_provider.render(component_name, attrs, &block)
         else
           super
         end
