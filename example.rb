@@ -7,21 +7,9 @@ require "action_view/context"
 require "action_view/buffers"
 
 template_string = <<-RBX
-<div>
-  <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
-  <div {**{ class: "myClass" }}></div>
-  Some words
-  <p>Lorem ipsum</p>
-  <input type="submit" value={@ivar_val} disabled />
-  {true && <p>Is true</p>}
-  {false && <p>Is false</p>}
-  {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
-  <Button prop1="val1" prop2={true && "val2"}>the content</Button>
-  <Forms.TextField />
-  <ul>
-    {["hi", "there", "nick"].map { |val| <li>{val}</li> }}
-  </ul>
-</div>
+<ul>
+  {["Hello", "world"].map { |v| <li>{v}</li> }}
+</ul>
 RBX
 
 module Components
