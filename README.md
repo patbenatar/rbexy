@@ -103,10 +103,12 @@ _Note: rbexy has limited support for tags within expressions. It's really only t
 
 #### Execution Context
 
-You can control the context in which your ruby expressions are evaluated by the rbexy compiler, allowing you to make ivars, methods, etc available to your template expressions:
+Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#tag`. We provide a built-in `Rbexy::HtmlRuntime` that leverages ActionView's helpers to render your template as HTML.
+
+Subclass it to add methods and instance variables that you'd like to make available to your template.
 
 ```ruby
-class CompileContext
+class MyRuntime < Rbexy::HtmlRuntime
   def initialize
     @an_ivar = "Ivar value"
   end
@@ -116,10 +118,7 @@ class CompileContext
   end
 end
 
-Rbexy.compile(
-  "<p class={a_method}>{@an_ivar}</p>",
-  Rbexy::HtmlCompiler.new(CompileContext.new)
-)
+Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
 ```
 
 ### Tags

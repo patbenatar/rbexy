@@ -1,90 +1,36 @@
 require "bundler"
 Bundler.require
-require "active_support/inflector"
-require "active_support/core_ext/string/strip"
 
-code_string = <<-RBCODE
-puts "Hello #{@name}"
-local_var = "Joe"
-eval("puts [@name, local_var].join(' ')")
-RBCODE
+require "active_support/all"
+require "action_view/helpers"
+require "action_view/context"
+require "action_view/buffers"
 
-class MyContext
-  def initialize
-    @name = "Nick"
-  end
-end
-
-MyContext.new.instance_eval(code_string)
-
-exit
-
-template_string = <<-RBX.strip_heredoc.strip
-  <div foo bar="baz" thing={["hey", "you"].join()}>
-    <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
-    <div {**{ class: "myClass" }}></div>
-    Some words
-    <p>Lorem ipsum</p>
-    <input type="submit" value={@ivar_val} disabled />
-    <Button>the content</Button>
-    <Forms.TextField />
-    {true && <p>Is true</p>}
-    {false && <p>Is false</p>}
-    {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
-  </div>
+template_string = <<-RBX
+<div foo bar="baz" thing={["hey", "you"].join()}>
+  <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
+  <div {**{ class: "myClass" }}></div>
+  Some words
+  <p>Lorem ipsum</p>
+  <input type="submit" value={@ivar_val} disabled />
+  {true && <p>Is true</p>}
+  {false && <p>Is false</p>}
+  {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
+</div>
 RBX
 
-class CompileContext
-  def initialize
-    @ivar_val = "ivar value"
-  end
-
+class MyRuntime < Rbexy::HtmlRuntime
   def splat_attrs
     {
-      attr1: "val1",
-      attr2: "val2"
+      key1: "val1",
+      key2: "val2"
     }
   end
 end
 
-module Components
-  class ButtonComponent
-    def initialize(**attrs)
-    end
+puts "=============== Compiled ruby code ==============="
+code = Rbexy.compile(template_string)
+puts code
 
-    def render
-      "<button class=\"myCustomButton\">#{yield}</button>"
-    end
-  end
-
-  module Forms
-    class TextFieldComponent
-      def initialize(**attrs)
-      end
-
-      def render
-        "<input type=\"text\" />"
-      end
-    end
-  end
-end
-
-class ComponentProvider
-  def match?(name)
-    find(name) != nil
-  end
-
-  def render(name, attrs, &block)
-    find(name).new(**attrs).render(&block)
-  end
-
-  def find(name)
-    ActiveSupport::Inflector.constantize("Components::#{name.gsub(".", "::")}Component")
-  rescue NameError => e
-    nil
-  end
-end
-
-# html_compiler = Rbexy::HtmlCompiler.new(CompileContext.new)
-component_compiler = Rbexy::ComponentCompiler.new(CompileContext.new, ComponentProvider.new)
-puts Rbexy.compile(template_string, component_compiler)
+puts "=============== Result of eval ==============="
+puts MyRuntime.new.evaluate(code)
