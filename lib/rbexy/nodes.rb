@@ -24,15 +24,31 @@ module Rbexy
       end
     end
 
-    class Expression
-      attr_reader :content
+    class ExpressionGroup
+      attr_reader :contents
 
-      def initialize(content)
-        @content = content
+      def initialize(contents)
+        @contents = contents
       end
 
       def compile(compiler)
-        compiler.eval(content)
+        contents
+          .map { |c| c.is_a?(Expression) ? c : c.compile(compiler) }
+          .join("")
+      end
+    end
+
+    class Expression
+      attr_reader :contents
+
+      def initialize(contents)
+        @contents = contents
+      end
+
+      def compile(compiler)
+        contents
+          .map { |c| c.is_a?(Expression) ? c : c.compile(compiler) }
+          .join("")
       end
     end
 

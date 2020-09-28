@@ -37,7 +37,7 @@ module Rbexy
       return unless take(:OPEN_EXPRESSION)
       token = take!(:EXPRESSION)
       take!(:CLOSE_EXPRESSION)
-      Nodes::Expression.new(token[1])
+      Nodes::Expression.new([token[1]])
     end
 
     def parse_expression!

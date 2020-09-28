@@ -17,6 +17,28 @@ RSpec.describe Rbexy::Parser do
     expect(result.first.content).to eq "thing = 'bar'"
   end
 
+  it "parses tags within expressions" do
+    subject = Rbexy::Parser.new([
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Is "],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION, "'hello'.upcase"],
+      [:CLOSE_EXPRESSION],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION, ""],
+      [:CLOSE_EXPRESSION],
+    ])
+    result = subject.parse.children
+
+    expect(result.first).to be_a Rbexy::Nodes::Expression
+  end
+
   it "parses named tags" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
