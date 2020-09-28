@@ -139,17 +139,12 @@ RSpec.describe Rbexy do
       </ul>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::HtmlRuntime)
+    result = Rbexy.evaluate(template_string, Rbexy::HtmlRuntime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
-      <div foo="" bar="baz" thing="heyyou">
-        <h1 class="myClass" attr1="val1" attr2="val2">Hello world</h1>
-        <div class="myClass"></div>
-        Some words
-        <p>Lorem ipsum</p>
-        <input type="submit" value="ivar value" disabled="disabled">
-        <p>Is true</p>\n  \n        <p class="myClass">Ternary is TRUE</p>
-      </div>
+      <ul>
+        <li>Hello</li><li>world</li>
+      </ul>
     OUTPUT
 
     expect(result).to eq expected
