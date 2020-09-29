@@ -10,9 +10,9 @@ module Rbexy
           helper Rbexy::ViewHelper
         end
 
-        # ActiveSupport.on_load(:action_view) do
-        #   ActionView::Context.prepend Rbexy::ViewHelper
-        # end
+        if defined?(ViewComponent)
+          ViewComponent::Base.include Rbexy::ViewHelper
+        end
       end
     end
   end

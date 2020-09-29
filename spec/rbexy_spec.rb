@@ -86,7 +86,7 @@ RSpec.describe Rbexy do
         find(name) != nil
       end
 
-      def render(name, attrs, &block)
+      def render(context, name, attrs, &block)
         find(name).new(**attrs).render(&block)
       end
 

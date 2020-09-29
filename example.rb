@@ -59,8 +59,9 @@ class ComponentProvider
     find(name) != nil
   end
 
-  def render(name, attrs, &block)
-    find(name).new(**attrs).render(&block)
+  def render(context, name, **attrs, &block)
+    props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
+    find(name).new(**props).render(&block)
   end
 
   private

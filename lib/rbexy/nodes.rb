@@ -23,7 +23,7 @@ module Rbexy
         <<-CODE
 Rbexy::OutputBuffer.new.tap do |output|
 #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-end
+end.html_safe
         CODE
       end
     end
@@ -84,7 +84,7 @@ Rbexy::OutputBuffer.new.tap do |output|
     Rbexy::OutputBuffer.new.tap do |output|
       #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
     end.html_safe
-  end.html_safe)
+  end)
   defined?(rbexy_context) && rbexy_context.pop
 end
 CODE
@@ -109,7 +109,7 @@ CODE
       end
 
       def compile
-        "#{ActiveSupport::Inflector.underscore(name)}: #{value.compile}"
+        "\"#{name}\": #{value.compile}"
       end
     end
   end

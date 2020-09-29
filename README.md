@@ -62,14 +62,13 @@ Rbexy.configure do |config|
 end
 ```
 
-When using Rbexy with Rails, the compiler and runtime are managed for you. All you need to do is tell Rails how to handle our `.rbx` template extension and tell Rbexy how to resolve custom components by providing a ComponentProvider implementation (if you're using custom components).
+Using Github's view_component library? Rbexy ships with a provider for that:
 
 ```ruby
-ActionView::Template.register_template_handler(:rbx, Rbexy::Rails::TemplateHandler)
+require "rbexy/component_providers/view_component_provider"
 
-# app/helpers/application_helper.rb
-module ApplicationHelper
-  include Rbexy::ViewHelper
+Rbexy.configure do |config|
+  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
 end
 ```
 
@@ -266,8 +265,8 @@ class MyComponentProvider
     find(name) != nil
   end
 
-  def render(name, attrs, &block)
-    find(name).new(**attrs).render(&block)
+  def render(context, name, **attrs, &block)
+    find(name).new(**attrs).render_in(context, &block)
   end
 
   private

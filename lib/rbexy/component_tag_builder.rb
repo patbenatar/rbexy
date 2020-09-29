@@ -10,7 +10,7 @@ module Rbexy
     def method_missing(called, *args, **attrs, &block)
       component_name = called.to_s.gsub("__", "::")
       if component_provider.match?(component_name)
-        component_provider.render(component_name, attrs, &block)
+        component_provider.render(@view_context, component_name, **attrs, &block)
       else
         super
       end
