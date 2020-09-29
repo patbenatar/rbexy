@@ -1,12 +1,5 @@
 require "active_support/inflector"
 
-# New approach for compiler:
-#
-# Build a big string of ruby code, with our literals as strings and our expressions
-# interpolated within it, then eval the whole thing at once.
-# * At the top we use Context#instance_eval
-# * Sub-expressions just use #eval so they have access to whatever scope they're in
-
 module Rbexy
   module Nodes
     module Util
@@ -28,13 +21,7 @@ module Rbexy
 
       def compile
         <<-CODE
-class OutputBuffer < String
-  def <<(content)
-    value = content.is_a?(Array) ? content.join : content
-    super(value || "")
-  end
-end
-OutputBuffer.new.tap do |output|
+Rbexy::OutputBuffer.new.tap do |output|
 #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
 end
         CODE
@@ -87,14 +74,18 @@ end
       end
 
       def compile
-        tag = "tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+        tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
 
         if children.length > 0
 <<-CODE
-#{tag} do
-  OutputBuffer.new.tap do |output|
-    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-  end.html_safe
+Rbexy::OutputBuffer.new.tap do |output|
+  defined?(rbexy_context) && rbexy_context.push({})
+  output << (#{tag} do
+    Rbexy::OutputBuffer.new.tap do |output|
+      #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+    end.html_safe
+  end.html_safe)
+  defined?(rbexy_context) && rbexy_context.pop
 end
 CODE
         else

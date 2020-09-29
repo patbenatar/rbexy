@@ -23,8 +23,9 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    class Runtime < Rbexy::HtmlRuntime
+    class Runtime < Rbexy::Runtime
       def initialize
+        super
         @ivar_val = "ivar value"
       end
 
@@ -89,6 +90,8 @@ RSpec.describe Rbexy do
         find(name).new(**attrs).render(&block)
       end
 
+      private
+
       def find(name)
         ActiveSupport::Inflector.constantize("Components::#{name}Component")
       rescue NameError => e
@@ -97,7 +100,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    class MyRuntime < Rbexy::ComponentRuntime
+    class MyRuntime < Rbexy::Runtime
       def initialize(component_provider)
         super(component_provider)
         @ivar_val = "ivar value"
@@ -139,7 +142,7 @@ RSpec.describe Rbexy do
       </ul>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::HtmlRuntime.new)
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <ul>
