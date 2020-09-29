@@ -22,7 +22,7 @@ module Rbexy
       def compile
         <<-CODE
 Rbexy::OutputBuffer.new.tap do |output|
-#{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+  #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
 end.html_safe
         CODE
       end
@@ -74,23 +74,27 @@ end.html_safe
       end
 
       def compile
-        tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+        StringIO.new.tap do |code|
+          code.puts "Rbexy::OutputBuffer.new.tap do |output|"
+          code.puts "rbexy_context.push({}) if respond_to?(:rbexy_context)"
 
-        if children.length > 0
-<<-CODE
-Rbexy::OutputBuffer.new.tap do |output|
-  defined?(rbexy_context) && rbexy_context.push({})
-  output << (#{tag} do
-    Rbexy::OutputBuffer.new.tap do |output|
-      #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-    end.html_safe
-  end)
-  defined?(rbexy_context) && rbexy_context.pop
-end
+          tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+
+          code.puts(if children.length > 0
+<<-CODE.strip
+output << (#{tag} do
+  Rbexy::OutputBuffer.new.tap do |output|
+    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+  end.html_safe
+end)
 CODE
-        else
-          tag
-        end
+          else
+            "output << (#{tag})"
+          end)
+
+          code.puts "rbexy_context.pop if respond_to?(:rbexy_context)"
+          code.puts "end"
+        end.string
       end
 
       def compile_attrs

@@ -11,6 +11,8 @@ module Rbexy
   autoload :ViewHelper, "rbexy/view_helper"
   autoload :Configuration, "rbexy/configuration"
 
+  ContextNotFound = Class.new(StandardError)
+
   class << self
     def configure
       yield(configuration)

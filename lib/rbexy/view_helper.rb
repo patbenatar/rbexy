@@ -1,7 +1,5 @@
 module Rbexy
   module ViewHelper
-    ContextNotFound = Class.new(StandardError)
-
     def create_context(name, value)
       rbexy_context.last[name] = value
     end
@@ -14,7 +12,7 @@ module Rbexy
     end
 
     def rbexy_context
-      @rbexy_context ||= []
+      @rbexy_context ||= [{}]
     end
 
     def rbexy_tag
