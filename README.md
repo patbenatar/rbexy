@@ -40,6 +40,40 @@ end
 
 with their accompying template files (also can be `.rbx`!), scoped scss files, JS and other assets (not shown).
 
+## Getting Started (with Rails)
+
+Add it to your Gemfile and `bundle install`:
+
+```ruby
+gem "rbexy"
+```
+
+In `config/application.rb`:
+
+```ruby
+require "rbexy/rails/engine"
+```
+
+Add a `config/initializers/rbexy.rb` and register your ComponentProvider (see "Custom components" below for more info):
+
+```ruby
+Rbexy.configure do |config|
+  config.component_provider = MyComponentProvider.new
+end
+```
+
+Using Github's view_component library? Rbexy ships with a provider for that:
+
+```ruby
+require "rbexy/component_providers/view_component_provider"
+
+Rbexy.configure do |config|
+  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
+end
+```
+
+_For usage outside of Rails, see "Usage outside of Rails" below._
+
 ## Template Syntax
 
 ### Text
@@ -190,12 +224,12 @@ You can splat a hash into attributes:
 
 #### Custom components
 
-Use the `Rbexy::ComponentRuntime` to add support for custom components (like those implemented with view_component or other ruby component libraries). You just need to tell rbexy how to render your custom components as it encounters them while evaluating your template.
-
-_See "Execution Context" below for more details._
+You can use custom components alongside standard HTML components. You just need to tell rbexy how to resolve your custom component classes as it encounters them while evaluating your template by implementing a ComponentProvider as demonstrated below:
 
 ```ruby
-module Components
+module MyComponents
+  # Define your components as POROs or use a library like
+  # ViewComponent
   class ButtonComponent
     def initialize(prop1:, prop2:)
       @prop1 = prop1
@@ -211,6 +245,8 @@ module Components
   end
 
   module Forms
+    # Namespaced components are available in the template with
+    # dot-notation, ie `Forms.TextField` in this case
     class TextFieldComponent
       def initialize(**attrs)
       end
@@ -222,24 +258,58 @@ module Components
   end
 end
 
-class ComponentProvider
+# Implement a component provider with #match? and #render methods
+# that Rbexy will call as it evaluates your template
+class MyComponentProvider
   def match?(name)
     find(name) != nil
   end
 
-  def render(name, attrs, &block)
-    find(name).new(**attrs).render(&block)
+  def render(context, name, **attrs, &block)
+    find(name).new(**attrs).render_in(context, &block)
   end
 
+  private
+
   def find(name)
-    ActiveSupport::Inflector.constantize("Components::#{name}Component")
+    ActiveSupport::Inflector.constantize("MyComponents::#{name}Component")
   rescue NameError => e
     raise e unless e.message =~ /constant/
     nil
   end
 end
 
-class MyRuntime < Rbexy::ComponentRuntime
+# Register your component provider with Rbexy
+Rbexy.configure do |config|
+  config.component_provider = MyComponentProvider.new
+end
+```
+
+## Usage outside of Rails
+
+Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#rbexy_tag`. We provide a built-in runtime leveraging ActionView's helpers that you can extend from or build your own:
+
+Subclass to add methods and instance variables that you'd like to make available to your template.
+
+```ruby
+class MyRuntime < Rbexy::Runtime
+  def initialize
+    super
+    @an_ivar = "Ivar value"
+  end
+
+  def a_method
+    "Method value"
+  end
+end
+
+Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
+```
+
+If you're using custom components, inject a ComponentProvider (see "Custom components" for an example implementation):
+
+```ruby
+class MyRuntime < Rbexy::Runtime
   def initialize(component_provider)
     super(component_provider)
     @ivar_val = "ivar value"
@@ -255,36 +325,13 @@ end
 
 Rbexy.evaluate(
   "<Forms.TextField /><Button prop1=\"val1\" prop2={true && \"val2\">Submit</Button>",
-  MyRuntime.new(ComponentProvider.new)
+  MyRuntime.new(MyComponentProvider.new)
 )
-```
-
-## Execution Context
-
-Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#tag`. We provide a couple built-in runtimes that you can extend from or build your own:
-
-* `Rbexy::HtmlRuntime` leverages ActionView's helpers to render templates that include only valid HTML tags as an HTML document.
-* `Rbexy::ComponentRuntime` allows you to render your custom components in addition to HTML.
-
-Subclass one of these to add methods and instance variables that you'd like to make available to your template.
-
-```ruby
-class MyRuntime < Rbexy::HtmlRuntime
-  def initialize
-    @an_ivar = "Ivar value"
-  end
-
-  def a_method
-    "Method value"
-  end
-end
-
-Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
 ```
 
 Or implement your own runtime, so long as it conforms to the API:
 
-* `#tag` that returns a tag builder conforming to the API of `ActionView::Helpers::TagHelpers::TagBuilder`
+* `#rbexy_tag` that returns a tag builder conforming to the API of `ActionView::Helpers::TagHelpers::TagBuilder`
 * `#evaluate(code)` that evals the given string of ruby code
 
 ## Installation

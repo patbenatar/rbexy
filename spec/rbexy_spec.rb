@@ -23,8 +23,9 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    class Runtime < Rbexy::HtmlRuntime
+    class Runtime < Rbexy::Runtime
       def initialize
+        super
         @ivar_val = "ivar value"
       end
 
@@ -85,9 +86,11 @@ RSpec.describe Rbexy do
         find(name) != nil
       end
 
-      def render(name, attrs, &block)
+      def render(context, name, **attrs, &block)
         find(name).new(**attrs).render(&block)
       end
+
+      private
 
       def find(name)
         ActiveSupport::Inflector.constantize("Components::#{name}Component")
@@ -97,7 +100,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    class MyRuntime < Rbexy::ComponentRuntime
+    class MyRuntime < Rbexy::Runtime
       def initialize(component_provider)
         super(component_provider)
         @ivar_val = "ivar value"
@@ -139,7 +142,7 @@ RSpec.describe Rbexy do
       </ul>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::HtmlRuntime.new)
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <ul>
@@ -148,5 +151,97 @@ RSpec.describe Rbexy do
     OUTPUT
 
     expect(result).to eq expected
+  end
+
+  describe "context" do
+    it "allows children to access context set by parents" do
+      class ComponentProvider
+        def initialize
+          @components = {
+            "Form" => Class.new do
+              def render(context)
+                context.create_context(:form, { value: "here" })
+                "<form>#{yield}</form>".html_safe
+              end
+            end,
+            "TextField" => Class.new do
+              def render(context)
+                form = context.use_context(:form)
+                "<input type=\"text\" value=\"#{form[:value]}\">".html_safe
+              end
+            end
+          }
+        end
+
+        def match?(name)
+          find(name) != nil
+        end
+
+        def render(context, name, **attrs, &block)
+          find(name).new(**attrs).render(context, &block)
+        end
+
+        def find(name)
+          @components[name]
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        <Form>
+          <TextField />
+        </Form>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new(ComponentProvider.new))
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <form>
+          <input type="text" value="here">
+        </form>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "does not allow siblings to access one another's contexts" do
+      class ComponentProvider
+        def initialize
+          @components = {
+            "Form" => Class.new do
+              def render(context)
+                context.create_context(:form, { value: "here" })
+                "<form>#{yield if block_given?}</form>".html_safe
+              end
+            end,
+            "TextField" => Class.new do
+              def render(context)
+                form = context.use_context(:form)
+                "<input type=\"text\" value=\"#{form[:value]}\">".html_safe
+              end
+            end
+          }
+        end
+
+        def match?(name)
+          find(name) != nil
+        end
+
+        def render(context, name, **attrs, &block)
+          find(name).new(**attrs).render(context, &block)
+        end
+
+        def find(name)
+          @components[name]
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        <Form></Form>
+        <TextField />
+      RBX
+
+      expect { Rbexy.evaluate(template_string, Rbexy::Runtime.new(ComponentProvider.new)) }
+        .to raise_error Rbexy::ContextNotFound
+    end
   end
 end

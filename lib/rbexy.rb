@@ -5,17 +5,31 @@ module Rbexy
   autoload :Parser, "rbexy/parser"
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
-  autoload :HtmlRuntime, "rbexy/html_runtime"
-  autoload :ComponentRuntime, "rbexy/component_runtime"
   autoload :HashMash, "rbexy/hash_mash"
+  autoload :OutputBuffer, "rbexy/output_buffer"
+  autoload :ComponentTagBuilder, "rbexy/component_tag_builder"
+  autoload :ViewHelper, "rbexy/view_helper"
+  autoload :Configuration, "rbexy/configuration"
 
-  def self.compile(template_string)
-    tokens = Rbexy::Lexer.new(template_string).tokenize
-    template = Rbexy::Parser.new(tokens).parse
-    template.compile
-  end
+  ContextNotFound = Class.new(StandardError)
 
-  def self.evaluate(template_string, runtime)
-    runtime.evaluate compile(template_string)
+  class << self
+    def configure
+      yield(configuration)
+    end
+
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    def compile(template_string)
+      tokens = Rbexy::Lexer.new(template_string).tokenize
+      template = Rbexy::Parser.new(tokens).parse
+      template.compile
+    end
+
+    def evaluate(template_string, runtime)
+      runtime.evaluate compile(template_string)
+    end
   end
 end

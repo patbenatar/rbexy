@@ -1,12 +1,5 @@
 require "active_support/inflector"
 
-# New approach for compiler:
-#
-# Build a big string of ruby code, with our literals as strings and our expressions
-# interpolated within it, then eval the whole thing at once.
-# * At the top we use Context#instance_eval
-# * Sub-expressions just use #eval so they have access to whatever scope they're in
-
 module Rbexy
   module Nodes
     module Util
@@ -28,15 +21,9 @@ module Rbexy
 
       def compile
         <<-CODE
-class OutputBuffer < String
-  def <<(content)
-    value = content.is_a?(Array) ? content.join : content
-    super(value || "")
-  end
-end
-OutputBuffer.new.tap do |output|
-#{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-end
+Rbexy::OutputBuffer.new.tap do |output|
+  #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
+end.html_safe
         CODE
       end
     end
@@ -87,19 +74,27 @@ end
       end
 
       def compile
-        tag = "tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+        StringIO.new.tap do |code|
+          code.puts "Rbexy::OutputBuffer.new.tap do |output|"
+          code.puts "rbexy_context.push({}) if respond_to?(:rbexy_context)"
 
-        if children.length > 0
-<<-CODE
-#{tag} do
-  OutputBuffer.new.tap do |output|
+          tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+
+          code.puts(if children.length > 0
+<<-CODE.strip
+output << (#{tag} do
+  Rbexy::OutputBuffer.new.tap do |output|
     #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
   end.html_safe
-end
+end)
 CODE
-        else
-          tag
-        end
+          else
+            "output << (#{tag})"
+          end)
+
+          code.puts "rbexy_context.pop if respond_to?(:rbexy_context)"
+          code.puts "end.html_safe"
+        end.string
       end
 
       def compile_attrs
@@ -118,7 +113,7 @@ CODE
       end
 
       def compile
-        "#{ActiveSupport::Inflector.underscore(name)}: #{value.compile}"
+        "\"#{name}\": #{value.compile}"
       end
     end
   end

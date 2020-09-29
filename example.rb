@@ -16,7 +16,7 @@ template_string = <<-RBX
   {true && <p>Is true</p>}
   {false && <p>Is false</p>}
   {true ? <p {**{ class: "myClass" }}>Ternary is {'true'.upcase}</p> : <p>Ternary is false</p>}
-  <Button prop1="val1" prop2={true && "val2"}>the content</Button>
+  <Button prop1="val1" prop2={true && "val2"} multi-word-prop="value">the content</Button>
   <Forms.TextField label={->(n) { <label id={n}>Something</label> }} note={<p>the note</p>} />
   <ul>
     {["hi", "there", "nick"].map { |val| <li>{val}</li> }}
@@ -26,16 +26,17 @@ RBX
 
 module Components
   class ButtonComponent
-    def initialize(prop1:, prop2:)
+    def initialize(prop1:, prop2:, multi_word_prop:)
       @prop1 = prop1
       @prop2 = prop2
+      @multi_word_prop = multi_word_prop
     end
 
     def render
       # Render it yourself, call one of Rails view helpers (link_to,
       # content_tag, etc), or use a template file. Be sure to render
       # children by yielding to the given block.
-      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
+      "<button class=\"#{[@prop1, @prop2, @multi_word_prop].join("-")}\">#{yield}</button>"
     end
   end
 
@@ -58,9 +59,12 @@ class ComponentProvider
     find(name) != nil
   end
 
-  def render(name, attrs, &block)
-    find(name).new(**attrs).render(&block)
+  def render(context, name, **attrs, &block)
+    props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
+    find(name).new(**props).render(&block)
   end
+
+  private
 
   def find(name)
     ActiveSupport::Inflector.constantize("Components::#{name}Component")
@@ -70,7 +74,7 @@ class ComponentProvider
   end
 end
 
-class MyRuntime < Rbexy::ComponentRuntime
+class MyRuntime < Rbexy::Runtime
   def initialize(component_provider)
     super(component_provider)
     @ivar_val = "ivar value"
