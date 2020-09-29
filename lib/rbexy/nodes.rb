@@ -93,7 +93,7 @@ CODE
           end)
 
           code.puts "rbexy_context.pop if respond_to?(:rbexy_context)"
-          code.puts "end"
+          code.puts "end.html_safe"
         end.string
       end
 
