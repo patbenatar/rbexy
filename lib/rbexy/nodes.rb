@@ -76,7 +76,6 @@ end.html_safe
       def compile
         StringIO.new.tap do |code|
           code.puts "Rbexy::OutputBuffer.new.tap do |output|"
-          code.puts "rbexy_context.push({}) if respond_to?(:rbexy_context)"
 
           tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
 
@@ -92,7 +91,6 @@ CODE
             "output << (#{tag})"
           end)
 
-          code.puts "rbexy_context.pop if respond_to?(:rbexy_context)"
           code.puts "end.html_safe"
         end.string
       end
