@@ -9,6 +9,12 @@ require "action_view"
 
 module Rbexy
   class Component < ActionView::Base
+    class_attribute :component_file_location
+
+    def self.inherited(klass)
+      klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
+    end
+
     def initialize(view_context)
       super(
         view_context.lookup_context,
@@ -42,17 +48,17 @@ module Rbexy
     attr_reader :view_context, :content_block
 
     def template_path
-      # Infer template file location from class name, e.g.
-      # Form::TextFieldComponent would have a template at
-      # app/components/forms/text_field_component.(rbx|erb|etc)
-      template_root_path = ::Rails.root.join("app", "components", component_name)
+      # Look for template as sibling to component class, with the same filename
+      # but a template extension instead of `.rb`
+      template_root_path = self.class.component_file_location.chomp(File.extname(self.class.component_file_location))
 
       extensions = ActionView::Template.template_handler_extensions.join(",")
       template_files = Dir["#{template_root_path}.*{#{extensions}}"]
 
       if template_files.length > 1
-        # NICKTODO
-        raise "Too many templates"
+        raise AmbiguousTemplate, "found #{template_files.length} templates for #{self.class.name}"
+      elsif template_files.length == 0
+        raise TemplateNotFound, "couldn't find template for #{self.class.name}"
       else
         template_files.first
       end
