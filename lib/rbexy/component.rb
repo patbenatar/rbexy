@@ -1,12 +1,5 @@
 require "action_view"
 
-# NICKTODO: this class obv depends on Rails.. make that clear somehow.
-# consider how this gets required, wrt rbexy/rails, etc.. right now it isn't
-# autoloading and optify_masters manually requires it.
-
-# NICKTODO: need an approach for props.. #initialize with calling super and
-# passing context isn't great. too much room for dev error.
-
 module Rbexy
   class Component < ActionView::Base
     class_attribute :component_file_location

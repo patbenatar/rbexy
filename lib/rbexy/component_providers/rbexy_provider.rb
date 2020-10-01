@@ -1,5 +1,3 @@
-# NICKTODO: should this be default??
-
 module Rbexy
   module ComponentProviders
     class RbexyProvider
