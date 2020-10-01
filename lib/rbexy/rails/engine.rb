@@ -10,6 +10,10 @@ module Rbexy
           helper Rbexy::ViewHelper
         end
 
+        if defined?(ViewComponent)
+          ViewComponent::Base.include Rbexy::ViewHelper
+        end
+
         Rbexy.configure do |config|
           require "rbexy/component_providers/rbexy_provider"
           config.component_provider = Rbexy::ComponentProviders::RbexyProvider.new
