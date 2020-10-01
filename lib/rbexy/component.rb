@@ -15,7 +15,7 @@ module Rbexy
       klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
     end
 
-    def initialize(view_context)
+    def initialize(view_context, **props)
       super(
         view_context.lookup_context,
         view_context.assigns,
@@ -23,7 +23,14 @@ module Rbexy
       )
 
       @view_context = view_context
+
+      setup(**props)
     end
+
+    # Override in your subclass to handle props, setup your component, etc.
+    # You can also implement `initialize` but you just need to remember to
+    # call super(view_context).
+    def setup(**props); end
 
     def render(&block)
       @content = nil
@@ -41,6 +48,17 @@ module Rbexy
 
     def content
       @content ||= content_block ? view_context.capture(self, &content_block) : ""
+    end
+
+    def create_context(name, value)
+      rbexy_context.last[name] = value
+    end
+
+    def use_context(name)
+      index = rbexy_context.rindex { |c| c.has_key?(name) }
+      index ?
+        rbexy_context[index][name] :
+        raise(ContextNotFound, "no parent context `#{name}`")
     end
 
     private

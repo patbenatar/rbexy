@@ -224,7 +224,44 @@ You can splat a hash into attributes:
 
 ## Custom components
 
-You can use custom components alongside standard HTML tags. You just need to tell rbexy how to resolve your custom component classes as it encounters them while evaluating your template by implementing a ComponentProvider:
+You can use custom components alongside standard HTML tags:
+
+```jsx
+<div>
+  <PageHeader title="Welcome" />
+  <PageBody>
+    <p>To the world of custom components</p>
+  </PageBody>
+</div>
+```
+
+### `Rbexy::Component`
+
+We ship with a component superclass that you can use to implement your own components in Rails:
+
+```ruby
+class PageHeaderComponent < Rbexy::Component
+  def setup(title:)
+    @title = title
+  end
+end
+```
+
+### `ViewComponent`
+
+Using Github's view_component library? Rbexy ships with a provider that'll resolve your RBX tags like `<Button />` to their corresponding `ButtonComponent < ViewComponent::Base` components.
+
+```ruby
+require "rbexy/component_providers/view_component_provider"
+
+Rbexy.configure do |config|
+  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
+end
+```
+
+### Other types of components
+
+You just need to tell rbexy how to resolve your custom component classes as it encounters them while evaluating your template by implementing a ComponentProvider:
 
 ```ruby
 class MyComponentProvider
@@ -245,16 +282,6 @@ end
 ```
 
 See `lib/rbexy/component_providers/` for example implementations.
-
-Using Github's view_component library? Rbexy ships with a provider for that:
-
-```ruby
-require "rbexy/component_providers/view_component_provider"
-
-Rbexy.configure do |config|
-  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
-end
-```
 
 ## Context
 
