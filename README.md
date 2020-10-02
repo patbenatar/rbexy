@@ -219,7 +219,7 @@ You can use custom components alongside standard HTML tags:
 
 ### `Rbexy::Component`
 
-We ship with a component superclass that integrates nicely with Rails' ActionView and the controller rendering context. You can use it to easily implement custom components:
+We ship with a component superclass that integrates nicely with Rails' ActionView and the controller rendering context. You can use it to easily implement custom components in your Rails app:
 
 ```ruby
 # app/components/page_header_component.rb
@@ -237,7 +237,13 @@ By default, we'll look for a template file in the same directory as the class an
 <h1>{@title}</h1>
 ```
 
-If you'd prefer to instead render your component contents from the Ruby class, e.g. using Rails `tag` helpers, you can do so with `#call`:
+You can call this component from another `.rbx` template file (`<PageHeader title="Hello" />`)—either one rendered by another component class or a Rails view file like `app/views/products/index.rbx`. Or you can call it from ERB (or any other template language) like `PageHeaderComponent.new(self, title: "Hello").render`.
+
+Your components and their templates run in the same context as traditional Rails views, so you have access to all of the view helpers you're used to as well as any custom helpers you've defined in `app/helpers/`.
+
+#### Template-less components
+
+If you'd prefer to render your components entirely from Ruby, e.g. using Rails `tag` helpers, you can do so with `#call`:
 
 ```ruby
 class PageHeaderComponent < Rbexy::Component
@@ -329,7 +335,7 @@ See `lib/rbexy/component_providers/` for example implementations.
 
 ## Usage outside of Rails
 
-Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#rbexy_tag`. We provide a built-in runtime leveraging ActionView's helpers that you can extend from or build your own:
+Rbexy compiles your template into ruby code, which you can then execute in any context you like, so long as a tag builder is available at `#rbexy_tag`. We provide a built-in runtime leveraging ActionView's `tag` helper that you can extend from or build your own:
 
 Subclass to add methods and instance variables that you'd like to make available to your template.
 
