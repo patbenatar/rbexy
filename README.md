@@ -219,7 +219,7 @@ You can use custom components alongside standard HTML tags:
 
 ### `Rbexy::Component`
 
-We ship with a component superclass that you can use to implement your own components in Rails.
+We ship with a component superclass that integrates nicely with Rails' ActionView and the controller rendering context. You can use it to easily implement custom components:
 
 ```ruby
 # app/components/page_header_component.rb

@@ -7,11 +7,11 @@ module Rbexy
         ActionView::Template.register_template_handler(:rbx, Rbexy::Rails::TemplateHandler)
 
         ActiveSupport.on_load :action_controller do
-          helper Rbexy::ViewHelper
+          helper Rbexy::ViewContextHelper
         end
 
         if defined?(ViewComponent)
-          ViewComponent::Base.include Rbexy::ViewHelper
+          ViewComponent::Base.include Rbexy::ViewContextHelper
         end
 
         Rbexy.configure do |config|

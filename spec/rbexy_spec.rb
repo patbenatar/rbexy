@@ -207,13 +207,13 @@ RSpec.describe Rbexy do
       class ComponentProvider
         def initialize
           @components = {
-            "Form" => Class.new do
+            "Form" => Class.new(Rbexy::Component) do
               def render(context)
                 context.create_context(:form, { value: "here" })
                 "<form>#{yield if block_given?}</form>".html_safe
               end
             end,
-            "TextField" => Class.new do
+            "TextField" => Class.new(Rbexy::Component) do
               def render(context)
                 form = context.use_context(:form)
                 "<input type=\"text\" value=\"#{form[:value]}\">".html_safe
