@@ -1,13 +1,13 @@
 module Rbexy
   module ComponentProviders
-    class ViewComponentProvider
+    class RbexyProvider
       def match?(name)
         name =~ /^[A-Z]/ && find(name) != nil
       end
 
       def render(context, name, **attrs, &block)
         props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
-        find(name).new(**props).render_in(context, &block)
+        find(name).new(context, **props).render(&block)
       end
 
       private

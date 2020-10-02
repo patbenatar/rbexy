@@ -54,24 +54,6 @@ In `config/application.rb`:
 require "rbexy/rails/engine"
 ```
 
-Add a `config/initializers/rbexy.rb` and register your ComponentProvider (see "Custom components" below for more info):
-
-```ruby
-Rbexy.configure do |config|
-  config.component_provider = MyComponentProvider.new
-end
-```
-
-Using Github's view_component library? Rbexy ships with a provider for that:
-
-```ruby
-require "rbexy/component_providers/view_component_provider"
-
-Rbexy.configure do |config|
-  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
-end
-```
-
 _For usage outside of Rails, see "Usage outside of Rails" below._
 
 ## Template Syntax
@@ -137,7 +119,7 @@ To conditionalize your template:
 </div>
 ```
 
-For loops:
+Loops:
 
 ```jsx
 <ul>
@@ -222,60 +204,118 @@ You can splat a hash into attributes:
 <div {**{ class: "myClass" }} {**@more_attrs}></div>
 ```
 
-#### Custom components
+## Custom components
 
-You can use custom components alongside standard HTML components. You just need to tell rbexy how to resolve your custom component classes as it encounters them while evaluating your template by implementing a ComponentProvider as demonstrated below:
+You can use custom components alongside standard HTML tags:
+
+```jsx
+<div>
+  <PageHeader title="Welcome" />
+  <PageBody>
+    <p>To the world of custom components</p>
+  </PageBody>
+</div>
+```
+
+### `Rbexy::Component`
+
+We ship with a component superclass that integrates nicely with Rails' ActionView and the controller rendering context. You can use it to easily implement custom components:
 
 ```ruby
-module MyComponents
-  # Define your components as POROs or use a library like
-  # ViewComponent
-  class ButtonComponent
-    def initialize(prop1:, prop2:)
-      @prop1 = prop1
-      @prop2 = prop2
-    end
+# app/components/page_header_component.rb
+class PageHeaderComponent < Rbexy::Component
+  def setup(title:)
+    @title = title
+  end
+end
+```
 
-    def render
-      # Render it yourself, call one of Rails view helpers (link_to,
-      # content_tag, etc), or use a template file. Be sure to render
-      # children by yielding to the given block.
-      "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
-    end
+By default, we'll look for a template file in the same directory as the class and with a matching filename:
+
+```jsx
+// app/components/page_header_component.rbx
+<h1>{@title}</h1>
+```
+
+If you'd prefer to instead render your component contents from the Ruby class, e.g. using Rails `tag` helpers, you can do so with `#call`:
+
+```ruby
+class PageHeaderComponent < Rbexy::Component
+  def setup(title:)
+    @title = title
   end
 
-  module Forms
-    # Namespaced components are available in the template with
-    # dot-notation, ie `Forms.TextField` in this case
-    class TextFieldComponent
-      def initialize(**attrs)
-      end
+  def call
+    tag.h1 @title
+  end
+end
+```
 
-      def render
-        "<input type=\"text\" />"
-      end
+#### Context
+
+`Rbexy::Component` implements a similar notion to React's Context API, allowing you to pass data through the component tree without having to pass props down manually.
+
+Given a template:
+
+```jsx
+<Form>
+  <TextField field={:title} />
+</Form>
+```
+
+The form component can use Rails `form_for` and then pass the `form` builder object down to any field components using context:
+
+```ruby
+class FormComponent < Rbexy::Component
+  def setup(form_object:)
+    @form_object = form_object
+  end
+
+  def call
+    form_for @form_object do |form|
+      create_context(:form, form)
+      content
     end
   end
 end
 
-# Implement a component provider with #match? and #render methods
-# that Rbexy will call as it evaluates your template
+class TextFieldComponent < Rbexy::Component
+  def setup(field:)
+    @field = field
+    @form = use_context(:form)
+  end
+
+  def call
+    @form.text_field @field
+  end
+end
+```
+
+### `ViewComponent`
+
+Using Github's view_component library? Rbexy ships with a provider that'll resolve your RBX tags like `<Button />` to their corresponding `ButtonComponent < ViewComponent::Base` components.
+
+```ruby
+require "rbexy/component_providers/view_component_provider"
+
+Rbexy.configure do |config|
+  config.component_provider = Rbexy::ComponentProviders::ViewComponentProvider.new
+end
+```
+
+### Other types of components
+
+You just need to tell rbexy how to resolve your custom component classes as it encounters them while evaluating your template by implementing a ComponentProvider:
+
+```ruby
 class MyComponentProvider
   def match?(name)
-    find(name) != nil
+    # Return true if the given tag name matches one of your custom components
   end
 
   def render(context, name, **attrs, &block)
-    find(name).new(**attrs).render_in(context, &block)
-  end
-
-  private
-
-  def find(name)
-    ActiveSupport::Inflector.constantize("MyComponents::#{name}Component")
-  rescue NameError => e
-    raise e unless e.message =~ /constant/
-    nil
+    # Instantiate and render your custom component for the given name, using
+    # the render context as needed (e.g. ActionView in Rails)
   end
 end
 
@@ -284,6 +324,8 @@ Rbexy.configure do |config|
   config.component_provider = MyComponentProvider.new
 end
 ```
+
+See `lib/rbexy/component_providers/` for example implementations.
 
 ## Usage outside of Rails
 
@@ -334,33 +376,16 @@ Or implement your own runtime, so long as it conforms to the API:
 * `#rbexy_tag` that returns a tag builder conforming to the API of `ActionView::Helpers::TagHelpers::TagBuilder`
 * `#evaluate(code)` that evals the given string of ruby code
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem "rbexy"
-```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install rbexy
-
 ## Development
 
 ```
 docker-compose build
-docker-compose run rbexy spec
+docker-compose run rbexy rspec
 ```
 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rbexy. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/rbexy/blob/master/CODE_OF_CONDUCT.md).
-
 
 ## License
 
