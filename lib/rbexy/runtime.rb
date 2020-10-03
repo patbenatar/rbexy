@@ -25,6 +25,9 @@ module Rbexy
 
     def evaluate(code)
       instance_eval(code)
+    rescue => e
+      e.set_backtrace(e.backtrace.map { |l| l.gsub("(eval)", "(rbx template string)") })
+      raise e
     end
   end
 end
