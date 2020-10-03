@@ -423,6 +423,63 @@ RBX
     ]
   end
 
+  it "allows attributes to span multiple lines" do
+    code = <<-CODE.strip_heredoc.strip
+      <div foo="bar"
+           baz="bip">
+      </div>
+    CODE
+
+    subject = Rbexy::Lexer.new(code)
+    expect(subject.tokenize).to eq [
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "div"],
+      [:OPEN_ATTRS],
+      [:ATTR_NAME, "foo"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "bar"],
+      [:CLOSE_ATTR_VALUE],
+      [:ATTR_NAME, "baz"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "bip"],
+      [:CLOSE_ATTR_VALUE],
+      [:CLOSE_ATTRS],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "\n"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "div"],
+      [:CLOSE_TAG_END],
+    ]
+  end
+
+  it "allows attributes to be on the next line after the tag name" do
+    code = <<-CODE.strip_heredoc.strip
+      <input
+        foo="bar"
+        baz="bip"
+      />
+    CODE
+
+    subject = Rbexy::Lexer.new(code)
+    expect(subject.tokenize).to eq [
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "input"],
+      [:OPEN_ATTRS],
+      [:ATTR_NAME, "foo"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "bar"],
+      [:CLOSE_ATTR_VALUE],
+      [:ATTR_NAME, "baz"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "bip"],
+      [:CLOSE_ATTR_VALUE],
+      [:CLOSE_ATTRS],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:CLOSE_TAG_END],
+    ]
+  end
+
   it "tokenizes some big nested markup with attributes" do
     code = <<-CODE.strip_heredoc
       <div foo="bar">
