@@ -17,6 +17,7 @@ module Rbexy
         Rbexy.configure do |config|
           require "rbexy/component_providers/rbexy_provider"
           config.component_provider = Rbexy::ComponentProviders::RbexyProvider.new
+          config.template_paths << ::Rails.root.join("app", "components")
         end
       end
     end

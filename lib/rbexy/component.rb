@@ -45,23 +45,11 @@ module Rbexy
     end
 
     def call
-      renderer = view_context.view_renderer
-
-      old_lookup_context = renderer.lookup_context
-
-      paths = old_lookup_context.view_paths.dup.unshift(
-        ActionView::OptimizedFileSystemResolver.new(::Rails.root.join("app", "components"))
-      )
-
-      details = LookupContext.details_hash(old_lookup_context)
-      # TODO: this should go in app-code, not Rbexy...
-      prefixes = %w(atoms molecules organisms)
-      new_lookup_context = LookupContext.new(paths, details, prefixes)
-
-      renderer.lookup_context = new_lookup_context
-      renderer.render(self, partial: component_name, &nil)
+      old_lookup_context = view_renderer.lookup_context
+      view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+      view_renderer.render(self, partial: component_name, &nil)
     ensure
-      renderer.lookup_context = old_lookup_context
+      view_renderer.lookup_context = old_lookup_context
     end
 
     def content
@@ -82,6 +70,22 @@ module Rbexy
     private
 
     attr_reader :view_context, :content_block
+
+    def build_lookup_context(existing_context)
+      paths = existing_context.view_paths.dup.unshift(
+        *Rbexy.configuration.template_paths.map { |p| ActionView::OptimizedFileSystemResolver.new(p) }
+      )
+
+      LookupContext.new(
+        paths,
+        LookupContext.details_hash(existing_context),
+        Rbexy.configuration.template_prefixes
+      )
+    end
+
+    def view_renderer
+      view_context.view_renderer
+    end
 
     def component_name
       self.class.name.underscore
