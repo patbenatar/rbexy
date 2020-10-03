@@ -3,6 +3,13 @@ require "action_view"
 module Rbexy
   class Component < ActionView::Base
     class LookupContext < ActionView::LookupContext
+      def self.details_hash(context)
+        context.registered_details.each_with_object({}) do |key, details_hash|
+          value = key == :locale ? [context.locale] : context.send(key)
+          details_hash[key] = value
+        end
+      end
+
       def args_for_lookup(name, prefixes, partial, keys, details_options)
         super(name, prefixes, false, keys, details_options)
       end
@@ -39,20 +46,17 @@ module Rbexy
 
     def call
       renderer = view_context.view_renderer
+
       old_lookup_context = renderer.lookup_context
 
-      paths = ActionView::PathSet.new(
-        [ActionView::OptimizedFileSystemResolver.new(::Rails.root.join("app", "components"))]
+      paths = old_lookup_context.view_paths.dup.unshift(
+        ActionView::OptimizedFileSystemResolver.new(::Rails.root.join("app", "components"))
       )
-      # TODO: ivar_get is super hacky... more stable / public API way to do this?
-      details = old_lookup_context.instance_variable_get(:@details)
+
+      details = LookupContext.details_hash(old_lookup_context)
       # TODO: this should go in app-code, not Rbexy...
       prefixes = %w(atoms molecules organisms)
       new_lookup_context = LookupContext.new(paths, details, prefixes)
-
-      # TODO: maybe we should be prepending our path onto the prior lookup,
-      # rather than replacing.. that way a nested `{render partial: "..."}` would
-      # still work using default Rails functionality...
 
       renderer.lookup_context = new_lookup_context
       renderer.render(self, partial: component_name, &nil)
