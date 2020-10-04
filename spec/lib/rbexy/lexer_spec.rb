@@ -32,6 +32,27 @@ RSpec.describe Rbexy::Lexer do
     end
   end
 
+  it "tokenizes html5 doctype declaration" do
+    subject = Rbexy::Lexer.new("<!DOCTYPE html>")
+    expect(subject.tokenize).to eq [
+      [:DECLARATION, "<!DOCTYPE html>"]
+    ]
+  end
+
+  it "tokenizes older html4 doctype declaration" do
+    template = <<-RBX.strip_heredoc.strip
+      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+    RBX
+
+    subject = Rbexy::Lexer.new(template)
+    expect(subject.tokenize).to eq [
+      [
+        :DECLARATION,
+        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
+      ]
+    ]
+  end
+
   it "tokenizes nested self-closing xml tags" do
     subject = Rbexy::Lexer.new("<div><br /></div>")
     expect(subject.tokenize).to eq [

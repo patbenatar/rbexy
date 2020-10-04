@@ -1,5 +1,7 @@
 require "active_support/inflector"
 
+# TODO: require the html_safe activesupport core_ext here, for non Rails usage
+
 module Rbexy
   module Nodes
     module Util
@@ -126,6 +128,18 @@ module Rbexy
     class SilentNewline
       def compile
         "\n"
+      end
+    end
+
+    class Declaration
+      attr_reader :content
+
+      def initialize(content)
+        @content = content
+      end
+
+      def compile
+        "\"#{Util.safe_string(content)}\".html_safe"
       end
     end
   end

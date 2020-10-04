@@ -11,6 +11,7 @@ RSpec.describe Rbexy do
 
   it "handles a bunch of html" do
     template_string = <<-RBX.strip_heredoc.strip
+      <!DOCTYPE html>
       <div foo bar="baz" thing={["hey", "you"].join()}>
         <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
         <div {**{ class: "myClass" }}></div>
@@ -40,6 +41,7 @@ RSpec.describe Rbexy do
     result = Rbexy.evaluate(template_string, Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
+      <!DOCTYPE html>
       <div foo="" bar="baz" thing="heyyou">
         <h1 class="myClass" attr1="val1" attr2="val2">Hello world</h1>
         <div class="myClass"></div>
