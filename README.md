@@ -25,14 +25,14 @@ Use your custom Ruby class components from `.rbx` templates just like you would 
 after defining them in Ruby:
 
 ```ruby
-class HeroComponent < ViewComponent::Base
-  def initialize(size:)
+class HeroComponent < Rbexy::Component # or use ViewComponent, or another component lib
+  def setup(size:)
     @size = size
   end
 end
 
-class ButtonComponent < ViewComponent::Base
-  def initialize(to:)
+class ButtonComponent < Rbexy::Component
+  def setup(to:)
     @to = to
   end
 end
