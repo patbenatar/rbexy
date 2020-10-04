@@ -53,6 +53,28 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  it "handles html with multiline tags" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div
+        foo
+        bar="baz"
+        thing={["hey", "you"].join()}>
+        <h1
+          {**{ class: "myClass" }}>Hello world</h1>
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div foo="" bar="baz" thing="heyyou">
+        <h1 class="myClass">Hello world</h1>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "handles custom components with html" do
     module Components
       class ButtonComponent
@@ -177,6 +199,15 @@ RSpec.describe Rbexy do
           </div>
         RBX
         4
+      ],
+      [
+        <<-RBX.strip_heredoc,
+          <input
+            foo="bar"
+            baz={an_undefined_method}
+          />
+        RBX
+        3
       ]
     ]
 

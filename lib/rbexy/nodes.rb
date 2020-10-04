@@ -65,16 +65,16 @@ module Rbexy
     end
 
     class XmlNode
-      attr_reader :name, :attrs, :children
+      attr_reader :name, :members, :children
 
-      def initialize(name, attrs, children)
+      def initialize(name, members, children)
         @name = name
-        @attrs = attrs || {}
+        @members = members || []
         @children = children
       end
 
       def compile
-        base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
+        base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
         tag = if children.length > 0
           [
             "#{base_tag} {",
@@ -96,10 +96,17 @@ module Rbexy
         ].join(" ")
       end
 
-      def compile_attrs
-        attrs.map do |attr|
-          attr.is_a?(ExpressionGroup) ? "**#{attr.compile}" : attr.compile
-        end.join(",")
+      def compile_members
+        members.each_with_object("") do |member, result|
+          case member
+          when ExpressionGroup
+            result << "**#{member.compile},"
+          when SilentNewline
+            result << member.compile
+          else
+            result << "#{member.compile},"
+          end
+        end
       end
     end
 
@@ -113,6 +120,12 @@ module Rbexy
 
       def compile
         "\"#{name}\": #{value.compile}"
+      end
+    end
+
+    class SilentNewline
+      def compile
+        "\n"
       end
     end
   end

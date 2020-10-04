@@ -423,6 +423,32 @@ RBX
     ]
   end
 
+  it "adds a silent newline between tag name and attributes that come on the next line (for source mapping)" do
+    code = <<-CODE.strip_heredoc.strip
+      <div
+        foo="bar">
+      </div>
+    CODE
+
+    subject = Rbexy::Lexer.new(code)
+    expect(subject.tokenize).to eq [
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "div"],
+      [:SILENT_NEWLINE],
+      [:OPEN_ATTRS],
+      [:ATTR_NAME, "foo"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "bar"],
+      [:CLOSE_ATTR_VALUE],
+      [:CLOSE_ATTRS],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "\n"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "div"],
+      [:CLOSE_TAG_END],
+    ]
+  end
+
   it "allows attributes to span multiple lines" do
     code = <<-CODE.strip_heredoc.strip
       <div foo="bar"
@@ -439,6 +465,7 @@ RBX
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bar"],
       [:CLOSE_ATTR_VALUE],
+      [:SILENT_NEWLINE],
       [:ATTR_NAME, "baz"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bip"],
@@ -464,15 +491,18 @@ RBX
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_NAME, "input"],
+      [:SILENT_NEWLINE],
       [:OPEN_ATTRS],
       [:ATTR_NAME, "foo"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bar"],
       [:CLOSE_ATTR_VALUE],
+      [:SILENT_NEWLINE],
       [:ATTR_NAME, "baz"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bip"],
       [:CLOSE_ATTR_VALUE],
+      [:SILENT_NEWLINE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],

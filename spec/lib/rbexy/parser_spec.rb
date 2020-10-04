@@ -111,21 +111,21 @@ RSpec.describe Rbexy::Parser do
 
     div = subject.parse.children.first
     expect(div).to be_a Rbexy::Nodes::XmlNode
-    expect(div.attrs.length).to eq 3
+    expect(div.members.length).to eq 3
 
-    attrFoo = div.attrs[0]
+    attrFoo = div.members[0]
     expect(attrFoo).to be_a Rbexy::Nodes::XmlAttr
     expect(attrFoo.name).to eq "foo"
     expect(attrFoo.value).to be_a Rbexy::Nodes::Text
     expect(attrFoo.value.content).to eq ""
 
-    attrBar = div.attrs[1]
+    attrBar = div.members[1]
     expect(attrBar).to be_a Rbexy::Nodes::XmlAttr
     expect(attrBar.name).to eq "bar"
     expect(attrBar.value).to be_a Rbexy::Nodes::Text
     expect(attrBar.value.content).to eq "baz"
 
-    attrThing = div.attrs[2]
+    attrThing = div.members[2]
     expect(attrThing).to be_a Rbexy::Nodes::XmlAttr
     expect(attrThing.name).to eq "thing"
     expect(attrThing.value).to be_a Rbexy::Nodes::ExpressionGroup
@@ -150,9 +150,9 @@ RSpec.describe Rbexy::Parser do
 
     div = subject.parse.children.first
     expect(div).to be_a Rbexy::Nodes::XmlNode
-    expect(div.attrs.length).to eq 1
+    expect(div.members.length).to eq 1
 
-    attrFoo = div.attrs[0]
+    attrFoo = div.members[0]
     expect(attrFoo).to be_a Rbexy::Nodes::ExpressionGroup
     expect(attrFoo.statements.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
   end
