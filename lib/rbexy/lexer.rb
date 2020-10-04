@@ -162,6 +162,7 @@ module Rbexy
           elsif scanner.scan(Patterns.tag_name)
             tokens << [:TAG_NAME, scanner.matched]
           elsif scanner.scan(Patterns.whitespace)
+            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
             tokens << [:OPEN_ATTRS]
             stack.push(:tag_attrs)
           else
@@ -177,9 +178,9 @@ module Rbexy
             raise SyntaxError, self
           end
         when :tag_attrs
-          scanner.skip(Patterns.whitespace)
-
-          if scanner.check(Patterns.close_tag)
+          if scanner.scan(Patterns.whitespace)
+            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
+          elsif scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTRS]
             stack.pop
           elsif scanner.scan(Patterns.attr_assignment)
@@ -202,6 +203,7 @@ module Rbexy
             stack.push(:expression)
           elsif scanner.scan(Patterns.whitespace) || scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTR_VALUE]
+            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
             stack.pop
           else
             raise SyntaxError, self

@@ -20,11 +20,11 @@ module Rbexy
       end
 
       def compile
-        <<-CODE
-Rbexy::OutputBuffer.new.tap do |output|
-  #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-end.html_safe
-        CODE
+        [
+          "Rbexy::OutputBuffer.new.tap { |output|",
+            children.map(&:compile).map { |c| "output << (#{c})"}.join(";"),
+          "}.html_safe"
+        ].join(" ")
       end
     end
 
@@ -65,42 +65,48 @@ end.html_safe
     end
 
     class XmlNode
-      attr_reader :name, :attrs, :children
+      attr_reader :name, :members, :children
 
-      def initialize(name, attrs, children)
+      def initialize(name, members, children)
         @name = name
-        @attrs = attrs || {}
+        @members = members || []
         @children = children
       end
 
       def compile
-        StringIO.new.tap do |code|
-          code.puts "Rbexy::OutputBuffer.new.tap do |output|"
-          code.puts "rbexy_context.push({}) if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component) && respond_to?(:rbexy_context)"
+        base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
+        tag = if children.length > 0
+          [
+            "#{base_tag} {",
+              "Rbexy::OutputBuffer.new.tap { |output|",
+                children.map(&:compile).map { |c| "output << (#{c})"}.join(";"),
+              "}.html_safe",
+            "}"
+          ].join(" ")
+        else
+          base_tag
+        end
 
-          tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_attrs})"
-
-          code.puts(if children.length > 0
-<<-CODE.strip
-output << (#{tag} do
-  Rbexy::OutputBuffer.new.tap do |output|
-    #{children.map(&:compile).map { |c| "output << (#{c})"}.join("\n")}
-  end.html_safe
-end)
-CODE
-          else
-            "output << (#{tag})"
-          end)
-
-          code.puts "rbexy_context.pop if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component) && respond_to?(:rbexy_context)"
-          code.puts "end.html_safe"
-        end.string
+        [
+          "Rbexy::OutputBuffer.new.tap { |output|",
+            "rbexy_context.push({}) if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component) && respond_to?(:rbexy_context);",
+            "output << (#{tag});",
+            "rbexy_context.pop if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component) && respond_to?(:rbexy_context);",
+          "}.html_safe"
+        ].join(" ")
       end
 
-      def compile_attrs
-        attrs.map do |attr|
-          attr.is_a?(ExpressionGroup) ? "**#{attr.compile}" : attr.compile
-        end.join(",")
+      def compile_members
+        members.each_with_object("") do |member, result|
+          case member
+          when ExpressionGroup
+            result << "**#{member.compile},"
+          when SilentNewline
+            result << member.compile
+          else
+            result << "#{member.compile},"
+          end
+        end
       end
     end
 
@@ -114,6 +120,12 @@ CODE
 
       def compile
         "\"#{name}\": #{value.compile}"
+      end
+    end
+
+    class SilentNewline
+      def compile
+        "\n"
       end
     end
   end

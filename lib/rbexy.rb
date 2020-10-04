@@ -12,8 +12,6 @@ module Rbexy
   autoload :Configuration, "rbexy/configuration"
 
   ContextNotFound = Class.new(StandardError)
-  TemplateNotFound = Class.new(StandardError)
-  AmbiguousTemplate = Class.new(StandardError)
 
   class << self
     def configure

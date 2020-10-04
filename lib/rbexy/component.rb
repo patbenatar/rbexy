@@ -2,10 +2,21 @@ require "action_view"
 
 module Rbexy
   class Component < ActionView::Base
-    class_attribute :component_file_location
+    class LookupContext < ActionView::LookupContext
+      def self.details_hash(context)
+        context.registered_details.each_with_object({}) do |key, details_hash|
+          value = key == :locale ? [context.locale] : context.send(key)
+          details_hash[key] = value
+        end
+      end
 
-    def self.inherited(klass)
-      klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
+      # We override any calls to args_for_lookup and set partial=false so that
+      # the lookup context doesn't automatically add a `_` prefix to the
+      # template path, since we're using the Rails partial-rendering
+      # functionality but don't want our templates prefixed with a `_`
+      def args_for_lookup(name, prefixes, partial, keys, details_options)
+        super(name, prefixes, false, keys, details_options)
+      end
     end
 
     def initialize(view_context, **props)
@@ -32,11 +43,11 @@ module Rbexy
     end
 
     def call
-      source = File.read(template_path)
-      handler = ActionView::Template.handler_for_extension(File.extname(template_path).gsub(".", ""))
-      locals = []
-      template = ActionView::Template.new(source, component_name, handler, locals: locals)
-      template.render(self, locals)
+      old_lookup_context = view_renderer.lookup_context
+      view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+      view_renderer.render(self, partial: component_name, &nil)
+    ensure
+      view_renderer.lookup_context = old_lookup_context
     end
 
     def content
@@ -58,21 +69,20 @@ module Rbexy
 
     attr_reader :view_context, :content_block
 
-    def template_path
-      # Look for template as sibling to component class, with the same filename
-      # but a template extension instead of `.rb`
-      template_root_path = self.class.component_file_location.chomp(File.extname(self.class.component_file_location))
+    def build_lookup_context(existing_context)
+      paths = existing_context.view_paths.dup.unshift(
+        *Rbexy.configuration.template_paths.map { |p| ActionView::OptimizedFileSystemResolver.new(p) }
+      )
 
-      extensions = ActionView::Template.template_handler_extensions.join(",")
-      template_files = Dir["#{template_root_path}.*{#{extensions}}"]
+      LookupContext.new(
+        paths,
+        LookupContext.details_hash(existing_context),
+        Rbexy.configuration.template_prefixes
+      )
+    end
 
-      if template_files.length > 1
-        raise AmbiguousTemplate, "found #{template_files.length} templates for #{self.class.name}"
-      elsif template_files.length == 0
-        raise TemplateNotFound, "couldn't find template for #{self.class.name}"
-      else
-        template_files.first
-      end
+    def view_renderer
+      view_context.view_renderer
     end
 
     def component_name

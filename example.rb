@@ -21,6 +21,17 @@ template_string = <<-RBX
   <ul>
     {["hi", "there", "nick"].map { |val| <li>{val}</li> }}
   </ul>
+  <p
+    class="something">Text</p>
+  <input
+    class="foobar"
+    />
+  <div
+    with="lots"
+    of="attributes"
+  >
+    Content
+  </div>
 </div>
 RBX
 

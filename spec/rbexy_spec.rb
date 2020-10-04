@@ -53,6 +53,28 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  it "handles html with multiline tags" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div
+        foo
+        bar="baz"
+        thing={["hey", "you"].join()}>
+        <h1
+          {**{ class: "myClass" }}>Hello world</h1>
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div foo="" bar="baz" thing="heyyou">
+        <h1 class="myClass">Hello world</h1>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "handles custom components with html" do
     module Components
       class ButtonComponent
@@ -151,5 +173,53 @@ RSpec.describe Rbexy do
     OUTPUT
 
     expect(result).to eq expected
+  end
+
+  context "compiled code maintains the same line numbers as the template so error messages are useful" do
+    examples = [
+      ["{an_undefined_method}", 1],
+      ["Hello {an_undefined_method}", 1],
+      ["Hello <input attr={an_undefined_method} />", 1],
+      ["<input attr={an_undefined_method} />", 1],
+      ["Hello {true && \"hey\"} {an_undefined_method}", 1],
+      ["Hello {true && \"hey\"} <input attr={an_undefined_method} />", 1],
+      [
+        <<-RBX.strip_heredoc,
+          Hello
+          {an_undefined_method}
+        RBX
+        2
+      ],
+      [
+        <<-RBX.strip_heredoc,
+          Hello
+          {true && "hey"}
+          <div>
+            <input attr={an_undefined_method} />
+          </div>
+        RBX
+        4
+      ],
+      [
+        <<-RBX.strip_heredoc,
+          <input
+            foo="bar"
+            baz={an_undefined_method}
+          />
+        RBX
+        3
+      ]
+    ]
+
+    examples.each do |(template_string, expected_line_number)|
+      it "raises on line #{expected_line_number} for `#{template_string}`" do
+        expect { Rbexy.evaluate(template_string, Rbexy::Runtime.new) }
+          .to raise_error do |error|
+            expect(error).to be_a NameError
+            expect(error.backtrace.first)
+              .to include "(rbx template string):#{expected_line_number}"
+          end
+      end
+    end
   end
 end
