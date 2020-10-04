@@ -19,12 +19,6 @@ module Rbexy
       end
     end
 
-    class_attribute :component_file_location
-
-    def self.inherited(klass)
-      klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
-    end
-
     def initialize(view_context, **props)
       super(
         view_context.lookup_context,
