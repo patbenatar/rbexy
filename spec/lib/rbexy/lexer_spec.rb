@@ -32,12 +32,6 @@ RSpec.describe Rbexy::Lexer do
     end
   end
 
-  it "raises a SyntaxError if a self-closing tag never closes" do
-    subject = Rbexy::Lexer.new("<input type=\"text\">")
-    puts subject.tokenize.to_s
-    expect { subject.tokenize }.to raise_error SyntaxError
-  end
-
   it "tokenizes html5 doctype declaration" do
     subject = Rbexy::Lexer.new("<!DOCTYPE html>")
     expect(subject.tokenize).to eq [
