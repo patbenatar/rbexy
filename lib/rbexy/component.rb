@@ -10,6 +10,10 @@ module Rbexy
         end
       end
 
+      # We override any calls to args_for_lookup and set partial=false so that
+      # the lookup context doesn't automatically add a `_` prefix to the
+      # template path, since we're using the Rails partial-rendering
+      # functionality but don't want our templates prefixed with a `_`
       def args_for_lookup(name, prefixes, partial, keys, details_options)
         super(name, prefixes, false, keys, details_options)
       end
