@@ -25,7 +25,7 @@ module Rbexy
     end
 
     def parse_token
-      parse_text || parse_expression || parse_tag
+      parse_text || parse_expression || parse_tag || parse_declaration
     end
 
     def parse_text
@@ -125,6 +125,13 @@ module Rbexy
       take!(:CLOSE_TAG_END)
 
       children
+    end
+
+    private
+
+    def parse_declaration
+      return unless token = take(:DECLARATION)
+      Nodes::Declaration.new(token[1])
     end
 
     def take(token_name)

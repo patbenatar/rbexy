@@ -6,6 +6,15 @@ RSpec.describe Rbexy::Parser do
     expect(result.first.content).to eq "Hello world"
   end
 
+  it "parses declarations" do
+    subject = Rbexy::Parser.new([
+      [:DECLARATION, "<!DOCTYPE html>"]
+    ])
+    result = subject.parse.children
+    expect(result.first).to be_a Rbexy::Nodes::Declaration
+    expect(result.first.content).to eq "<!DOCTYPE html>"
+  end
+
   it "parses expressions" do
     subject = Rbexy::Parser.new([
       [:OPEN_EXPRESSION],

@@ -28,7 +28,8 @@ module Rbexy
       single_quote: /'/,
       double_quoted_text_content: /[^"]+/,
       single_quoted_text_content: /[^']+/,
-      expression_internal_tag_prefixes: /(\s+(&&|\?|:|do|do\s*\|[^\|]+\||{|{\s*\|[^\|]+\|)\s+\z|\A\s*\z)/
+      expression_internal_tag_prefixes: /(\s+(&&|\?|:|do|do\s*\|[^\|]+\||{|{\s*\|[^\|]+\|)\s+\z|\A\s*\z)/,
+      declaration: /<![^>]*>/
     )
 
     attr_reader :stack, :tokens, :scanner, :curr_expr_quote_levels
@@ -50,7 +51,9 @@ module Rbexy
       until scanner.eos?
         case stack.last
         when :default
-          if scanner.scan(Patterns.open_tag_def)
+          if scanner.scan(Patterns.declaration)
+            tokens << [:DECLARATION, scanner.matched]
+          elsif scanner.scan(Patterns.open_tag_def)
             tokens << [:OPEN_TAG_DEF]
             stack.push(:tag_def)
           elsif scanner.scan(Patterns.open_tag_end)
