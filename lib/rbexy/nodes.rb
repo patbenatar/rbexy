@@ -1,7 +1,3 @@
-require "active_support/inflector"
-
-# TODO: require the html_safe activesupport core_ext here, for non Rails usage
-
 module Rbexy
   module Nodes
     module Util
