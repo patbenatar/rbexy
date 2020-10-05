@@ -26,7 +26,7 @@ module Rbexy
     end
 
     def parse_token
-      parse_text || parse_expression || parse_tag || parse_declaration
+      parse_text || parse_silent_newline || parse_expression || parse_tag || parse_declaration
     end
 
     def parse_text

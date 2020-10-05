@@ -677,4 +677,89 @@ RBX
       [:TEXT, "\n"]
     ]
   end
+
+  context "comments" do
+    it "tokenizes lines starting with # as SILENT_NEWLINE" do
+      template_string = <<-RBX.strip_heredoc.strip
+        Hello
+        # some comment
+        world
+      RBX
+
+      subject = Rbexy::Lexer.new(template_string)
+      expect(subject.tokenize).to eq [
+        [:TEXT, "Hello\n"],
+        [:SILENT_NEWLINE],
+        [:TEXT, "world"],
+      ]
+    end
+
+    it "tokenizes the first line if starting with # as SILENT_NEWLINE" do
+      template_string = <<-RBX.strip_heredoc.strip
+        # some comment
+        Hello world
+      RBX
+
+      subject = Rbexy::Lexer.new(template_string)
+      expect(subject.tokenize).to eq [
+        [:SILENT_NEWLINE],
+        [:TEXT, "Hello world"],
+      ]
+    end
+
+    it "tokenizes the last line if starting with # as SILENT_NEWLINE" do
+      template_string = <<-RBX.strip_heredoc.strip
+      Hello world
+      # some comment
+      RBX
+
+      subject = Rbexy::Lexer.new(template_string)
+      expect(subject.tokenize).to eq [
+        [:TEXT, "Hello world\n"],
+        [:SILENT_NEWLINE],
+      ]
+    end
+
+    it "trims trailing whitespace from text before a comment line" do
+      template_string = <<-RBX.strip_heredoc.strip
+        Hello world
+          # some indented comment
+        Another text
+      RBX
+
+      subject = Rbexy::Lexer.new(template_string)
+      expect(subject.tokenize).to eq [
+        [:TEXT, "Hello world\n"],
+        [:SILENT_NEWLINE],
+        [:TEXT, "Another text"]
+      ]
+    end
+
+    it "allows comments as children of tags" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <div>
+          # some comment
+        </div>
+      RBX
+
+      subject = Rbexy::Lexer.new(template_string)
+      expect(subject.tokenize).to eq [
+        [:OPEN_TAG_DEF],
+        [:TAG_NAME, "div"],
+        [:CLOSE_TAG_DEF],
+        [:TEXT, "\n"],
+        [:SILENT_NEWLINE],
+        [:OPEN_TAG_END],
+        [:TAG_NAME, "div"],
+        [:CLOSE_TAG_END],
+      ]
+    end
+
+    it "treats an escaped \\# as TEXT" do
+      subject = Rbexy::Lexer.new('\# not a comment')
+      expect(subject.tokenize).to eq [
+        [:TEXT, '\# not a comment']
+      ]
+    end
+  end
 end
