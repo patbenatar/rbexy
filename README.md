@@ -54,7 +54,38 @@ In `config/application.rb`:
 require "rbexy/rails/engine"
 ```
 
-_For usage outside of Rails, see "Usage outside of Rails" below._
+_Not using Rails? See "Usage outside of Rails" below._
+
+Create your first component at `app/components/hello_world_component.rb`:
+
+```ruby
+class HelloWorldComponent < Rbexy::Component
+  def setup(name:)
+    @name = name
+  end
+end
+```
+
+With a template `app/components/hello_world_component.rbx`:
+
+```jsx
+<div>
+  <h1>Hello {@name}</h1>
+  {content}
+</div>
+```
+
+Add a controller, action, route, and `rbx` view like `app/views/hello_worlds/index.rbx`:
+
+```jsx
+<HelloWorld name="Nick">
+  <p>Welcome to the world of component-based frontend development in Rails!</p>
+</HelloWorld>
+```
+
+_Or you can render Rbexy components from ERB with `<%= HelloWorldComponent.new(self, name: "Nick").render %>`_
+
+Fire up `rails s`, navigate to your route, and you should see Rbexy in action!
 
 ## Template Syntax
 
