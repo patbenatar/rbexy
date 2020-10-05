@@ -177,18 +177,29 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
-  # it "TODO", focus: true do
-  #   template_string = <<-RBX.strip_heredoc.strip
-  #     <Context.Parent>
-  #       <Context.Child />
-  #     </Context.Parent>
-  #     {true && <Context.Sibling />}
-  #   RBX
+  it "doesn't hang when encountering boolean expression void tag at end of template" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+      </div>
+      {true && <br />}
+    RBX
 
-  #   result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = ""
 
-  #   expect(result).to eq 'foo'
-  # end
+    expect do
+      Timeout::timeout(1) do
+        result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      end
+    end.not_to raise_error
+
+    expect(result).to eq <<-RESULT.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+      </div>
+      <br>
+    RESULT
+  end
 
   context "compiled code maintains the same line numbers as the template so error messages are useful" do
     examples = [
