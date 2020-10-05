@@ -7,10 +7,13 @@ require "action_view/context"
 require "action_view/buffers"
 
 template_string = <<-RBX
+# A comment here
 <div>
   <h1 {**{ class: "myClass" }} {**splat_attrs}>Hello world</h1>
   <div {**{ class: "myClass" }}></div>
   Some words
+  # A comment here
+  # A comment here
   <p>Lorem ipsum</p>
   <input type="submit" value={@ivar_val} disabled />
   {true && <p>Is true</p>}
@@ -19,6 +22,7 @@ template_string = <<-RBX
   <Button prop1="val1" prop2={true && "val2"} multi-word-prop="value">the content</Button>
   <Forms.TextField label={->(n) { <label id={n}>Something</label> }} note={<p>the note</p>} />
   <ul>
+    # A comment here
     {["hi", "there", "nick"].map { |val| <li>{val}</li> }}
   </ul>
   <p
@@ -32,7 +36,9 @@ template_string = <<-RBX
   >
     Content
   </div>
+  # comment
 </div>
+# comment
 RBX
 
 module Components

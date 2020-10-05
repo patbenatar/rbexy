@@ -19,7 +19,8 @@ module Rbexy
       close_tag: /\s*\/?>/,
       close_self_closing_tag: /\s*\/>/,
       tag_name: /\/?[A-Za-z0-9\-_.]+/,
-      text_content: /[^<{]+/,
+      text_content: /[^<{#]+/,
+      comment: /^\p{Blank}*#.*(\n|\z)/,
       whitespace: /\s+/,
       attr: /[A-Za-z0-9\-_\.]+/,
       open_attr_splat: /{\*\*/,
@@ -57,6 +58,8 @@ module Rbexy
             open_tag_def
           elsif scanner.scan(Patterns.open_expression)
             open_expression
+          elsif scanner.scan(Patterns.comment)
+            tokens << [:SILENT_NEWLINE]
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
@@ -70,6 +73,8 @@ module Rbexy
             stack.push(:tag_end)
           elsif scanner.scan(Patterns.open_expression)
             open_expression
+          elsif scanner.scan(Patterns.comment)
+            tokens << [:SILENT_NEWLINE]
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
@@ -80,7 +85,15 @@ module Rbexy
             self.curr_default_text += scanner.matched
             if scanner.matched.end_with?('\\') && scanner.peek(1) == "{"
               self.curr_default_text += scanner.getch
+            elsif scanner.matched.end_with?('\\') && scanner.peek(1) == "#"
+              self.curr_default_text += scanner.getch
             else
+              if scanner.peek(1) == "#"
+                # If the next token is a comment, trim trailing whitespace from
+                # the text value so we don't add to the indentation of the next
+                # value that is output after the comment
+                self.curr_default_text = curr_default_text.gsub(/^\p{Blank}*\z/, "")
+              end
               tokens << [:TEXT, curr_default_text]
               self.curr_default_text = ""
               stack.pop

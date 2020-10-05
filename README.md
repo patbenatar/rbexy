@@ -80,6 +80,19 @@ As attributes:
 <div class="myClass"></div>
 ```
 
+### Comments
+
+Start a line with `#` to leave a comment:
+
+```jsx
+# Comments can be at the root
+<div>
+  # Or within tags
+  # spanning multiple lines
+  <h1>Hello world</h1>
+</div>
+```
+
 ### Expressions
 
 You can put ruby code anywhere that you would put text, just wrap it in `{ ... }`
