@@ -55,7 +55,19 @@ module Rbexy
             tokens << [:DECLARATION, scanner.matched]
           elsif scanner.scan(Patterns.open_tag_def)
             tokens << [:OPEN_TAG_DEF]
-            stack.push(:tag_def)
+            stack.push(:tag, :tag_def)
+          elsif scanner.scan(Patterns.open_expression)
+            tokens << [:OPEN_EXPRESSION]
+            stack.push(:expression)
+          elsif scanner.check(Patterns.text_content)
+            stack.push(:default_text)
+          else
+            raise SyntaxError, self
+          end
+        when :tag
+          if scanner.scan(Patterns.open_tag_def)
+            tokens << [:OPEN_TAG_DEF]
+            stack.push(:tag, :tag_def)
           elsif scanner.scan(Patterns.open_tag_end)
             tokens << [:OPEN_TAG_END]
             stack.push(:tag_end)
@@ -102,19 +114,6 @@ module Rbexy
           else
             raise SyntaxError, self
           end
-        when :expression_inner_tag
-          if scanner.scan(Patterns.open_tag_end)
-            tokens << [:OPEN_TAG_END]
-            stack.pop
-            stack.push(:tag_end)
-          elsif scanner.scan(Patterns.open_expression)
-            tokens << [:OPEN_EXPRESSION]
-            stack.push(:expression)
-          elsif scanner.check(Patterns.text_content)
-            stack.push(:default_text)
-          else
-            raise SyntaxError, self
-          end
         when :expression_inner_bracket
           if scanner.scan(Patterns.close_expression)
             self.curr_expr += scanner.matched
@@ -158,7 +157,7 @@ module Rbexy
             tokens << [:CLOSE_TAG_DEF]
             tokens << [:OPEN_TAG_END]
             tokens << [:CLOSE_TAG_END]
-            stack.pop
+            stack.pop(2)
           elsif scanner.scan(Patterns.close_tag)
             tokens << [:CLOSE_TAG_DEF]
             stack.pop
@@ -174,7 +173,7 @@ module Rbexy
         when :tag_end
           if scanner.scan(Patterns.close_tag)
             tokens << [:CLOSE_TAG_END]
-            stack.pop
+            stack.pop(2)
           elsif scanner.scan(Patterns.tag_name)
             tokens << [:TAG_NAME, scanner.matched]
           else
@@ -242,7 +241,7 @@ module Rbexy
         tokens << [:EXPRESSION_BODY, curr_expr]
         self.curr_expr = ""
         tokens << [:OPEN_TAG_DEF]
-        stack.push(:expression_inner_tag, :tag_def)
+        stack.push(:tag, :tag_def)
       else
         self.curr_expr += scanner.matched
       end

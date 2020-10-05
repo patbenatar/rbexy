@@ -177,6 +177,19 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  # it "TODO", focus: true do
+  #   template_string = <<-RBX.strip_heredoc.strip
+  #     <Context.Parent>
+  #       <Context.Child />
+  #     </Context.Parent>
+  #     {true && <Context.Sibling />}
+  #   RBX
+
+  #   result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+  #   expect(result).to eq 'foo'
+  # end
+
   context "compiled code maintains the same line numbers as the template so error messages are useful" do
     examples = [
       ["{an_undefined_method}", 1],

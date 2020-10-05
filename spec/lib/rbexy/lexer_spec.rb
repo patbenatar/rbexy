@@ -215,6 +215,52 @@ RSpec.describe Rbexy::Lexer do
     ]
   end
 
+  it "tokenizes self-closing tags within a boolean expression" do
+    template_string = <<-RBX.strip_heredoc.strip
+      {true && <br />}
+    RBX
+
+    subject = Rbexy::Lexer.new(template_string)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "br"],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION]
+    ]
+  end
+
+  it "tokenizes nested tags within a boolean expression" do
+    template_string = <<-RBX.strip_heredoc.strip
+      {true && <h1><span>Hey</span></h1>}
+    RBX
+
+    subject = Rbexy::Lexer.new(template_string)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "true && "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+        [:OPEN_TAG_DEF],
+        [:TAG_NAME, "span"],
+        [:CLOSE_TAG_DEF],
+        [:TEXT, "Hey"],
+        [:OPEN_TAG_END],
+        [:TAG_NAME, "span"],
+        [:CLOSE_TAG_END],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION]
+    ]
+  end
+
   it "does not specially tokenize boolean expressions that aren't followed by a tag" do
     subject = Rbexy::Lexer.new("{true && 'hey'}")
     expect(subject.tokenize).to eq [
@@ -263,6 +309,27 @@ RSpec.describe Rbexy::Lexer do
       [:TEXT, "No"],
       [:OPEN_TAG_END],
       [:TAG_NAME, "h2"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes self-closing tags within a ternary expression" do
+    subject = Rbexy::Lexer.new("{true ? <br /> : <input />}")
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "true ? "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "br"],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, " : "],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "input"],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
       [:CLOSE_TAG_END],
       [:EXPRESSION_BODY, ""],
       [:CLOSE_EXPRESSION],
