@@ -67,6 +67,9 @@ RSpec.describe ApplicationController, type: :controller do
       expect(result).to have_tag("h1", text: "value")
     end
 
-    it "does not expose context to siblings"
+    it "does not expose context to siblings" do
+      expect { Context::WrappingWithSiblingComponent.new(view_context).render }
+        .to raise_error(/no parent context `thing`/)
+    end
   end
 end
