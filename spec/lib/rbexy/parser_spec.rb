@@ -292,4 +292,37 @@ RSpec.describe Rbexy::Parser do
     expect(expr).to be_a Rbexy::Nodes::ExpressionGroup
     expect(expr.statements.first.content).to eq "thing = 'foo'"
   end
+
+  it "raises an error when encountering tag that opens but never closes" do
+    subject = Rbexy::Parser.new([
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "div"],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello world"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "h1"],
+      [:CLOSE_TAG_END],
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "br"],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "div"],
+      [:CLOSE_TAG_END]
+    ])
+
+    expect { Timeout::timeout(1) { subject.parse } }
+      .to raise_error(Rbexy::Parser::ParseError)
+  end
+
+  it "raises an error when encountering expression that opens but never closes" do
+    subject = Rbexy::Parser.new([
+      [:OPEN_EXPRESSION]
+    ])
+
+    expect { Timeout::timeout(1) { subject.parse } }
+      .to raise_error(Rbexy::Parser::ParseError)
+  end
 end
