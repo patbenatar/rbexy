@@ -201,6 +201,19 @@ RSpec.describe Rbexy do
     RESULT
   end
 
+  # TODO: move to parser spec
+  it "raises a parse error when encountering void tag that fails to self-close" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+        <br>
+      </div>
+    RBX
+
+    expect { Rbexy.evaluate(template_string, Rbexy::Runtime.new) }
+      .to raise_error(Rbexy::Parser::ParseError)
+  end
+
   context "compiled code maintains the same line numbers as the template so error messages are useful" do
     examples = [
       ["{an_undefined_method}", 1],

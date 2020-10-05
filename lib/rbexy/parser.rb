@@ -11,6 +11,7 @@ module Rbexy
     end
 
     def parse
+      validate_tokens!
       Nodes::Template.new(parse_tokens)
     end
 
@@ -186,6 +187,18 @@ module Rbexy
 
     def unexpected_token!(expected_token)
       raise(ParseError, "Unexpected token #{tokens[position][0]}, expecting #{expected_token}\n#{error_window}")
+    end
+
+    def validate_tokens!
+      validate_all_tags_close!
+    end
+
+    def validate_all_tags_close!
+      open_count = tokens.count { |t| t[0] == :OPEN_TAG_DEF }
+      close_count = tokens.count { |t| t[0] == :OPEN_TAG_END }
+      if open_count != close_count
+        raise(ParseError, "#{open_count - close_count} tags fail to close. All tags must close, either <NAME></NAME> or self-closing <NAME />")
+      end
     end
   end
 end
