@@ -29,5 +29,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency "actionview", ">= 5.0", "< 7.0"
   spec.add_dependency "railties", ">= 5.0", "< 7.0"
 
-  spec.add_development_dependency "rspec", "~> 3.2"
+  spec.add_development_dependency "rails", ">= 5.0", "< 7.0"
+  spec.add_development_dependency "rspec", "~> 3.9"
+  spec.add_development_dependency "guard-rspec", "~> 4.7", ">= 4.7.3"
+  spec.add_development_dependency "rspec-rails", "~> 4.0", ">= 4.0.1"
+  spec.add_development_dependency "rspec-html-matchers", "~> 0.9.3"
+  spec.add_development_dependency "rake"
+  spec.add_development_dependency "pry-byebug"
+  spec.add_development_dependency "sqlite3"
 end

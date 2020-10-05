@@ -389,6 +389,12 @@ docker-compose build
 docker-compose run rbexy rspec
 ```
 
+Or auto-run tests with guard if you prefer:
+
+```
+docker-compose run rbexy guard
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rbexy. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/rbexy/blob/master/CODE_OF_CONDUCT.md).
