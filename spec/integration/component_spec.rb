@@ -88,7 +88,7 @@ RSpec.describe ApplicationController, type: :controller do
     end
 
     context "namespaced atoms" do
-      it "allows components in atoms/ to be namespaced with dot notation" do
+      it "allows components in atoms/ to be namespaced with dot notation", focus: true do
         result = NamespacedWrappingComponent.new(view_context).render
         expect(result).to have_tag("h1", text: "Child content")
       end
