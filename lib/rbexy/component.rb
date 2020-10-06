@@ -43,11 +43,10 @@ module Rbexy
     end
 
     def call
-      old_lookup_context = view_renderer.lookup_context
-      view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+      replace_lookup_context if top_level_component?
       view_renderer.render(self, partial: component_name, &nil)
     ensure
-      view_renderer.lookup_context = old_lookup_context
+      restore_lookup_context if top_level_component?
     end
 
     def content
@@ -68,6 +67,15 @@ module Rbexy
     private
 
     attr_reader :view_context, :content_block
+
+    def replace_lookup_context
+      old_lookup_context = view_renderer.lookup_context
+      view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+    end
+
+    def restore_lookup_context
+      view_renderer.lookup_context = old_lookup_context
+    end
 
     def build_lookup_context(existing_context)
       paths = existing_context.view_paths.dup.unshift(
@@ -95,6 +103,10 @@ module Rbexy
       else
         super
       end
+    end
+
+    def top_level_component?
+      rbexy_context.length == 1
     end
   end
 end
