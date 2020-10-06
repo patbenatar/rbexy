@@ -43,10 +43,10 @@ module Rbexy
     end
 
     def call
-      replace_lookup_context if top_level_component?
+      replace_lookup_context
       view_renderer.render(self, partial: component_name, &nil)
     ensure
-      restore_lookup_context if top_level_component?
+      restore_lookup_context
     end
 
     def content
@@ -66,15 +66,18 @@ module Rbexy
 
     private
 
-    attr_reader :view_context, :content_block
+    attr_reader :view_context, :content_block, :old_lookup_context
 
     def replace_lookup_context
-      old_lookup_context = view_renderer.lookup_context
+      return if view_renderer.lookup_context.is_a? Rbexy::Component::LookupContext
+      @old_lookup_context = view_renderer.lookup_context
       view_renderer.lookup_context = build_lookup_context(old_lookup_context)
     end
 
     def restore_lookup_context
+      return unless old_lookup_context
       view_renderer.lookup_context = old_lookup_context
+      @old_lookup_context = nil
     end
 
     def build_lookup_context(existing_context)
@@ -82,11 +85,7 @@ module Rbexy
         *Rbexy.configuration.template_paths.map { |p| ActionView::OptimizedFileSystemResolver.new(p) }
       )
 
-      LookupContext.new(
-        paths,
-        LookupContext.details_hash(existing_context),
-        Rbexy.configuration.template_prefixes
-      )
+      LookupContext.new(paths, LookupContext.details_hash(existing_context))
     end
 
     def view_renderer
@@ -103,12 +102,6 @@ module Rbexy
       else
         super
       end
-    end
-
-    # TODO: actually check if view_context.lookup_context.is_a? Rbexy::Component::LookupContext
-    # and don't re-do it if so
-    def top_level_component?
-      rbexy_context.length == 1
     end
   end
 end
