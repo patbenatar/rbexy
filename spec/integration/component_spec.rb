@@ -72,4 +72,19 @@ RSpec.describe ApplicationController, type: :controller do
         .to raise_error(/no parent context `thing`/)
     end
   end
+
+  context "atomic design folder structure (via config.template_paths option)" do
+    it "allows components to exist in atomically organized dirs inside app/components/" do
+      result = MoleculeWithAtomComponent.new(view_context).render
+      expect(result).to have_tag("h1", text: "Hello molecule")
+      expect(result).to have_tag("h1", text: "Hello atom")
+    end
+
+    context "namespaced atoms" do
+      it "allows atomic components to be namespaced with dot notation" do
+        result = NamespacedWrappingComponent.new(view_context).render
+        expect(result).to have_tag("h1", text: "Child content")
+      end
+    end
+  end
 end
