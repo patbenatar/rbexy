@@ -105,6 +105,8 @@ module Rbexy
       end
     end
 
+    # TODO: actually check if view_context.lookup_context.is_a? Rbexy::Component::LookupContext
+    # and don't re-do it if so
     def top_level_component?
       rbexy_context.length == 1
     end
