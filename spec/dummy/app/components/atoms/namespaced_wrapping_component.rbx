@@ -1,0 +1,3 @@
+<NamespacedParent>
+  <NamespacedParent.Child />
+</NamespacedParent>

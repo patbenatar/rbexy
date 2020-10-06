@@ -72,4 +72,26 @@ RSpec.describe ApplicationController, type: :controller do
         .to raise_error(/no parent context `thing`/)
     end
   end
+
+  context "template_prefixes option" do
+    before do
+      @old_prefixes = Rbexy.configuration.template_prefixes
+      Rbexy.configuration.template_prefixes.concat %w(atoms molecules organisms)
+    end
+
+    after { Rbexy.configuration.template_prefixes = @old_prefixes }
+
+    it "allows components to exist in prefix dirs inside app/components/" do
+      result = MoleculeWithAtomComponent.new(view_context).render
+      expect(result).to have_tag("h1", text: "Hello molecule")
+      expect(result).to have_tag("h1", text: "Hello atom")
+    end
+
+    context "namespaced atoms" do
+      it "allows components in atoms/ to be namespaced with dot notation" do
+        result = NamespacedWrappingComponent.new(view_context).render
+        expect(result).to have_tag("h1", text: "Child content")
+      end
+    end
+  end
 end

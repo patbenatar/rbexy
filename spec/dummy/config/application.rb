@@ -25,6 +25,15 @@ module Dummy
     # Application configuration can go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
+
+    ATOMIC_COMPONENT_PATHS = [
+      Rails.root.join("app", "components", "atoms"),
+      Rails.root.join("app", "components", "molecules"),
+      Rails.root.join("app", "components", "organisms")
+    ]
+
+    config.autoload_paths.concat(ATOMIC_COMPONENT_PATHS)
+    config.eager_load_paths.concat(ATOMIC_COMPONENT_PATHS)
   end
 end
 
