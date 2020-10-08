@@ -115,7 +115,7 @@ module Rbexy
             expression_inner_single_quote
           elsif scanner.scan(Patterns.open_tag_def)
             potential_expression_inner_tag
-          elsif scanner.scan(Patterns.expression_content)
+          elsif expression_content?
             self.curr_expr += scanner.matched
           else
             raise SyntaxError, self
@@ -132,7 +132,7 @@ module Rbexy
             expression_inner_single_quote
           elsif scanner.scan(Patterns.open_tag_def)
             potential_expression_inner_tag
-          elsif scanner.scan(Patterns.expression_content)
+          elsif expression_content?
             self.curr_expr += scanner.matched
           else
             raise SyntaxError, self
@@ -237,6 +237,7 @@ module Rbexy
     end
 
     def potential_expression_inner_tag
+      # binding.pry
       if self.curr_expr =~ Patterns.expression_internal_tag_prefixes
         tokens << [:EXPRESSION_BODY, curr_expr]
         self.curr_expr = ""
@@ -274,6 +275,17 @@ module Rbexy
     def expression_quoted_string_content
       self.curr_expr += scanner.getch
       stack.pop unless curr_expr.end_with?('\\')
+    end
+
+    def expression_content?
+      # Patterns.expression_content ends at `<` characters, because we need to
+      # separately scan for allowed open_tag_defs within expressions. We should
+      # support any found open_tag_ends as expression content, as that means the
+      # open_tag_def was not considered allowed (or stack would be inside
+      # :tag_def instead of :expression) so we should thus also consider the
+      # open_tag_end to just be a part of the expression (maybe its in a string,
+      # etc).
+      scanner.scan(Patterns.expression_content) || scanner.scan(Patterns.open_tag_end)
     end
   end
 end

@@ -414,6 +414,30 @@ RBX
     ]
   end
 
+  it "doesn't try to parse tags within %q(...) string notation" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div attr={%q(
+        <p>something</p>
+      )} />
+    RBX
+    subject = Rbexy::Lexer.new(template_string)
+    expect(subject.tokenize).to eq [
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "div"],
+      [:OPEN_ATTRS],
+      [:ATTR_NAME, "attr"],
+      [:OPEN_ATTR_VALUE],
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "%q(\n  <p>something</p>\n)"],
+      [:CLOSE_EXPRESSION],
+      [:CLOSE_ATTR_VALUE],
+      [:CLOSE_ATTRS],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:CLOSE_TAG_END]
+    ]
+  end
+
   it "tokenizes value-less attributes" do
     subject = Rbexy::Lexer.new("<button disabled>")
     expect(subject.tokenize).to eq [
