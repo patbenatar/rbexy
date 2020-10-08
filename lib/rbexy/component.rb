@@ -64,6 +64,14 @@ module Rbexy
         raise(ContextNotFound, "no parent context `#{name}`")
     end
 
+    def view_renderer
+      view_context.view_renderer
+    end
+
+    def component_name
+      self.class.name.underscore
+    end
+
     private
 
     attr_reader :view_context, :content_block, :old_lookup_context
@@ -86,14 +94,6 @@ module Rbexy
       )
 
       LookupContext.new(paths, LookupContext.details_hash(existing_context))
-    end
-
-    def view_renderer
-      view_context.view_renderer
-    end
-
-    def component_name
-      self.class.name.underscore
     end
 
     def method_missing(meth, *args, &block)
