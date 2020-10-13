@@ -10,8 +10,6 @@ module Rbexy
         find(name).new(**props).render_in(context, &block)
       end
 
-      private
-
       def find(name)
         ActiveSupport::Inflector.constantize("#{name}Component")
       rescue NameError => e

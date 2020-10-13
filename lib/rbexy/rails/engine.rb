@@ -12,6 +12,9 @@ module Rbexy
 
         ActiveSupport.on_load :action_controller_base do
           helper Rbexy::ViewContextHelper
+          helper_method :rbexy_component_provider
+
+          def rbexy_component_provider; end
         end
 
         if defined?(ViewComponent)
