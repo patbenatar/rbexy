@@ -6,7 +6,7 @@ module Rbexy
       initializer "rbexy" do |app|
         ActionView::Template.register_template_handler(:rbx, Rbexy::Rails::TemplateHandler)
 
-        ActiveSupport.on_load :action_controller do
+        ActiveSupport.on_load :action_controller_base do
           helper Rbexy::ViewContextHelper
         end
 
