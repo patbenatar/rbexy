@@ -375,6 +375,16 @@ Rbexy.configure do |config|
 end
 ```
 
+Or in Rails you can customize the component provider just for a controller:
+
+```ruby
+class ThingsController < ApplicationController
+  def rbexy_component_provider
+    MyComponentProvider.new
+  end
+end
+```
+
 See `lib/rbexy/component_providers/` for example implementations.
 
 ## Usage outside of Rails

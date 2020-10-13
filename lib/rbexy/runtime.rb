@@ -11,11 +11,21 @@ module Rbexy
 
     DefaultTagBuilder = ActionView::Helpers::TagHelper::TagBuilder
 
-    def self.create_tag_builder(context, provider = Rbexy.configuration.component_provider)
+    def self.create_tag_builder(context, provider = nil)
+      provider = provider ||
+        provider_from_context(context) ||
+        Rbexy.configuration.component_provider
+
       if provider
         ComponentTagBuilder.new(context, provider)
       else
         ActionView::Helpers::TagHelper::TagBuilder.new(context)
+      end
+    end
+
+    def self.provider_from_context(context)
+      if context.respond_to?(:rbexy_component_provider)
+        context.rbexy_component_provider
       end
     end
 
