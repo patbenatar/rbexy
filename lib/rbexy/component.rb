@@ -3,6 +3,8 @@ require "action_view"
 module Rbexy
   class Component < ActionView::Base
     class LookupContext < ActionView::LookupContext
+      attr_accessor :component_name_stack
+
       def self.details_hash(context)
         context.registered_details.each_with_object({}) do |key, details_hash|
           value = key == :locale ? [context.locale] : context.send(key)
@@ -15,7 +17,8 @@ module Rbexy
       # template path, since we're using the Rails partial-rendering
       # functionality but don't want our templates prefixed with a `_`
       def args_for_lookup(name, prefixes, partial, keys, details_options)
-        super(name, prefixes, false, keys, details_options)
+        partial = false if component_name_stack.include?(name)
+        super(name, prefixes, partial, keys, details_options)
       end
     end
 
@@ -77,9 +80,12 @@ module Rbexy
     attr_reader :view_context, :content_block, :old_lookup_context
 
     def replace_lookup_context
-      return if view_renderer.lookup_context.is_a? Rbexy::Component::LookupContext
-      @old_lookup_context = view_renderer.lookup_context
-      view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+      unless view_renderer.lookup_context.is_a? Rbexy::Component::LookupContext
+        @old_lookup_context = view_renderer.lookup_context
+        view_renderer.lookup_context = build_lookup_context(old_lookup_context)
+      end
+
+      (view_renderer.lookup_context.component_name_stack ||= []) << component_name
     end
 
     def restore_lookup_context
