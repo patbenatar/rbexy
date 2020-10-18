@@ -40,7 +40,6 @@ module Rbexy
     def setup(**props); end
 
     def render(&block)
-      @content = nil
       @content_block = block_given? ? block : nil
       call
     end
@@ -53,7 +52,7 @@ module Rbexy
     end
 
     def content
-      @content ||= content_block ? view_context.capture(self, &content_block) : ""
+      content_block ? view_context.capture(self, &content_block) : ""
     end
 
     def create_context(name, value)
