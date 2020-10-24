@@ -3,5 +3,6 @@ module Rbexy
 
   module Rails
     autoload :Engine, "rbexy/rails/engine"
+    autoload :ControllerHelper, "rbexy/rails/controller_helper"
   end
 end
