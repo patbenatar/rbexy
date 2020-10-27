@@ -1,4 +1,6 @@
 RSpec.describe ApplicationController, type: :controller do
+  render_views
+
   controller do; end
   let(:view_context) { controller.view_context }
 

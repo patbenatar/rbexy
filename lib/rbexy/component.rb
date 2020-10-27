@@ -1,25 +1,26 @@
 require "action_view"
+require "active_support/core_ext/class/attribute"
 
 module Rbexy
   class Component < ActionView::Base
-    class LookupContext < ActionView::LookupContext
-      attr_accessor :component_name_stack
-
-      def self.details_hash(context)
-        context.registered_details.each_with_object({}) do |key, details_hash|
-          value = key == :locale ? [context.locale] : context.send(key)
-          details_hash[key] = value
-        end
+    class TemplatePath < String
+      def to_s
+        self
       end
+    end
 
-      # We override any calls to args_for_lookup and set partial=false so that
-      # the lookup context doesn't automatically add a `_` prefix to the
-      # template path, since we're using the Rails partial-rendering
-      # functionality but don't want our templates prefixed with a `_`
-      def args_for_lookup(name, prefixes, partial, keys, details_options)
-        partial = false if component_name_stack.include?(name)
-        super(name, prefixes, partial, keys, details_options)
-      end
+    class_attribute :component_file_location
+
+    def self.inherited(klass)
+      klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
+    end
+
+    def self.component_name
+      name.underscore
+    end
+
+    def component_name
+      self.class.component_name
     end
 
     def initialize(view_context, **props)
@@ -45,10 +46,9 @@ module Rbexy
     end
 
     def call
-      replace_lookup_context
-      view_renderer.render(self, partial: component_name, &nil)
-    ensure
-      restore_lookup_context
+      path = TemplatePath.new(component_name)
+      template = view_context.lookup_context.find(path)
+      template.render(self, {})
     end
 
     def content
@@ -66,40 +66,13 @@ module Rbexy
         raise(ContextNotFound, "no parent context `#{name}`")
     end
 
-    def view_renderer
-      view_context.view_renderer
-    end
-
-    def component_name
-      self.class.name.underscore
+    def compiled_method_container
+      Rbexy::Component
     end
 
     private
 
-    attr_reader :view_context, :content_block, :old_lookup_context
-
-    def replace_lookup_context
-      unless view_renderer.lookup_context.is_a? Rbexy::Component::LookupContext
-        @old_lookup_context = view_renderer.lookup_context
-        view_renderer.lookup_context = build_lookup_context(old_lookup_context)
-      end
-
-      (view_renderer.lookup_context.component_name_stack ||= []) << component_name
-    end
-
-    def restore_lookup_context
-      return unless old_lookup_context
-      view_renderer.lookup_context = old_lookup_context
-      @old_lookup_context = nil
-    end
-
-    def build_lookup_context(existing_context)
-      paths = existing_context.view_paths.dup.unshift(
-        *Rbexy.configuration.template_paths.map { |p| ActionView::OptimizedFileSystemResolver.new(p) }
-      )
-
-      LookupContext.new(paths, LookupContext.details_hash(existing_context))
-    end
+    attr_reader :view_context, :content_block
 
     def method_missing(meth, *args, &block)
       if view_context.respond_to?(meth)
