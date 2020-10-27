@@ -88,7 +88,7 @@ module Rbexy
         [
           "Rbexy::OutputBuffer.new.tap { |output|",
             "rbexy_context.push({}) if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component);",
-            "output << (#{tag});",
+            "output << (#{tag}).html_safe;",
             "rbexy_context.pop if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component);",
           "}.html_safe"
         ].join(" ")
