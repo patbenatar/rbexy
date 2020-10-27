@@ -85,11 +85,14 @@ module Rbexy
           base_tag
         end
 
+        context_open = Rbexy.configuration.enable_context ? "rbexy_context.push({});" : nil
+        context_close = Rbexy.configuration.enable_context ? "rbexy_context.pop;" : nil
+
         [
           "Rbexy::OutputBuffer.new.tap { |output|",
-            "rbexy_context.push({}) if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component);",
+            context_open,
             "output << (#{tag}).html_safe;",
-            "rbexy_context.pop if defined?(Rbexy::Component) && self.is_a?(Rbexy::Component);",
+            context_close,
           "}.html_safe"
         ].join(" ")
       end
