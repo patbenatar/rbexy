@@ -1,0 +1,11 @@
+<h1>Hello erb</h1>
+
+<h1>Rails partial</h1>
+<%= time do %>
+  <% render "simple_partial" %>
+<% end %>
+
+<h1>Rbexy component w/ template</h1>
+<%= time do %>
+  <% PerfTest::SimpleComponent.new(self).render %>
+<% end %>

@@ -91,7 +91,7 @@ module Rbexy
         [
           "Rbexy::OutputBuffer.new.tap { |output|",
             context_open,
-            "output << (#{tag});",
+            "output << (#{tag}).html_safe;",
             context_close,
           "}.html_safe"
         ].join(" ")

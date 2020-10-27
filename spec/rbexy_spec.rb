@@ -248,4 +248,31 @@ RSpec.describe Rbexy do
       end
     end
   end
+
+  it "escapes unwanted html" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div>
+        <h1>Here it comes</h1>
+        <p>{@some_ugc_string}</p>
+      </div>
+    RBX
+
+    class MyRuntime < Rbexy::Runtime
+      def initialize(*args)
+        super
+        @some_ugc_string = "<p>html here</p>"
+      end
+    end
+
+    result = Rbexy.evaluate(template_string, MyRuntime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div>
+        <h1>Here it comes</h1>
+        <p>&lt;p&gt;html here&lt;/p&gt;</p>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
 end
