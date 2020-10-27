@@ -7,5 +7,13 @@ module Rbexy
     def rbexy_context
       @rbexy_context ||= [{}]
     end
+
+    def rbexy_lookup_context
+      @rbexy_lookup_context
+    end
+
+    def rbexy_lookup_context=(val)
+      @rbexy_lookup_context = val
+    end
   end
 end
