@@ -10,11 +10,11 @@ module Rbexy
       def find_templates(name, prefix, partial, details, locals = [])
         return [] unless name.is_a? Rbexy::Component::TemplatePath
 
-        templates_path = File.join(path, prefix, name)
+        templates_path = File.join(@path, prefix, name)
         extensions = details[:handlers].join(",")
 
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
-          source = ActionView::Template::Sources::File.new(template_path)
+          source = File.binread(template_path)
           handler = ActionView::Template.handler_for_extension(File.extname(template_path)[1..-1])
 
           ActionView::Template.new(source, template_path, handler, locals: [])
