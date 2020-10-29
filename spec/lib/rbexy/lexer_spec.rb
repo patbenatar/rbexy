@@ -622,6 +622,31 @@ RBX
     ]
   end
 
+  it "tokenizes attributes with colon in the name" do
+    code = <<-CODE.strip_heredoc.strip
+      <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" />
+    CODE
+
+    subject = Rbexy::Lexer.new(code)
+    expect(subject.tokenize).to eq [
+      [:OPEN_TAG_DEF],
+      [:TAG_NAME, "svg"],
+      [:OPEN_ATTRS],
+      [:ATTR_NAME, "version"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "1.1"],
+      [:CLOSE_ATTR_VALUE],
+      [:ATTR_NAME, "xmlns:xlink"],
+      [:OPEN_ATTR_VALUE],
+      [:TEXT, "http://www.w3.org/1999/xlink"],
+      [:CLOSE_ATTR_VALUE],
+      [:CLOSE_ATTRS],
+      [:CLOSE_TAG_DEF],
+      [:OPEN_TAG_END],
+      [:CLOSE_TAG_END],
+    ]
+  end
+
   it "tokenizes some big nested markup with attributes" do
     code = <<-CODE.strip_heredoc
       <div foo="bar">

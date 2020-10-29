@@ -22,7 +22,7 @@ module Rbexy
       text_content: /[^<{#]+/,
       comment: /^\p{Blank}*#.*(\n|\z)/,
       whitespace: /\s+/,
-      attr: /[A-Za-z0-9\-_\.]+/,
+      attr: /[A-Za-z0-9\-_\.:]+/,
       open_attr_splat: /{\*\*/,
       attr_assignment: /=/,
       double_quote: /"/,
