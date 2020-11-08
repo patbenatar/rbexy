@@ -46,7 +46,7 @@ module Rbexy
     end
 
     def content
-      content_block ? view_context.capture(self, &content_block) : ""
+      content_block ? view_context.capture(&content_block) : ""
     end
 
     def create_context(name, value)

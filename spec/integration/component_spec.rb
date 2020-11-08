@@ -30,7 +30,7 @@ RSpec.describe ApplicationController, type: :controller do
       .to have_tag("h1", text: "prop value after setup")
   end
 
-  it "exposes children to the component" do
+  it "exposes children to the component", focus: true do
     result = WithChildren::WrappingComponent.new(view_context).render
     expect(result).to have_tag("h1", text: "Here come the children...")
     expect(result).to have_tag("h1", text: "Text in a child")

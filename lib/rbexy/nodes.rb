@@ -18,7 +18,7 @@ module Rbexy
       end
 
       def compile
-        "#{children.map(&:compile).map { |c| "output_buffer << rbexy_prep_output(#{c})"}.join(";")};output_buffer;"
+        "#{children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})"}.join(";")};@output_buffer;"
       end
     end
 
@@ -72,7 +72,7 @@ module Rbexy
         tag = if children.length > 0
           [
             "#{base_tag} {",
-              children.map(&:compile).map { |c| "@view_context.output_buffer << rbexy_prep_output(#{c})" }.join(";"),
+              children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})" }.join(";"),
             "}"
           ].join
         else
