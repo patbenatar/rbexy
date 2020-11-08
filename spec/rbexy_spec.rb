@@ -80,22 +80,23 @@ RSpec.describe Rbexy do
   it "handles custom components with html" do
     module Components
       class ButtonComponent
-        def initialize(prop1:, prop2:)
+        def initialize(context, prop1:, prop2:)
+          @context = context
           @prop1 = prop1
           @prop2 = prop2
         end
 
-        def render
+        def render(&block)
           # Render it yourself, call one of Rails view helpers (link_to,
           # content_tag, etc), or use a template file. Be sure to render
-          # children by yielding to the given block.
-          "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
+          # children by capturing the given block.
+          "<button class=\"#{[@prop1, @prop2].join("-")}\">#{@context.capture(&block)}</button>"
         end
       end
 
       module Forms
         class TextFieldComponent
-          def initialize(**attrs)
+          def initialize(context, **attrs)
           end
 
           def render
@@ -111,7 +112,7 @@ RSpec.describe Rbexy do
       end
 
       def render(context, name, **attrs, &block)
-        find(name).new(**attrs).render(&block)
+        find(name).new(context, **attrs).render(&block)
       end
 
       private
