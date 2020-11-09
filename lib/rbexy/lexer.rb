@@ -237,7 +237,6 @@ module Rbexy
     end
 
     def potential_expression_inner_tag
-      # binding.pry
       if self.curr_expr =~ Patterns.expression_internal_tag_prefixes
         tokens << [:EXPRESSION_BODY, curr_expr]
         self.curr_expr = ""

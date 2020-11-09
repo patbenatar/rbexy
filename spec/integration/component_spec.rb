@@ -30,7 +30,7 @@ RSpec.describe ApplicationController, type: :controller do
       .to have_tag("h1", text: "prop value after setup")
   end
 
-  it "exposes children to the component", focus: true do
+  it "exposes children to the component" do
     result = WithChildren::WrappingComponent.new(view_context).render
     expect(result).to have_tag("h1", text: "Here come the children...")
     expect(result).to have_tag("h1", text: "Text in a child")
@@ -50,16 +50,23 @@ RSpec.describe ApplicationController, type: :controller do
   it "has good stack traces for template runtime errors" do
     expect { ErroringComponent.new(view_context).render }
       .to raise_error do |error|
-        first_template_line = error.backtrace.find { |l| l.include?("erroring_component.rbx") }
-        expect(first_template_line).to include "erroring_component.rbx:2"
+        expect(error.backtrace[0]).to include "erroring_component.rbx:2"
       end
   end
 
   it "has good stack traces for child component template runtime errors" do
     expect { WithChildren::ErroringWrappingComponent.new(view_context).render }
       .to raise_error do |error|
-        first_template_line = error.backtrace.find { |l| l.include?("erroring_parent_component.rbx") }
-        expect(first_template_line).to include "erroring_parent_component.rbx:2"
+        expect(error.backtrace[0]).to include "erroring_child_component.rbx:2"
+        expect(error.backtrace[1]).to include "erroring_wrapping_component.rbx:1"
+      end
+  end
+
+  it "has good stack traces for errors that occur in the component class" do
+    expect { ErroringInClassComponent.new(view_context).render }
+      .to raise_error do |error|
+        expect(error.backtrace[0]).to include "erroring_in_class_component.rb:3"
+        expect(error.backtrace[1]).to include "erroring_in_class_component.rbx:2"
       end
   end
 

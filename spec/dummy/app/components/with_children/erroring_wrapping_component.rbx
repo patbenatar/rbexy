@@ -1,3 +1,3 @@
-<WithChildren.ErroringParent>
+<WithChildren.ErroringChild>
   <h1>Text in a child</h1>
-</WithChildren.ErroringParent>
+</WithChildren.ErroringChild>

@@ -3,6 +3,7 @@ module Rbexy
     attr_accessor :component_provider
     attr_accessor :template_paths
     attr_accessor :enable_context
+    attr_accessor :debug
 
     def template_paths
       @template_paths ||= []

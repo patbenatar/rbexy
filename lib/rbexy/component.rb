@@ -43,10 +43,19 @@ module Rbexy
       path = TemplatePath.new(component_name)
       template = view_context.lookup_context.find(path)
       template.render(self, {})
+    rescue ActionView::Template::Error => error
+      unless Rbexy.configuration.debug
+        clean_trace = error.backtrace.reject do |line|
+          file = line.split(":").first
+          file =~ /lib\/rbexy\/.*\.rb/ || file =~ /lib\/action_view\/.*\.rb/ || file =~ /lib\/active_support\/notifications\.rb/
+        end
+        error.set_backtrace(clean_trace)
+      end
+      raise error
     end
 
     def content
-      content_block ? view_context.capture(&content_block) : ""
+      content_block ? content_block.call : ""
     end
 
     def create_context(name, value)
