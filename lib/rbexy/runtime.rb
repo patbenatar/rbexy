@@ -6,7 +6,6 @@ require "action_view/buffers"
 module Rbexy
   class Runtime
     include ActionView::Context
-    include ActionView::Helpers::CaptureHelper
     include ActionView::Helpers::TagHelper
     include ViewContextHelper
 
@@ -30,11 +29,8 @@ module Rbexy
       end
     end
 
-    attr_accessor :output_buffer
-
     def initialize(component_provider = nil)
       @rbexy_tag = self.class.create_tag_builder(self, component_provider)
-      @view_context = self
     end
 
     def evaluate(code)
