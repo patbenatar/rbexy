@@ -43,24 +43,23 @@ RBX
 
 module Components
   class ButtonComponent
-    def initialize(context, prop1:, prop2:, multi_word_prop:)
-      @context = context
+    def initialize(prop1:, prop2:, multi_word_prop:)
       @prop1 = prop1
       @prop2 = prop2
       @multi_word_prop = multi_word_prop
     end
 
-    def render(&block)
+    def render
       # Render it yourself, call one of Rails view helpers (link_to,
       # content_tag, etc), or use a template file. Be sure to render
       # children by yielding to the given block.
-      "<button class=\"#{[@prop1, @prop2, @multi_word_prop].join("-")}\">#{@context.capture(&block)}</button>"
+      "<button class=\"#{[@prop1, @prop2, @multi_word_prop].join("-")}\">#{yield}</button>"
     end
   end
 
   module Forms
     class TextFieldComponent
-      def initialize(context, label:, note:, **attrs)
+      def initialize(label:, note:, **attrs)
         @label = label
         @note = note
       end
@@ -79,7 +78,7 @@ class ComponentProvider
 
   def render(context, name, **attrs, &block)
     props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
-    find(name).new(context, **props).render(&block)
+    find(name).new(**props).render(&block)
   end
 
   private
