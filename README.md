@@ -48,6 +48,8 @@ Add it to your Gemfile and `bundle install`:
 gem "rbexy"
 ```
 
+_From 1.0 onward, we only support Rails 6. If you're using Rails 5, use the 0.x releases._
+
 In `config/application.rb`:
 
 ```ruby
