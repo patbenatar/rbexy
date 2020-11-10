@@ -47,10 +47,12 @@ RSpec.describe ApplicationController, type: :controller do
     expect(result).to have_tag("a", with: { href: "/foo/bar" }, text: "Foo")
   end
 
-  it "has good stack traces for template runtime errors" do
+  it "has good stack traces for template runtime errors (doesn't include rbexy internal blocks and methods)" do
     expect { ErroringComponent.new(view_context).render }
       .to raise_error do |error|
-        expect(error.backtrace[0]).to include "erroring_component.rbx:2"
+        expect(error.backtrace[0]).to include "erroring_component.rbx:3"
+        expect(error.backtrace[1]).to include "erroring_component.rbx:3:in `times'"
+        expect(error.backtrace[2]).to include "component_spec.rb"
       end
   end
 
