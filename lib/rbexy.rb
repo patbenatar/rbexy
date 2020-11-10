@@ -6,7 +6,6 @@ module Rbexy
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
   autoload :HashMash, "rbexy/hash_mash"
-  autoload :OutputBuffer, "rbexy/output_buffer"
   autoload :ComponentTagBuilder, "rbexy/component_tag_builder"
   autoload :ViewContextHelper, "rbexy/view_context_helper"
   autoload :Configuration, "rbexy/configuration"
