@@ -8,12 +8,16 @@ module Rbexy
       @rbexy_context ||= [{}]
     end
 
-    def rbexy_prep_output(*content)
-      return if content.length == 0
-      content = content.first
+    def rbexy_prep_output(*value)
+      return if value.length == 0
+      value = value.first
 
-      value = content.is_a?(Array) ? content.join.html_safe : content
+      value = rbexy_is_html_safe_array?(value) ? value.join.html_safe : value
       [nil, false].include?(value) ? "" : value.to_s
+    end
+
+    def rbexy_is_html_safe_array?(value)
+      value.is_a?(Array) && value.all? { |v| v.respond_to?(:html_safe?) && v.html_safe? }
     end
   end
 end

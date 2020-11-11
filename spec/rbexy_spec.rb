@@ -159,24 +159,6 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
-  it "handles loops with blocks" do
-    template_string = <<-RBX.strip_heredoc.strip
-      <ul>
-        {["Hello", "world"].map { |v| <li>{v}</li> }}
-      </ul>
-    RBX
-
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
-
-    expected = <<-OUTPUT.strip_heredoc.strip
-      <ul>
-        <li>Hello</li><li>world</li>
-      </ul>
-    OUTPUT
-
-    expect(result).to eq expected
-  end
-
   it "doesn't hang when encountering boolean expression void tag at end of template" do
     template_string = <<-RBX.strip_heredoc.strip
       <div>
@@ -274,5 +256,39 @@ RSpec.describe Rbexy do
     OUTPUT
 
     expect(result).to eq expected
+  end
+
+  describe "array expressions" do
+    it "compiles and joins rbx returned from loops like `map`" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <ul>
+          {["Hello", "world"].map { |v| <li>{v}</li> }}
+        </ul>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li>Hello</li><li>world</li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "does not try to join arbitrary arrays" do
+      template_string = <<-RBX.strip_heredoc.strip
+        {["Hello", "world"]}
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        [&quot;Hello&quot;, &quot;world&quot;]
+      OUTPUT
+
+      expect(result).to eq expected
+    end
   end
 end
