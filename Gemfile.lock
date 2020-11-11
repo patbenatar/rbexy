@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbexy (0.3.1)
+    rbexy (1.0.0)
       actionview (>= 5.0, < 7.0)
       activesupport (>= 5.0, < 7.0)
       railties (>= 5.0, < 7.0)
@@ -201,7 +201,7 @@ PLATFORMS
 DEPENDENCIES
   guard-rspec (~> 4.7, >= 4.7.3)
   pry-byebug
-  rails (>= 5.0, < 7.0)
+  rails (>= 6.0, < 7.0)
   rake
   rbexy!
   rspec (~> 3.9)

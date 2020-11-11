@@ -3,6 +3,8 @@ require "active_support/core_ext/class/attribute"
 
 module Rbexy
   class Component < ActionView::Base
+    autoload :BacktraceCleaner, "rbexy/component/backtrace_cleaner"
+
     class TemplatePath < String
       def to_s
         self
@@ -43,10 +45,13 @@ module Rbexy
       path = TemplatePath.new(component_name)
       template = view_context.lookup_context.find(path)
       template.render(self, {})
+    rescue ActionView::Template::Error => error
+      error.set_backtrace clean_template_backtrace(error.backtrace)
+      raise error
     end
 
     def content
-      content_block ? view_context.capture(self, &content_block) : ""
+      content_block ? content_block.call : ""
     end
 
     def create_context(name, value)
@@ -74,6 +79,11 @@ module Rbexy
       else
         super
       end
+    end
+
+    def clean_template_backtrace(backtrace)
+      return backtrace if Rbexy.configuration.debug
+      BacktraceCleaner.new(backtrace).call
     end
   end
 end

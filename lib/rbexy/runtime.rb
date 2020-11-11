@@ -34,6 +34,7 @@ module Rbexy
     end
 
     def evaluate(code)
+      @output_buffer = ActionView::OutputBuffer.new
       instance_eval(code)
     rescue => e
       e.set_backtrace(e.backtrace.map { |l| l.gsub("(eval)", "(rbx template string)") })

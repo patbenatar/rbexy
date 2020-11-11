@@ -18,11 +18,7 @@ module Rbexy
       end
 
       def compile
-        [
-          "Rbexy::OutputBuffer.new.tap { |output|",
-            children.map(&:compile).map { |c| "output << (#{c})"}.join(";"),
-          "}.html_safe"
-        ].join(" ")
+        "#{children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})"}.join(";")};@output_buffer"
       end
     end
 
@@ -75,26 +71,24 @@ module Rbexy
         base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
         tag = if children.length > 0
           [
-            "#{base_tag} {",
-              "Rbexy::OutputBuffer.new.tap { |output|",
-                children.map(&:compile).map { |c| "output << (#{c})"}.join(";"),
-              "}.html_safe",
-            "}"
-          ].join(" ")
+            "#{base_tag} { capture {",
+              children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})" }.join(";"),
+            "} }"
+          ].join
         else
           base_tag
+        end + ".html_safe"
+
+        if Rbexy.configuration.enable_context
+          [
+            "(",
+              "rbexy_context.push({});",
+              "#{tag}.tap { rbexy_context.pop }",
+            ")"
+          ].join
+        else
+          tag
         end
-
-        context_open = Rbexy.configuration.enable_context ? "rbexy_context.push({});" : nil
-        context_close = Rbexy.configuration.enable_context ? "rbexy_context.pop;" : nil
-
-        [
-          "Rbexy::OutputBuffer.new.tap { |output|",
-            context_open,
-            "output << (#{tag}).html_safe;",
-            context_close,
-          "}.html_safe"
-        ].join(" ")
       end
 
       def compile_members

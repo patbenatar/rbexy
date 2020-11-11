@@ -47,19 +47,28 @@ RSpec.describe ApplicationController, type: :controller do
     expect(result).to have_tag("a", with: { href: "/foo/bar" }, text: "Foo")
   end
 
-  it "has good stack traces for template runtime errors" do
+  it "has good stack traces for template runtime errors (doesn't include rbexy internal blocks and methods)" do
     expect { ErroringComponent.new(view_context).render }
       .to raise_error do |error|
-        first_template_line = error.backtrace.find { |l| l.include?("erroring_component.rbx") }
-        expect(first_template_line).to include "erroring_component.rbx:2"
+        expect(error.backtrace[0]).to include "erroring_component.rbx:3"
+        expect(error.backtrace[1]).to include "erroring_component.rbx:3:in `times'"
+        expect(error.backtrace[2]).to include "component_spec.rb"
       end
   end
 
   it "has good stack traces for child component template runtime errors" do
     expect { WithChildren::ErroringWrappingComponent.new(view_context).render }
       .to raise_error do |error|
-        first_template_line = error.backtrace.find { |l| l.include?("erroring_parent_component.rbx") }
-        expect(first_template_line).to include "erroring_parent_component.rbx:2"
+        expect(error.backtrace[0]).to include "erroring_child_component.rbx:2"
+        expect(error.backtrace[1]).to include "erroring_wrapping_component.rbx:1"
+      end
+  end
+
+  it "has good stack traces for errors that occur in the component class" do
+    expect { ErroringInClassComponent.new(view_context).render }
+      .to raise_error do |error|
+        expect(error.backtrace[0]).to include "erroring_in_class_component.rb:3"
+        expect(error.backtrace[1]).to include "erroring_in_class_component.rbx:2"
       end
   end
 
