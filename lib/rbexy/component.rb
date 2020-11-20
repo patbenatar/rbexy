@@ -54,17 +54,6 @@ module Rbexy
       content_block ? content_block.call : ""
     end
 
-    def create_context(name, value)
-      rbexy_context.last[name] = value
-    end
-
-    def use_context(name)
-      index = rbexy_context.rindex { |c| c.has_key?(name) }
-      index ?
-        rbexy_context[index][name] :
-        raise(ContextNotFound, "no parent context `#{name}`")
-    end
-
     def compiled_method_container
       Rbexy::Component
     end

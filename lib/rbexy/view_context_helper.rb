@@ -4,10 +4,6 @@ module Rbexy
       @rbexy_tag ||= Runtime.create_tag_builder(self)
     end
 
-    def rbexy_context
-      @rbexy_context ||= [{}]
-    end
-
     def rbexy_prep_output(*value)
       return if value.length == 0
       value = value.first
