@@ -61,7 +61,7 @@ module Rbexy
     class XmlNode
       attr_reader :name, :members, :children
 
-      KNOWN_HTML_ELEMENTS = %w[
+      KNOWN_HTML_ELEMENTS = %w(
         a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
         bdi bdo bgsound big blink blockquote body br button canvas caption center circle cite clipPath code col colgroup
         color-profile command content data datalist dd defs del desc details dfn dialog dir discard div dl dt element
@@ -76,7 +76,16 @@ module Rbexy
         samp script section select set shadow slot small solidcolor source spacer span stop strike strong style sub
         summary sup svg switch symbol table tbody td template text textarea textPath tfoot th thead time title tr track
         tspan tt u ul unknown use var video view wbr xmp
-      ]
+      ).to_set
+
+      # KNOWN_BOOLEAN_ATTRIBUTES = ActionView::Helpers::TagHelper::BOOLEAN_ATTRIBUTES
+      # %(#{key}="#{key}")
+      KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::VOID_ELEMENTS
+      # if VOID_ELEMENTS.include?(name) && content.nil?
+      #   "<#{name.to_s.dasherize}#{tag_options(options, escape_attributes)}>".html_safe
+      # else
+      #   content_tag_string(name.to_s.dasherize, content || "", options, escape_attributes)
+      # end
 
       def initialize(name, members, children)
         @name = name
@@ -85,27 +94,54 @@ module Rbexy
       end
 
       def compile
-        base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
-        tag = if children.length > 0
-          [
-            "#{base_tag} { capture {",
-              children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})" }.join(";"),
-            "} }"
-          ].join
+        if KNOWN_HTML_ELEMENTS.include?(name)
+          attrs = compile_members_to_s
+          # if KNOWN_VOID_ELEMENTS.include?(name) && children.length == 0
+          #   "\"<#{name}#{attrs}>\".html_safe"
+          # elsif children.length == 0
+          #   "\"<#{name}#{attrs} />\".html_safe"
+          # else
+            "\"<#{name}#{attrs}>\".html_safe + #{children.map(&:compile).join(" + ")} + \"</#{name}>\".html_safe"
+          # end
         else
-          base_tag
-        end + ".html_safe"
+          base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
+          tag = if children.length > 0
+            [
+              "#{base_tag} { capture {",
+                children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})" }.join(";"),
+              "} }"
+            ].join
+          else
+            base_tag
+          end + ".html_safe"
 
-        if Rbexy.configuration.enable_context
-          [
-            "(",
-              "rbexy_context.push({});",
-              "#{tag}.tap { rbexy_context.pop }",
-            ")"
-          ].join
-        else
-          tag
+          if Rbexy.configuration.enable_context
+            [
+              "(",
+                "rbexy_context.push({});",
+                "#{tag}.tap { rbexy_context.pop }",
+              ")"
+            ].join
+          else
+            tag
+          end
         end
+      end
+
+      def compile_members_to_s
+        return "" unless members.length > 0
+
+        " " + members.map do |member|
+          case member
+          when ExpressionGroup
+            # TODO
+          when SilentNewline
+            member.compile
+          else
+            member.compile_to_s
+            # result << "#{member.compile},"
+          end
+        end.join(" + ")
       end
 
       def compile_members
@@ -116,7 +152,7 @@ module Rbexy
           when SilentNewline
             result << member.compile
           else
-            result << "#{member.compile},"
+            result << "#{member.compile_to_h},"
           end
         end
       end
@@ -130,8 +166,12 @@ module Rbexy
         @value = value
       end
 
-      def compile
+      def compile_to_h
         "\"#{name}\": #{value.compile}"
+      end
+
+      def compile_to_s
+        "\"#{name}=\" + #{value.compile}"
       end
     end
 

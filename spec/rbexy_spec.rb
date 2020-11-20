@@ -9,6 +9,26 @@ RSpec.describe Rbexy do
     expect(Rbexy::VERSION).not_to be nil
   end
 
+  it "handles simple html", focus: true do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div class="container">
+        <h1>Hello world</h1>
+        <p>This is the body</p>
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div class="container">
+        <h1>Hello world</h1>
+        <p>This is the body</p>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "handles a bunch of html" do
     template_string = <<-RBX.strip_heredoc.strip
       <!DOCTYPE html>

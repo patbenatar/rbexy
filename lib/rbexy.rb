@@ -25,7 +25,11 @@ module Rbexy
     def compile(template_string)
       tokens = Rbexy::Lexer.new(template_string).tokenize
       template = Rbexy::Parser.new(tokens).parse
-      template.compile
+      result = template.compile
+      puts "-------------------"
+      puts result
+      puts "-------------------"
+      result
     end
 
     def evaluate(template_string, runtime)
