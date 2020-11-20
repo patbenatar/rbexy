@@ -8,6 +8,7 @@ module Rbexy
     include ActionView::Context
     include ActionView::Helpers::TagHelper
     include ViewContextHelper
+    include ComponentContext
 
     DefaultTagBuilder = ActionView::Helpers::TagHelper::TagBuilder
 

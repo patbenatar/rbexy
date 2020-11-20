@@ -8,6 +8,7 @@ module Rbexy
   autoload :HashMash, "rbexy/hash_mash"
   autoload :ComponentTagBuilder, "rbexy/component_tag_builder"
   autoload :ViewContextHelper, "rbexy/view_context_helper"
+  autoload :ComponentContext, "rbexy/component_context"
   autoload :Configuration, "rbexy/configuration"
 
   ContextNotFound = Class.new(StandardError)
