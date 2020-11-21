@@ -95,13 +95,15 @@ module Rbexy
 
       def compile
         if KNOWN_HTML_ELEMENTS.include?(name)
-          attrs = compile_members_to_s
+          compiled_children = children.map { |c| "\#{#{c.compile}}" }.join
+          "%Q(<#{name}>#{compiled_children}</#{name}>).html_safe"
+          # attrs = compile_members_to_s
           # if KNOWN_VOID_ELEMENTS.include?(name) && children.length == 0
           #   "\"<#{name}#{attrs}>\".html_safe"
           # elsif children.length == 0
           #   "\"<#{name}#{attrs} />\".html_safe"
           # else
-            "\"<#{name}#{attrs}>\".html_safe + #{children.map(&:compile).join(" + ")} + \"</#{name}>\".html_safe"
+            # "\"<#{name}#{attrs}>\".html_safe + #{children.map(&:compile).join(" + ")} + \"</#{name}>\".html_safe"
           # end
         else
           base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
