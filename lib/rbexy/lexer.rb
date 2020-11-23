@@ -33,16 +33,35 @@ module Rbexy
       declaration: /<![^>]*>/
     )
 
-    attr_reader :stack, :tokens, :scanner, :curr_expr_quote_levels
-    attr_accessor :curr_expr_bracket_levels, :curr_expr, :curr_default_text,
-                  :curr_quoted_text
+    # TODO: move this to the component resolver? maybe Rbexy always runs its
+    # default resolver first, and only delegates to the user injected one if
+    # we don't match a valid html element? or the default resolver + prefixes
+    # is enough to work for most cases, that if you want to override you subclass
+    # or implement the whole thing and being smart about html elements is up to you...
+    KNOWN_HTML_ELEMENTS = %w(
+      a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
+      bdi bdo bgsound big blink blockquote body br button canvas caption center circle cite clipPath code col colgroup
+      color-profile command content data datalist dd defs del desc details dfn dialog dir discard div dl dt element
+      ellipse em embed feBlend feColorMatrix feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting
+      feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage
+      feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence
+      fieldset figcaption figure filter font footer foreignObject form frame frameset g h1 h2 h3 h4 h5 h6 hatch
+      hatchpath head header hgroup hr html i iframe image img input ins isindex kbd keygen label legend li line
+      linearGradient link listing main map mark marker marquee mask menu menuitem mesh meshgradient meshpatch meshrow
+      meta metadata meter mpath multicol nav nextid nobr noembed noframes noscript object ol optgroup option output p
+      param path pattern picture plaintext polygon polyline pre progress q radialGradient rb rect rp rt rtc ruby s
+      samp script section select set shadow slot small solidcolor source spacer span stop strike strong style sub
+      summary sup svg switch symbol table tbody td template text textarea textPath tfoot th thead time title tr track
+      tspan tt u ul unknown use var video view wbr xmp
+    ).to_set
+
+    attr_reader :stack, :tokens, :scanner
+    attr_accessor :curr_expr, :curr_raw, :curr_quoted_text
 
     def initialize(code)
       @stack = [:default]
-      @curr_expr_bracket_levels = 0
-      @curr_expr_quote_levels = { single: 0, double: 0 }
       @curr_expr = ""
-      @curr_default_text = ""
+      @curr_raw = ""
       @curr_quoted_text = ""
       @tokens = []
       @scanner = StringScanner.new(code)
@@ -61,7 +80,9 @@ module Rbexy
           elsif scanner.scan(Patterns.comment)
             tokens << [:SILENT_NEWLINE]
           elsif scanner.check(Patterns.text_content)
-            stack.push(:default_text)
+            stack.push(:raw)
+          elsif scanner.scan(Patterns.open_tag_end)
+            stack.push(:raw)
           else
             raise SyntaxError, self
           end
@@ -76,26 +97,28 @@ module Rbexy
           elsif scanner.scan(Patterns.comment)
             tokens << [:SILENT_NEWLINE]
           elsif scanner.check(Patterns.text_content)
-            stack.push(:default_text)
+            # TODO: is this right?
+            # where do we handle attribute values that are strings?
+            stack.push(:raw)
           else
             raise SyntaxError, self
           end
-        when :default_text
+        when :raw
           if scanner.scan(Patterns.text_content)
-            self.curr_default_text += scanner.matched
+            self.curr_raw += scanner.matched
             if scanner.matched.end_with?('\\') && scanner.peek(1) == "{"
-              self.curr_default_text += scanner.getch
+              self.curr_raw += scanner.getch
             elsif scanner.matched.end_with?('\\') && scanner.peek(1) == "#"
-              self.curr_default_text += scanner.getch
+              self.curr_raw += scanner.getch
             else
               if scanner.peek(1) == "#"
                 # If the next token is a comment, trim trailing whitespace from
                 # the text value so we don't add to the indentation of the next
                 # value that is output after the comment
-                self.curr_default_text = curr_default_text.gsub(/^\p{Blank}*\z/, "")
+                self.curr_raw = curr_raw.gsub(/^\p{Blank}*\z/, "")
               end
-              tokens << [:TEXT, curr_default_text]
-              self.curr_default_text = ""
+              tokens << [:RAW, curr_raw]
+              self.curr_raw = ""
               stack.pop
             end
           else
@@ -222,7 +245,8 @@ module Rbexy
               self.curr_quoted_text += scanner.getch
             end
           elsif scanner.scan(Patterns.double_quote)
-            tokens << [:TEXT, curr_quoted_text]
+            # TODO: is this right?
+            tokens << [:RAW, curr_quoted_text]
             self.curr_quoted_text = ""
             stack.pop
           else
@@ -247,8 +271,15 @@ module Rbexy
     end
 
     def open_tag_def
-      tokens << [:OPEN_TAG_DEF]
-      stack.push(:tag, :tag_def)
+      if scanner.check(Patterns.tag_name) && KNOWN_HTML_ELEMENTS.include?(scanner.matched)
+        scanner.unscan
+        stack.push(:raw)
+      else
+        # TODO: rename "tag" to "component" everywhere now that its just for
+        # custom components, not all HTML tags
+        tokens << [:OPEN_TAG_DEF]
+        stack.push(:tag, :tag_def)
+      end
     end
 
     def open_expression

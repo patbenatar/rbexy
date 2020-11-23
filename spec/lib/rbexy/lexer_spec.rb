@@ -1,21 +1,16 @@
 require "active_support/core_ext/string/strip"
 
 RSpec.describe Rbexy::Lexer do
-  it "tokenizes text" do
-    subject = Rbexy::Lexer.new("Hello world")
-    expect(subject.tokenize).to eq [[:TEXT, "Hello world"]]
-  end
+  context "focus", focus: true do
+    it "tokenizes text" do
+      subject = Rbexy::Lexer.new("Hello world")
+      expect(subject.tokenize).to eq [[:RAW, "Hello world"]]
+    end
 
-  it "tokenizes xml tags" do
-    subject = Rbexy::Lexer.new("<div></div>")
-    expect(subject.tokenize).to eq [
-      [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
-      [:CLOSE_TAG_DEF],
-      [:OPEN_TAG_END],
-      [:TAG_NAME, "div"],
-      [:CLOSE_TAG_END]
-    ]
+    it "tokenizes xml tags" do
+      subject = Rbexy::Lexer.new("<div></div>")
+      expect(subject.tokenize).to eq [[:RAW, "<div></div>"]]
+    end
   end
 
   it "tokenizes self-closing xml tags" do

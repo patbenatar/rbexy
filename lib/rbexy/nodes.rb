@@ -2,9 +2,10 @@ module Rbexy
   module Nodes
     module Util
       def self.safe_string(str)
-        str.gsub('"', '\\"')
+        str.gsub('"', '\\"').gsub("'", "\\'")
       end
 
+      # TODO: we shouldn't need this anymore
       def self.safe_tag_name(name)
         name.gsub(".", "__")
       end
@@ -18,7 +19,28 @@ module Rbexy
       end
 
       def compile
-        "#{children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})"}.join(";")};@output_buffer"
+        result = ""
+        output_mode = nil
+
+        children.each do |child|
+          if child.safe_append?
+            if output_mode == nil
+              result << "@output_buffer.safe_append='"
+            elsif output_mode == :append
+              result << ";"
+            end
+
+            output_mode = :safe_append
+            result << child.compile
+          end
+        end
+
+        if output_mode == :safe_append
+          result << "'.freeze;"
+        end
+
+        # "#{children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})"}.join(";")};@output_buffer.to_s"
+        "#{result}@output_buffer.to_s"
       end
     end
 
@@ -29,8 +51,12 @@ module Rbexy
         @content = content
       end
 
+      def safe_append?
+        true
+      end
+
       def compile
-        "\"#{Util.safe_string(content)}\""
+        Util.safe_string(content)
       end
     end
 

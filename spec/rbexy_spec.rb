@@ -9,24 +9,40 @@ RSpec.describe Rbexy do
     expect(Rbexy::VERSION).not_to be nil
   end
 
-  it "handles simple html", focus: true do
-    template_string = <<-RBX.strip_heredoc.strip
-      <div class="container">
-        <h1>Hello world</h1>
-        <p>This is the body</p>
-      </div>
-    RBX
+  context "tmp" do
+    it "handles text" do
+      template_string = <<-RBX.strip_heredoc.strip
+        Hello world
+      RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
-    expected = <<-OUTPUT.strip_heredoc.strip
-      <div class="container">
-        <h1>Hello world</h1>
-        <p>This is the body</p>
-      </div>
-    OUTPUT
+      expected = <<-OUTPUT.strip_heredoc.strip
+        Hello world
+      OUTPUT
 
-    expect(result).to eq expected
+      expect(result).to eq expected
+    end
+
+    it "handles simple html" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <div class="container">
+          <h1>Hello world</h1>
+          <p>This is the body</p>
+        </div>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <div class="container">
+          <h1>Hello world</h1>
+          <p>This is the body</p>
+        </div>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
   end
 
   it "handles a bunch of html" do

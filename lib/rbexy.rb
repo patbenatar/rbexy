@@ -2,6 +2,7 @@ require "rbexy/version"
 
 module Rbexy
   autoload :Lexer, "rbexy/lexer"
+  autoload :SimpleLexer, "rbexy/simple_lexer"
   autoload :Parser, "rbexy/parser"
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
