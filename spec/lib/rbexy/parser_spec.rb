@@ -1,4 +1,4 @@
-RSpec.describe Rbexy::Parser do
+RSpec.describe Rbexy::Parser, focus: true do
   it "handles :TEXT" do
     subject = Rbexy::Parser.new([[:TEXT, "Hello world"]])
     result = subject.parse.children
@@ -33,7 +33,7 @@ RSpec.describe Rbexy::Parser do
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && "],
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "h1"],
+      [:TAG_DETAILS, { name: "h1", type: :html }],
       [:CLOSE_TAG_DEF],
       [:TEXT, "Is "],
       [:OPEN_EXPRESSION],
@@ -53,7 +53,7 @@ RSpec.describe Rbexy::Parser do
     expect(group.statements[0]).to be_a Rbexy::Nodes::Expression
     expect(group.statements[0].content).to eq "true && "
 
-    expect(group.statements[1]).to be_a Rbexy::Nodes::XMLNode
+    expect(group.statements[1]).to be_a Rbexy::Nodes::HTMLNode
     expect(group.statements[1].name).to eq "h1"
     expect(group.statements[1].children[0]).to be_a Rbexy::Nodes::Text
     expect(group.statements[1].children[0].content).to eq "Is "
@@ -67,13 +67,13 @@ RSpec.describe Rbexy::Parser do
   it "parses named tags" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
       [:CLOSE_TAG_END]
     ])
     result = subject.parse.children
-    expect(result.first).to be_a Rbexy::Nodes::XMLNode
+    expect(result.first).to be_a Rbexy::Nodes::HTMLNode
     expect(result.first.name).to eq "div"
   end
 
@@ -90,7 +90,7 @@ RSpec.describe Rbexy::Parser do
   it "raises if tag is missing an end" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF]
     ])
     expect { subject.parse }.to raise_error Rbexy::Parser::ParseError
@@ -99,7 +99,7 @@ RSpec.describe Rbexy::Parser do
   it "parses tag attributes" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:OPEN_ATTRS],
       [:ATTR_NAME, "foo"],
       [:ATTR_NAME, "bar"],
@@ -119,7 +119,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.members.length).to eq 3
 
     attrFoo = div.members[0]
@@ -144,7 +144,7 @@ RSpec.describe Rbexy::Parser do
   it "parses splat attributes" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:OPEN_ATTRS],
       [:OPEN_ATTR_SPLAT],
       [:OPEN_EXPRESSION],
@@ -158,7 +158,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.members.length).to eq 1
 
     attrFoo = div.members[0]
@@ -169,24 +169,24 @@ RSpec.describe Rbexy::Parser do
   it "finds no children for self-closing tags" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "input"],
+      [:TAG_DETAILS, { name: "input", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
       [:CLOSE_TAG_END]
     ])
 
     input = subject.parse.children.first
-    expect(input).to be_a Rbexy::Nodes::XMLNode
+    expect(input).to be_a Rbexy::Nodes::HTMLNode
     expect(input.children.length).to eq 0
   end
 
   it "parses children" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
         [:OPEN_TAG_DEF],
-        [:TAG_NAME, "h1"],
+        [:TAG_DETAILS, { name: "h1", type: :html }],
         [:CLOSE_TAG_DEF],
 
         [:OPEN_TAG_END],
@@ -194,11 +194,11 @@ RSpec.describe Rbexy::Parser do
         [:CLOSE_TAG_END],
 
         [:OPEN_TAG_DEF],
-        [:TAG_NAME, "p"],
+        [:TAG_DETAILS, { name: "p", type: :html }],
         [:CLOSE_TAG_DEF],
 
           [:OPEN_TAG_DEF],
-          [:TAG_NAME, "span"],
+          [:TAG_DETAILS, { name: "span", type: :html }],
           [:CLOSE_TAG_DEF],
           [:OPEN_TAG_END],
           [:TAG_NAME, "span"],
@@ -214,7 +214,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.name).to eq "div"
     expect(div.children.length).to eq 2
 
@@ -234,14 +234,14 @@ RSpec.describe Rbexy::Parser do
   it "parses multiple things at the root" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
       [:CLOSE_TAG_END],
 
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "h1"],
+      [:TAG_DETAILS, { name: "h1", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
       [:TAG_NAME, "h1"],
@@ -260,7 +260,7 @@ RSpec.describe Rbexy::Parser do
   it "parses text within a tag into Rbexy::Nodes::Text" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
       [:TEXT, "Hello world"],
       [:OPEN_TAG_END],
@@ -277,7 +277,7 @@ RSpec.describe Rbexy::Parser do
   it "parses expression within a tag into Rbexy::Nodes::Expression" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "thing = 'foo'"],
@@ -296,17 +296,17 @@ RSpec.describe Rbexy::Parser do
   it "raises an error when encountering tag that opens but never closes" do
     subject = Rbexy::Parser.new([
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "div"],
+      [:TAG_DETAILS, { name: "div", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "h1"],
+      [:TAG_DETAILS, { name: "h1", type: :html }],
       [:CLOSE_TAG_DEF],
       [:TEXT, "Hello world"],
       [:OPEN_TAG_END],
       [:TAG_NAME, "h1"],
       [:CLOSE_TAG_END],
       [:OPEN_TAG_DEF],
-      [:TAG_NAME, "br"],
+      [:TAG_DETAILS, { name: "br", type: :html }],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
       [:TAG_NAME, "div"],
