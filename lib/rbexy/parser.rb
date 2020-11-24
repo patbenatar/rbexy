@@ -60,8 +60,7 @@ module Rbexy
     def parse_tag
       return unless take(:OPEN_TAG_DEF)
 
-      type = take!(:TAG_TYPE)
-      name = take!(:TAG_NAME)
+      details = take!(:TAG_DETAILS)[1]
       members = []
       members.concat(take_all(:SILENT_NEWLINE).map { Nodes::SilentNewline.new })
       members.concat(parse_attrs)
@@ -70,8 +69,11 @@ module Rbexy
 
       children = parse_children
 
-      klass = type == :component ? Nodes::ComponentNode : Nodes::HTMLNode
-      klass.new(name[1], members, children)
+      if details[:type] == :component
+        Nodes::ComponentNode.new(details[:component_class], members, children)
+      else
+        Nodes::HTMLNode.new(details[:name], members, children)
+      end
     end
 
     def parse_attrs
