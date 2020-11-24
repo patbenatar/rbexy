@@ -6,6 +6,7 @@ module Rbexy
       end
 
       def render(context, name, **attrs, &block)
+        # TODO: this is important when compiling ComponentNode
         props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
         find(name).new(context, **props).render(&block)
       end

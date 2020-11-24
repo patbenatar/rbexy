@@ -12,6 +12,7 @@ module Rbexy
 
     DefaultTagBuilder = ActionView::Helpers::TagHelper::TagBuilder
 
+    # TODO: get rid of tag builder
     def self.create_tag_builder(context, provider = nil)
       provider = provider ||
         provider_from_context(context) ||
