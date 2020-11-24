@@ -10,6 +10,7 @@ module Rbexy
   autoload :ViewContextHelper, "rbexy/view_context_helper"
   autoload :ComponentContext, "rbexy/component_context"
   autoload :Configuration, "rbexy/configuration"
+  autoload :ASTTransforms, "rbexy/ast_transforms"
 
   ContextNotFound = Class.new(StandardError)
 
