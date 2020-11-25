@@ -8,7 +8,7 @@ module Rbexy
       end
 
       def compile
-        statements.map(&:compile).join
+        "@output_buffer.append=(#{statements.map(&:compile).join});"
       end
     end
   end
