@@ -27,7 +27,8 @@ module Rbexy
     def compile(template_string, element_resolver = Rbexy.configuration.element_resolver)
       tokens = Rbexy::Lexer.new(template_string, element_resolver).tokenize
       template = Rbexy::Parser.new(tokens).parse
-      template.compile
+      precompiled_template = template.precompile
+      precompiled_template.compile
     end
 
     def evaluate(template_string, runtime)
