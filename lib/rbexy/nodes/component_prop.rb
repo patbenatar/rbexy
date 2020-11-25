@@ -1,8 +1,8 @@
 module Rbexy
   module Nodes
-    class SilentNewline < AbstractNode
+    class ComponentProp < XMLAttr
       def compile
-        "\n"
+        "\"#{name}\": #{value.compile}"
       end
     end
   end

@@ -1,15 +1,11 @@
 module Rbexy
   module Nodes
-    class XmlAttr < Base
+    class XMLAttr < AbstractNode
       attr_reader :name, :value
 
       def initialize(name, value)
         @name = name
         @value = value
-      end
-
-      def compile
-        "\"#{name}\": #{value.compile}"
       end
     end
   end
