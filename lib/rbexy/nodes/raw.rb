@@ -1,14 +1,18 @@
 module Rbexy
   module Nodes
     class Raw < AbstractNode
-      attr_reader :content
+      attr_reader :content, :template
 
-      def initialize(content)
+      OUTPUT = "@output_buffer.safe_append='%s'.freeze;"
+      STRING = "'%s'.html_safe.freeze;"
+
+      def initialize(content, template: OUTPUT)
         @content = content
+        @template = template
       end
 
       def compile
-        "@output_buffer.safe_append='#{content}'.freeze;"
+        template % content
       end
 
       def merge(other_raw)

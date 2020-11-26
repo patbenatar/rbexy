@@ -31,10 +31,10 @@ module Rbexy
       end
     end
 
-    def self.attr_expr(expr)
+    def self.splat_attrs(attrs_hash)
       # TagBuilder requires a view_context arg, but it's only used in #tag_string.
       # Since all we need is #tag_options, we pass in a nil view_context.
-      ActionView::Helpers::TagHelper::TagBuilder.new(nil).tag_options(expr)
+      ActionView::Helpers::TagHelper::TagBuilder.new(nil).tag_options(attrs_hash)
     end
 
     def initialize(component_provider = nil)
