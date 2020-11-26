@@ -22,6 +22,8 @@ module Rbexy
       end
 
       def compile_members
+        # TODO:
+        # props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
         members.each_with_object("") do |member, result|
           case member
           when ExpressionGroup
