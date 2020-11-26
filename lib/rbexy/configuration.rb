@@ -14,8 +14,6 @@ module Rbexy
       @element_resolver ||= ComponentResolver.new
     end
 
-    # TODO: write docs showing how to customize this for ViewComponent
-    # or provide a :view_component option?
     def component_rendering_templates
       @component_rendering_templates ||= {
         children: "{capture{%{children}}}",
