@@ -1,12 +1,14 @@
 module Rbexy
   module Nodes
     class AbstractNode
+      PrecompileRequired = Class.new(StandardError)
+
       def precompile
         [self]
       end
 
       def compile
-        raise NotImplementedError
+        raise PrecompileRequired, "#{self.class.name} must be precompiled first"
       end
 
       private
@@ -29,6 +31,10 @@ module Rbexy
         end
 
         compacted
+      end
+
+      def inject(nodes, builder:, between:)
+        Util.inject(nodes, builder: builder, between: between)
       end
     end
   end

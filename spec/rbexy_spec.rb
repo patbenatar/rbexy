@@ -157,7 +157,16 @@ RSpec.describe Rbexy do
       expect(Rbexy.evaluate('{true && <div />}', Rbexy::Runtime.new))
         .to eq '<div />'
     end
-  end
+
+    it "handles ternary expressions" do
+      expect(Rbexy.evaluate('{true ? <div /> : <span />}', Rbexy::Runtime.new))
+        .to eq '<div />'
+    end
+
+    it "handles ternary expressions with sub-expressions" do
+      expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}} /> : <span />}', Rbexy::Runtime.new))
+        .to eq '<div class="the-class" />'
+    end
 
     it "handles a bunch of html" do
       template_string = <<-RBX.strip_heredoc.strip
@@ -194,38 +203,38 @@ RSpec.describe Rbexy do
         <!DOCTYPE html>
         <div foo="" bar="baz" thing="heyyou">
           <h1 class="myClass" attr1="val1" attr2="val2">Hello world</h1>
-          <div class="myClass"></div>
+          <div class="myClass" />
           Some words
           <p>Lorem ipsum</p>
-          <input type="submit" value="ivar value" disabled="disabled">
-          <p>Is true</p>\n  \n        <p class="myClass">Ternary is TRUE</p>
+          <input type="submit" value="ivar value" disabled="">
+          <p>Is true</p>\n  \n          <p class="myClass">Ternary is TRUE</p>
         </div>
       OUTPUT
 
       expect(result).to eq expected
     end
-  # end
 
-  it "handles html with multiline tags" do
-    template_string = <<-RBX.strip_heredoc.strip
-      <div
-        foo
-        bar="baz"
-        thing={["hey", "you"].join()}>
-        <h1
-          {**{ class: "myClass" }}>Hello world</h1>
-      </div>
-    RBX
+    it "handles html with multiline tags" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <div
+          foo
+          bar="baz"
+          thing={["hey", "you"].join()}>
+          <h1
+            {**{ class: "myClass" }}>Hello world</h1>
+        </div>
+      RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
-    expected = <<-OUTPUT.strip_heredoc.strip
-      <div foo="" bar="baz" thing="heyyou">
-        <h1 class="myClass">Hello world</h1>
-      </div>
-    OUTPUT
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <div foo="" bar="baz" thing="heyyou">
+          <h1 class="myClass">Hello world</h1>
+        </div>
+      OUTPUT
 
-    expect(result).to eq expected
+      expect(result).to eq expected
+    end
   end
 
   it "handles custom components with html" do

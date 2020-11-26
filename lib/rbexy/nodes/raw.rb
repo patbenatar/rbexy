@@ -4,7 +4,7 @@ module Rbexy
       attr_reader :content, :template
 
       OUTPUT = "@output_buffer.safe_append='%s'.freeze;"
-      STRING = "'%s'.html_safe.freeze;"
+      EXPR_STRING = "'%s'.html_safe.freeze"
 
       def initialize(content, template: OUTPUT)
         @content = content
