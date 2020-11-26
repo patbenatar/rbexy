@@ -6,8 +6,6 @@ module Rbexy
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
   autoload :HashMash, "rbexy/hash_mash"
-  # TODO: won't need this anymore
-  autoload :ViewContextHelper, "rbexy/view_context_helper"
   autoload :ComponentContext, "rbexy/component_context"
   autoload :Configuration, "rbexy/configuration"
   autoload :ComponentResolver, "rbexy/component_resolver"
