@@ -12,7 +12,6 @@ module Rbexy
       end
 
       def compile
-        # TODO: figure out rbexy_prep_output() for html safe arrays
         "#{children.map(&:compile).join}@output_buffer.to_s"
       end
     end
