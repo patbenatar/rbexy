@@ -6,13 +6,14 @@ module Rbexy
       end
 
       def compile
-        kwargs = members.any? ? ",#{compile_members}" : ""
-        base_tag = "::#{name}.new(self#{kwargs}).render"
-        tag = if children.length > 0
-          "#{base_tag}{capture{#{children.map(&:compile).join}}}"
-        else
-          base_tag
-        end
+        templates = Rbexy.configuration.component_rendering_templates
+
+        tag = templates[:component] % {
+          component_class: name,
+          view_context: "self",
+          kwargs: compile_members,
+          children_block: children.any? ? templates[:children] % { children: children.map(&:compile).join } : ""
+        }
 
         if Rbexy.configuration.enable_context
           tag = "rbexy_context.push({});#{tag}.tap{rbexy_context.pop}"
