@@ -33,8 +33,13 @@ module Rbexy
       end
 
       def precompile_members
-        # TODO: how should HTMLElement handle splat attrs? silent newline? see Nodes::Component#compile_members
-        members.map(&:precompile).flatten
+        members.map do |node|
+          if node.is_a? ExpressionGroup
+            ExpressionGroup.new(node.statements, template: "Rbexy::Runtime.attr_expr(%s)", safe: true)
+          else
+            node
+          end
+        end.map(&:precompile).flatten
       end
     end
   end

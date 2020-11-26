@@ -7,9 +7,8 @@ module Rbexy
         @content = content
       end
 
-      def compile
-        # TODO
-        "\"#{Util.safe_string(content)}\".html_safe"
+      def precompile
+        [Raw.new(Util.escape_string(content))]
       end
     end
   end
