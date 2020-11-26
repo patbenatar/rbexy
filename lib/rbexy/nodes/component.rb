@@ -1,31 +1,24 @@
 module Rbexy
   module Nodes
     class Component < XMLNode
+      def precompile
+        [Component.new(name, members, compact(children.map(&:precompile).flatten))]
+      end
+
       def compile
-        base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
+        kwargs = members.any? ? ", #{compile_members}" : ""
+        base_tag = "#{name}.new(self#{kwargs}).render"
         tag = if children.length > 0
-          [
-            "#{base_tag} { capture {",
-              children.map(&:compile).map { |c| "@output_buffer << rbexy_prep_output(#{c})" }.join(";"),
-            "} }"
-          ].join
+          "#{base_tag}{capture{#{children.map(&:compile).join}}}"
         else
           base_tag
-        end + ".html_safe"
-
-        # TODO: if we made this into an abstract config like `component_preamble`, etc
-        # then we could fully extract Rbexy::Component into a separate gem making Rbexy just
-        # a template engine
-        if Rbexy.configuration.enable_context
-          [
-            "(",
-              "rbexy_context.push({});",
-              "#{tag}.tap { rbexy_context.pop }",
-            ")"
-          ].join
-        else
-          tag
         end
+
+        if Rbexy.configuration.enable_context
+          tag = "rbexy_context.push({});#{tag}.tap{rbexy_context.pop}"
+        end
+
+        "@output_buffer.safe_append=(#{tag});"
       end
 
       def compile_members

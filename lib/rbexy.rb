@@ -30,8 +30,8 @@ module Rbexy
       root.precompile.compile
     end
 
-    def evaluate(template_string, runtime)
-      runtime.evaluate compile(template_string)
+    def evaluate(template_string, runtime, element_resolver = Rbexy.configuration.element_resolver)
+      runtime.evaluate compile(template_string, element_resolver)
     end
   end
 end
