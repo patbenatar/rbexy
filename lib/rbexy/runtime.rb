@@ -7,7 +7,6 @@ module Rbexy
   class Runtime
     include ActionView::Context
     include ActionView::Helpers::TagHelper
-    include ViewContextHelper
     include ComponentContext
 
     def self.splat_attrs(attrs_hash)
