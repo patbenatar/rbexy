@@ -33,11 +33,6 @@ module Rbexy
       @resolution_cache[name] ||= find(name)
     end
 
-    # TODO: should we allow for changing how component classes get called
-    # at runtime? or just always use `klass.new(context, **props).render(block)`
-    # ... we need to have the option if we want to maintain support for other component
-    # libraries like ViewComponent.
-
     private
 
     def find(name)
