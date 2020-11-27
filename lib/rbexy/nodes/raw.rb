@@ -3,7 +3,7 @@ module Rbexy
     class Raw < AbstractNode
       attr_reader :content, :template
 
-      OUTPUT = "@output_buffer.safe_append='%s'.freeze;"
+      OUTPUT = "@output_buffer.safe_concat('%s'.freeze);"
       EXPR_STRING = "'%s'.html_safe.freeze"
 
       def initialize(content, template: OUTPUT)

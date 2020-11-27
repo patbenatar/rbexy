@@ -16,10 +16,10 @@ module Rbexy
         }
 
         if Rbexy.configuration.enable_context
-          tag = "rbexy_context.push({});#{tag}.tap{rbexy_context.pop}"
+          tag = "(rbexy_context.push({});#{tag}.tap{rbexy_context.pop})"
         end
 
-        "@output_buffer.safe_append=(#{tag});"
+        "@output_buffer.safe_concat(#{tag});"
       end
 
       def compile_members

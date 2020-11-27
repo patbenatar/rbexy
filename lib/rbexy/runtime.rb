@@ -9,10 +9,14 @@ module Rbexy
     include ActionView::Helpers::TagHelper
     include ComponentContext
 
-    def self.splat_attrs(attrs_hash)
+    def self.tag_builder
       # TagBuilder requires a view_context arg, but it's only used in #tag_string.
       # Since all we need is #tag_options, we pass in a nil view_context.
-      TagBuilder.new(nil).tag_options(attrs_hash).html_safe
+      @tag_builder ||= TagBuilder.new(nil)
+    end
+
+    def self.splat_attrs(attrs_hash)
+      tag_builder.tag_options(attrs_hash).html_safe
     end
 
     def self.expr_out(*value)
