@@ -72,7 +72,7 @@ module Rbexy
       children = parse_children
 
       if details[:type] == :component
-        Nodes::Component.new(details[:component_class], members, children)
+        Nodes::ComponentElement.new(details[:component_class], members, children)
       else
         Nodes::HTMLElement.new(details[:name], members, children)
       end

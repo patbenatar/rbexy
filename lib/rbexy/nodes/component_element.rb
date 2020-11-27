@@ -1,8 +1,8 @@
 module Rbexy
   module Nodes
-    class Component < XMLNode
+    class ComponentElement < AbstractElement
       def precompile
-        [Component.new(name, precompile_members, precompile_children)]
+        [ComponentElement.new(name, precompile_members, precompile_children)]
       end
 
       def compile
