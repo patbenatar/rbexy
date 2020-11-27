@@ -222,7 +222,8 @@ RSpec.describe Rbexy do
       end
     end
 
-    result = Rbexy.evaluate(template_string, Runtime.new)
+    compiled = Rbexy.compile(template_string)
+    result = profile { Runtime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <!DOCTYPE html>
@@ -306,7 +307,8 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    result = Rbexy.evaluate(template_string, MyRuntime.new)
+    compiled = Rbexy.compile(template_string)
+    result = profile { MyRuntime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div>
