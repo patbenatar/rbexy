@@ -20,6 +20,13 @@ module Rbexy
     attr_reader :resolution_cache
 
     def initialize
+      # TODO: cache by prefix as well
+      # takes the shape:
+      # {
+      #   nil => {prefix-less cache},
+      #   prefix1 => {cache},
+      #   ...
+      # }
       @resolution_cache = {}
     end
 

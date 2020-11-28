@@ -37,8 +37,8 @@ module Rbexy
     attr_accessor :curr_expr, :curr_default_text,
                   :curr_quoted_text
 
-    def initialize(code, element_resolver)
-      @scanner = StringScanner.new(code)
+    def initialize(template, element_resolver)
+      @scanner = StringScanner.new(template.source)
       @element_resolver = element_resolver
       @stack = [:default]
       @curr_expr = ""
