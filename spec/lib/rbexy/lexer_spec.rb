@@ -22,11 +22,11 @@ RSpec.describe Rbexy::Lexer do
     ButtonComponent = Class.new
 
     class Resolver
-      def component?(name)
+      def component?(name, template)
         name == "Button"
       end
 
-      def component_class(name)
+      def component_class(name, template)
         name == "Button" ? ButtonComponent : nil
       end
     end

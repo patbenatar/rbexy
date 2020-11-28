@@ -33,11 +33,12 @@ module Rbexy
       declaration: /<![^>]*>/
     )
 
-    attr_reader :stack, :tokens, :scanner, :element_resolver
+    attr_reader :stack, :tokens, :scanner, :element_resolver, :template
     attr_accessor :curr_expr, :curr_default_text,
                   :curr_quoted_text
 
     def initialize(template, element_resolver)
+      @template = template
       @scanner = StringScanner.new(template.source)
       @element_resolver = element_resolver
       @stack = [:default]
@@ -287,9 +288,9 @@ module Rbexy
     end
 
     def tag_details(name)
-      type = element_resolver.component?(name) ? :component : :html
+      type = element_resolver.component?(name, template) ? :component : :html
       details = { name: scanner.matched, type: type }
-      details[:component_class] = element_resolver.component_class(name) if type == :component
+      details[:component_class] = element_resolver.component_class(name, template) if type == :component
       details
     end
   end

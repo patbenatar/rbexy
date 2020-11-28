@@ -30,13 +30,13 @@ module Rbexy
       @resolution_cache = {}
     end
 
-    def component?(name)
+    def component?(name, template)
       return false if KNOWN_HTML_ELEMENTS.include?(name)
-      return true if component_class(name)
+      return true if component_class(name, template)
       false
     end
 
-    def component_class(name)
+    def component_class(name, template)
       @resolution_cache[name] ||= find(name)
     end
 
