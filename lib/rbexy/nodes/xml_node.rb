@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class XMLNode < Base
+    class XmlNode < Base
       attr_reader :name, :members, :children
 
       def initialize(name, members, children)

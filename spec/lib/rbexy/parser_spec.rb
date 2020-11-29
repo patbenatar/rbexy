@@ -53,7 +53,7 @@ RSpec.describe Rbexy::Parser do
     expect(group.statements[0]).to be_a Rbexy::Nodes::Expression
     expect(group.statements[0].content).to eq "true && "
 
-    expect(group.statements[1]).to be_a Rbexy::Nodes::XMLNode
+    expect(group.statements[1]).to be_a Rbexy::Nodes::XmlNode
     expect(group.statements[1].name).to eq "h1"
     expect(group.statements[1].children[0]).to be_a Rbexy::Nodes::Text
     expect(group.statements[1].children[0].content).to eq "Is "
@@ -73,7 +73,7 @@ RSpec.describe Rbexy::Parser do
       [:CLOSE_TAG_END]
     ])
     result = subject.parse.children
-    expect(result.first).to be_a Rbexy::Nodes::XMLNode
+    expect(result.first).to be_a Rbexy::Nodes::XmlNode
     expect(result.first.name).to eq "div"
   end
 
@@ -119,7 +119,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::XmlNode
     expect(div.members.length).to eq 3
 
     attrFoo = div.members[0]
@@ -158,7 +158,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::XmlNode
     expect(div.members.length).to eq 1
 
     attrFoo = div.members[0]
@@ -176,7 +176,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     input = subject.parse.children.first
-    expect(input).to be_a Rbexy::Nodes::XMLNode
+    expect(input).to be_a Rbexy::Nodes::XmlNode
     expect(input.children.length).to eq 0
   end
 
@@ -214,7 +214,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::XMLNode
+    expect(div).to be_a Rbexy::Nodes::XmlNode
     expect(div.name).to eq "div"
     expect(div.children.length).to eq 2
 

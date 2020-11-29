@@ -33,18 +33,19 @@ module Rbexy
       declaration: /<![^>]*>/
     )
 
-    attr_reader :stack, :tokens, :scanner, :element_resolver
-    attr_accessor :curr_expr, :curr_default_text,
+    attr_reader :stack, :tokens, :scanner, :curr_expr_quote_levels
+    attr_accessor :curr_expr_bracket_levels, :curr_expr, :curr_default_text,
                   :curr_quoted_text
 
-    def initialize(code, element_resolver)
-      @scanner = StringScanner.new(code)
-      @element_resolver = element_resolver
+    def initialize(code)
       @stack = [:default]
+      @curr_expr_bracket_levels = 0
+      @curr_expr_quote_levels = { single: 0, double: 0 }
       @curr_expr = ""
       @curr_default_text = ""
       @curr_quoted_text = ""
       @tokens = []
+      @scanner = StringScanner.new(code)
     end
 
     def tokenize
@@ -162,7 +163,7 @@ module Rbexy
             tokens << [:CLOSE_TAG_DEF]
             stack.pop
           elsif scanner.scan(Patterns.tag_name)
-            tokens << [:TAG_DETAILS, tag_details(scanner.matched)]
+            tokens << [:TAG_NAME, scanner.matched]
           elsif scanner.scan(Patterns.whitespace)
             scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
             tokens << [:OPEN_ATTRS]
@@ -284,13 +285,6 @@ module Rbexy
       # open_tag_end to just be a part of the expression (maybe its in a string,
       # etc).
       scanner.scan(Patterns.expression_content) || scanner.scan(Patterns.open_tag_end)
-    end
-
-    def tag_details(name)
-      type = element_resolver.component?(name) ? :component : :html
-      details = { name: scanner.matched, type: type }
-      details[:component_class] = element_resolver.component_class(name) if type == :component
-      details
     end
   end
 end
