@@ -46,6 +46,7 @@ module Rbexy
       template = view_context.lookup_context.find(path)
       template.render(self, {})
     rescue ActionView::Template::Error => error
+      # TODO: maybe this can be simplified now?
       error.set_backtrace clean_template_backtrace(error.backtrace)
       raise error
     end
