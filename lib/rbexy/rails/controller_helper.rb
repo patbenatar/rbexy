@@ -7,6 +7,7 @@ module Rbexy
       include ComponentContext
 
       included do
+        helper ViewContextHelper
         helper_method :rbexy_context, :create_context, :use_context
       end
 

@@ -12,6 +12,10 @@ module Rbexy
           include ControllerHelper
         end
 
+        if defined?(ViewComponent)
+          ViewComponent::Base.include ViewContextHelper
+        end
+
         Rbexy.configure do |config|
           config.template_paths << ::Rails.root.join("app", "components")
           config.enable_context = true
