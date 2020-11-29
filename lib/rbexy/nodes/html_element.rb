@@ -35,11 +35,7 @@ module Rbexy
       def precompile_members
         members.map do |node|
           if node.is_a? ExpressionGroup
-            ExpressionGroup.new(
-              node.statements,
-              inner_template: "Rbexy::Runtime.splat_attrs(%s)",
-              outer_template: ExpressionGroup::OUTPUT_SAFE
-            )
+            ExpressionGroup.new(node.statements, template: "Rbexy::Runtime.splat_attrs(%s)", safe: true)
           else
             node
           end
