@@ -1,10 +1,10 @@
 module Rbexy
   class Template
-    attr_reader :source, :virtual_path
+    attr_reader :source, :identifier
 
     def initialize(source)
       @source = source
-      @virtual_path = nil
+      @identifier = nil
     end
   end
 end

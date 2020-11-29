@@ -18,6 +18,7 @@ module Rbexy
     ).to_set
 
     attr_reader :resolution_cache
+    attr_accessor :component_namespaces
 
     def initialize
       # TODO: cache by prefix as well
@@ -28,9 +29,16 @@ module Rbexy
       #   ...
       # }
       @resolution_cache = {}
+      @component_namespaces = {}
     end
 
+    # config.element_resolver.component_namespaces = {
+    #   Rails.root.join("app", "views", "shopper") => "Shopper",
+    #   Rails.root.join("app", "components", "shopper") => "Shopper"
+    # }
+
     def component?(name, template)
+      binding.pry
       return false if KNOWN_HTML_ELEMENTS.include?(name)
       return true if component_class(name, template)
       false
