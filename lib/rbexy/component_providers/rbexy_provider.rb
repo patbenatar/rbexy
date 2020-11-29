@@ -1,4 +1,3 @@
-# TODO: all of this can be deleted
 module Rbexy
   module ComponentProviders
     class RbexyProvider
