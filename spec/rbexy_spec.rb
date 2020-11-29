@@ -134,17 +134,8 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
-    it "handles declarations" do
-      expect(Rbexy.evaluate("<!DOCTYPE html>", Rbexy::Runtime.new))
-        .to eq "<!DOCTYPE html>"
-    end
-
-    it "handles splat attrs on html elements" do
-      expect(Rbexy.evaluate('<div {**{class: "my-class"}} />', Rbexy::Runtime.new))
-        .to eq '<div class="my-class" />'
-    end
-
-    it "handles boolean attrs on html elements"
+    # TODO: test components
+    # and test that children of components get turned into raws as children of Component
   end
 
   it "handles a bunch of html" do

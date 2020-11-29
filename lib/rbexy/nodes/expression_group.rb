@@ -1,17 +1,14 @@
 module Rbexy
   module Nodes
     class ExpressionGroup < AbstractNode
-      attr_reader :statements, :template, :safe
+      attr_reader :statements
 
-      def initialize(statements, template: "%s", safe: false)
+      def initialize(statements)
         @statements = statements
-        @template = template
-        @safe = safe
       end
 
       def compile
-        append_meth = safe ? "safe_append" : "append"
-        "@output_buffer.#{append_meth}=(#{template % statements.map(&:compile).join});"
+        "@output_buffer.append=(#{statements.map(&:compile).join});"
       end
     end
   end
