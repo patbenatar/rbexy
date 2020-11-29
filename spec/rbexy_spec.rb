@@ -44,19 +44,7 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
-    it "handles html with expression attributes" do
-      template_string = <<-RBX.strip_heredoc.strip
-        <h1 class={true && "my-class"} id={false ? "is-true" : "is-false"}>Hello world</h1>
-      RBX
-
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
-
-      expected = <<-OUTPUT.strip_heredoc.strip
-        <h1 class="my-class" id="is-false">Hello world</h1>
-      OUTPUT
-
-      expect(result).to eq expected
-    end
+    it "handles html with expression attributes"
 
     it "self-closes child-less tags" do
       expect(Rbexy.evaluate("<div></div>", Rbexy::Runtime.new))
@@ -72,9 +60,6 @@ RSpec.describe Rbexy do
       expect(Rbexy.evaluate("<br />", Rbexy::Runtime.new))
         .to eq "<br>"
     end
-
-    # TODO: test components
-    # and test that children of components get turned into raws as children of Component
   end
 
   it "handles a bunch of html" do

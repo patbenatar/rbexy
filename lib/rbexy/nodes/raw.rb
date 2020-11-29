@@ -10,10 +10,6 @@ module Rbexy
       def compile
         "@output_buffer.safe_append='#{content}'.freeze;"
       end
-
-      def merge(other_raw)
-        content << other_raw.content
-      end
     end
   end
 end
