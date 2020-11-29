@@ -5,7 +5,7 @@ module Rbexy
 
       OUTPUT_UNSAFE = "@output_buffer.append=(Rbexy::Runtime.expr_out(%s));"
       OUTPUT_SAFE = "@output_buffer.safe_append=(Rbexy::Runtime.expr_out(%s));"
-      SUB_EXPR = "%s"
+      SUB_GROUP = "%s"
 
       def initialize(statements, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
         @statements = statements
@@ -27,11 +27,12 @@ module Rbexy
         precompiled = compact(statements.map(&:precompile).flatten)
 
         transformed = precompiled.map do |node|
-          case node
-          when Raw
+          # TODO: i think i can use a case statement for class switching like this
+          # there's one other spot we do it too...
+          if node.is_a?(Raw)
             Raw.new(node.content, template: Raw::EXPR_STRING)
-          when ExpressionGroup
-            ExpressionGroup.new(node.statements, outer_template: SUB_EXPR, inner_template: node.inner_template)
+          elsif node.is_a?(ExpressionGroup)
+            ExpressionGroup.new(node.statements, outer_template: SUB_GROUP, inner_template: node.inner_template)
           else
             node
           end

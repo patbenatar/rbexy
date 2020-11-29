@@ -2,12 +2,12 @@ module Rbexy
   module Nodes
     class Component < XMLNode
       def precompile
-        [Component.new(name, precompile_members, precompile_children)]
+        [Component.new(name, members, compact(children.map(&:precompile).flatten))]
       end
 
       def compile
-        kwargs = members.any? ? ",#{compile_members}" : ""
-        base_tag = "::#{name}.new(self#{kwargs}).render"
+        kwargs = members.any? ? ", #{compile_members}" : ""
+        base_tag = "#{name}.new(self#{kwargs}).render"
         tag = if children.length > 0
           "#{base_tag}{capture{#{children.map(&:compile).join}}}"
         else
@@ -22,6 +22,8 @@ module Rbexy
       end
 
       def compile_members
+        # TODO:
+        # props = attrs.transform_keys { |k| ActiveSupport::Inflector.underscore(k.to_s).to_sym }
         members.each_with_object("") do |member, result|
           case member
           when ExpressionGroup
@@ -31,17 +33,7 @@ module Rbexy
           else
             result << "#{member.compile},"
           end
-        end.gsub(/,\z/, "")
-      end
-
-      private
-
-      def precompile_members
-        members.map(&:precompile).flatten
-      end
-
-      def precompile_children
-        compact(children.map(&:precompile).flatten)
+        end
       end
     end
   end

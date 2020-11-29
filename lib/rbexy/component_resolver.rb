@@ -41,14 +41,11 @@ module Rbexy
     private
 
     def find(name)
-      find!(name)
+      # TODO: how does this handle dot-notation??
+      ActiveSupport::Inflector.constantize("#{name}Component")
     rescue NameError => e
       raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
       nil
-    end
-
-    def find!(name)
-      ActiveSupport::Inflector.constantize("#{name.gsub(".", "::")}Component")
     end
   end
 end
