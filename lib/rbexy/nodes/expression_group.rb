@@ -3,8 +3,8 @@ module Rbexy
     class ExpressionGroup < AbstractNode
       attr_reader :statements, :outer_template, :inner_template
 
-      OUTPUT_UNSAFE = "@output_buffer.concat(Rbexy::Runtime.expr_out(%s));"
-      OUTPUT_SAFE = "@output_buffer.safe_concat(Rbexy::Runtime.expr_out(%s));"
+      OUTPUT_UNSAFE = "@output_buffer.append=(Rbexy::Runtime.expr_out(%s));"
+      OUTPUT_SAFE = "@output_buffer.safe_append=(Rbexy::Runtime.expr_out(%s));"
       SUB_EXPR = "%s"
 
       def initialize(statements, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
