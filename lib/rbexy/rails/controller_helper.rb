@@ -6,8 +6,11 @@ module Rbexy
       extend ActiveSupport::Concern
       include ComponentContext
 
+      def rbexy_component_provider; end
+
       included do
         helper ViewContextHelper
+        helper_method :rbexy_component_provider
         helper_method :rbexy_context, :create_context, :use_context
       end
 

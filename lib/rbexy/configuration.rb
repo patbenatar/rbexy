@@ -1,5 +1,7 @@
 module Rbexy
   class Configuration
+    # TODO: get rid of provider everywhere
+    attr_accessor :component_provider
     attr_accessor :element_resolver
     attr_accessor :template_paths
     attr_accessor :enable_context
