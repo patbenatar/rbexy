@@ -6,10 +6,9 @@ module Rbexy
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
   autoload :HashMash, "rbexy/hash_mash"
-  autoload :ComponentTagBuilder, "rbexy/component_tag_builder"
-  autoload :ViewContextHelper, "rbexy/view_context_helper"
   autoload :ComponentContext, "rbexy/component_context"
   autoload :Configuration, "rbexy/configuration"
+  autoload :ComponentResolver, "rbexy/component_resolver"
 
   ContextNotFound = Class.new(StandardError)
 
@@ -22,14 +21,14 @@ module Rbexy
       @configuration ||= Configuration.new
     end
 
-    def compile(template_string)
-      tokens = Rbexy::Lexer.new(template_string).tokenize
-      template = Rbexy::Parser.new(tokens).parse
-      template.compile
+    def compile(template_string, element_resolver = Rbexy.configuration.element_resolver)
+      tokens = Lexer.new(template_string, element_resolver).tokenize
+      root = Parser.new(tokens).parse
+      root.precompile.compile
     end
 
-    def evaluate(template_string, runtime)
-      runtime.evaluate compile(template_string)
+    def evaluate(template_string, runtime, element_resolver = Rbexy.configuration.element_resolver)
+      runtime.evaluate compile(template_string, element_resolver)
     end
   end
 end

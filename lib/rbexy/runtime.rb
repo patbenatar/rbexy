@@ -7,31 +7,28 @@ module Rbexy
   class Runtime
     include ActionView::Context
     include ActionView::Helpers::TagHelper
-    include ViewContextHelper
     include ComponentContext
 
-    DefaultTagBuilder = ActionView::Helpers::TagHelper::TagBuilder
-
-    def self.create_tag_builder(context, provider = nil)
-      provider = provider ||
-        provider_from_context(context) ||
-        Rbexy.configuration.component_provider
-
-      if provider
-        ComponentTagBuilder.new(context, provider)
-      else
-        ActionView::Helpers::TagHelper::TagBuilder.new(context)
-      end
+    def self.tag_builder
+      # TagBuilder requires a view_context arg, but it's only used in #tag_string.
+      # Since all we need is #tag_options, we pass in a nil view_context.
+      @tag_builder ||= TagBuilder.new(nil)
     end
 
-    def self.provider_from_context(context)
-      if context.respond_to?(:rbexy_component_provider)
-        context.rbexy_component_provider
-      end
+    def self.splat_attrs(attrs_hash)
+      tag_builder.tag_options(attrs_hash).html_safe
     end
 
-    def initialize(component_provider = nil)
-      @rbexy_tag = self.class.create_tag_builder(self, component_provider)
+    def self.expr_out(*value)
+      return if value.length == 0
+      value = value.first
+
+      value = html_safe_array?(value) ? value.join.html_safe : value
+      [nil, false].include?(value) ? "" : value.to_s
+    end
+
+    def self.html_safe_array?(value)
+      value.is_a?(Array) && value.all? { |v| v.respond_to?(:html_safe?) && v.html_safe? }
     end
 
     def evaluate(code)

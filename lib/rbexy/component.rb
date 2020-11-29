@@ -63,11 +63,7 @@ module Rbexy
     attr_reader :view_context, :content_block
 
     def method_missing(meth, *args, &block)
-      if view_context.respond_to?(meth)
-        view_context.send(meth, *args, &block)
-      else
-        super
-      end
+      view_context.send(meth, *args, &block)
     end
 
     def clean_template_backtrace(backtrace)

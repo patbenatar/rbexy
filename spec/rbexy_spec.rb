@@ -9,6 +9,190 @@ RSpec.describe Rbexy do
     expect(Rbexy::VERSION).not_to be nil
   end
 
+  it "handles simple nested html" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+        <p>Welcome to Rbexy</p>
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+        <p>Welcome to Rbexy</p>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
+  it "handles html with string attributes" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <h1 class="my-class" id="the-id">Hello world</h1>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <h1 class="my-class" id="the-id">Hello world</h1>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
+  it "handles html with expression attributes" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <h1 class={true && "my-class"} id={false ? "is-true" : "is-false"}>Hello world</h1>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <h1 class="my-class" id="is-false">Hello world</h1>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
+  it "self-closes child-less tags" do
+    expect(Rbexy.evaluate("<div></div>", Rbexy::Runtime.new))
+      .to eq "<div />"
+  end
+
+  it "self-closes self-closing tags" do
+    expect(Rbexy.evaluate("<div />", Rbexy::Runtime.new))
+      .to eq "<div />"
+  end
+
+  it "does not self-close void tags" do
+    expect(Rbexy.evaluate("<br />", Rbexy::Runtime.new))
+      .to eq "<br>"
+  end
+
+  it "handles custom components" do
+    class ButtonComponent
+      def initialize(context, **props)
+      end
+
+      def render
+        "<button>"
+      end
+    end
+
+    class Resolver
+      def component?(name)
+        name == "Button"
+      end
+
+      def component_class(name)
+        name == "Button" ? ButtonComponent : nil
+      end
+    end
+
+    expect(Rbexy.evaluate("<Button />", Rbexy::Runtime.new, Resolver.new))
+      .to eq "<button>"
+  end
+
+  it "handles custom components with html children" do
+    class ContainerComponent
+      def initialize(context, **props)
+      end
+
+      def render
+        "<div>#{yield}</div>"
+      end
+    end
+
+    class Resolver
+      def component?(name)
+        name == "Container"
+      end
+
+      def component_class(name)
+        name == "Container" ? ContainerComponent : nil
+      end
+    end
+
+    template_string = <<-RBX.strip_heredoc.strip
+      <Container>
+        <h1>Hello world</h1>
+      </Container>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new, Resolver.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div>
+        <h1>Hello world</h1>
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
+  it "underscores multi-word attrs when passing to custom component" do
+    class ButtonComponent
+      def initialize(context, the_class_name:)
+        @the_class_name = the_class_name
+      end
+
+      def render
+        "<button class=\"#{@the_class_name}\">"
+      end
+    end
+
+    class Resolver
+      def component?(name)
+        name == "Button"
+      end
+
+      def component_class(name)
+        name == "Button" ? ButtonComponent : nil
+      end
+    end
+
+    expect(Rbexy.evaluate('<Button the-class-name="foo" />', Rbexy::Runtime.new, Resolver.new))
+      .to eq '<button class="foo">'
+  end
+
+  it "handles declarations" do
+    expect(Rbexy.evaluate("<!DOCTYPE html>", Rbexy::Runtime.new))
+      .to eq "<!DOCTYPE html>"
+  end
+
+  it "handles splat attrs on html elements" do
+    expect(Rbexy.evaluate('<div {**{class: "my-class"}} />', Rbexy::Runtime.new))
+      .to eq '<div class="my-class" />'
+  end
+
+  it "handles multi-word attrs on html elements" do
+    expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz" />', Rbexy::Runtime.new))
+      .to eq '<form accept-charset="utf-8" data-foo-bar="baz" />'
+  end
+
+  it "handles boolean attrs on html elements" do
+    expect(Rbexy.evaluate('<div disabled />', Rbexy::Runtime.new))
+      .to eq '<div disabled="" />'
+  end
+
+  it "handles boolean expressions" do
+    expect(Rbexy.evaluate('{true && <div />}', Rbexy::Runtime.new))
+      .to eq '<div />'
+  end
+
+  it "handles ternary expressions" do
+    expect(Rbexy.evaluate('{true ? <div /> : <span />}', Rbexy::Runtime.new))
+      .to eq '<div />'
+  end
+
+  it "handles ternary expressions with sub-expressions" do
+    expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}} /> : <span />}', Rbexy::Runtime.new))
+      .to eq '<div class="the-class" />'
+  end
+
   it "handles a bunch of html" do
     template_string = <<-RBX.strip_heredoc.strip
       <!DOCTYPE html>
@@ -38,16 +222,17 @@ RSpec.describe Rbexy do
       end
     end
 
-    result = Rbexy.evaluate(template_string, Runtime.new)
+    compiled = Rbexy.compile(template_string)
+    result = profile { Runtime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <!DOCTYPE html>
       <div foo="" bar="baz" thing="heyyou">
         <h1 class="myClass" attr1="val1" attr2="val2">Hello world</h1>
-        <div class="myClass"></div>
+        <div class="myClass" />
         Some words
         <p>Lorem ipsum</p>
-        <input type="submit" value="ivar value" disabled="disabled">
+        <input type="submit" value="ivar value" disabled="">
         <p>Is true</p>\n  \n        <p class="myClass">Ternary is TRUE</p>
       </div>
     OUTPUT
@@ -78,55 +263,31 @@ RSpec.describe Rbexy do
   end
 
   it "handles custom components with html" do
-    module Components
-      class ButtonComponent
-        def initialize(prop1:, prop2:)
-          @prop1 = prop1
-          @prop2 = prop2
-        end
-
-        def render
-          # Render it yourself, call one of Rails view helpers (link_to,
-          # content_tag, etc), or use a template file. Be sure to render
-          # children by yielding to the given block.
-          "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
-        end
+    class ButtonComponent
+      def initialize(context, prop1:, prop2:)
+        @prop1 = prop1
+        @prop2 = prop2
       end
 
-      module Forms
-        class TextFieldComponent
-          def initialize(**attrs)
-          end
-
-          def render
-            "<input type=\"text\" />"
-          end
-        end
+      def render
+        "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
       end
     end
 
-    class ComponentProvider
-      def match?(name)
-        find(name) != nil
-      end
+    module Forms
+      class TextFieldComponent
+        def initialize(context, **props)
+        end
 
-      def render(context, name, **attrs, &block)
-        find(name).new(**attrs).render(&block)
-      end
-
-      private
-
-      def find(name)
-        ActiveSupport::Inflector.constantize("Components::#{name}Component")
-      rescue NameError => e
-        raise e unless e.message =~ /constant/
-        nil
+        def render
+          "<input type=\"text\" />"
+        end
       end
     end
 
     class MyRuntime < Rbexy::Runtime
-      def initialize(component_provider)
-        super(component_provider)
+      def initialize
+        super
         @ivar_val = "ivar value"
       end
 
@@ -146,7 +307,8 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    result = Rbexy.evaluate(template_string, MyRuntime.new(ComponentProvider.new))
+    compiled = Rbexy.compile(template_string)
+    result = profile { MyRuntime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div>
