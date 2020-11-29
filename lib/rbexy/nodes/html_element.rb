@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class HTMLElement < AbstractElement
+    class HTMLElement < XMLNode
       KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::VOID_ELEMENTS.map(&:to_s).to_set
 
       def precompile
