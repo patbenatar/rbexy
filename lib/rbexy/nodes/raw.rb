@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class Raw < AbstractNode
+    class Raw < Base
       attr_reader :content
 
       def initialize(content)
@@ -8,7 +8,7 @@ module Rbexy
       end
 
       def compile
-        "@output_buffer.safe_append='#{content}'.freeze;"
+        # TODO
       end
     end
   end

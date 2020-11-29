@@ -1,4 +1,4 @@
-RSpec.describe Rbexy::Parser do
+RSpec.describe Rbexy::Parser, focus: true do
   it "handles :TEXT" do
     subject = Rbexy::Parser.new([[:TEXT, "Hello world"]])
     result = subject.parse.children
@@ -53,7 +53,7 @@ RSpec.describe Rbexy::Parser do
     expect(group.statements[0]).to be_a Rbexy::Nodes::Expression
     expect(group.statements[0].content).to eq "true && "
 
-    expect(group.statements[1]).to be_a Rbexy::Nodes::HTMLElement
+    expect(group.statements[1]).to be_a Rbexy::Nodes::HTMLNode
     expect(group.statements[1].name).to eq "h1"
     expect(group.statements[1].children[0]).to be_a Rbexy::Nodes::Text
     expect(group.statements[1].children[0].content).to eq "Is "
@@ -73,7 +73,7 @@ RSpec.describe Rbexy::Parser do
       [:CLOSE_TAG_END]
     ])
     result = subject.parse.children
-    expect(result.first).to be_a Rbexy::Nodes::HTMLElement
+    expect(result.first).to be_a Rbexy::Nodes::HTMLNode
     expect(result.first.name).to eq "div"
   end
 
@@ -119,23 +119,23 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::HTMLElement
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.members.length).to eq 3
 
     attrFoo = div.members[0]
-    expect(attrFoo).to be_a Rbexy::Nodes::HTMLAttr
+    expect(attrFoo).to be_a Rbexy::Nodes::XmlAttr
     expect(attrFoo.name).to eq "foo"
     expect(attrFoo.value).to be_a Rbexy::Nodes::Text
     expect(attrFoo.value.content).to eq ""
 
     attrBar = div.members[1]
-    expect(attrBar).to be_a Rbexy::Nodes::HTMLAttr
+    expect(attrBar).to be_a Rbexy::Nodes::XmlAttr
     expect(attrBar.name).to eq "bar"
     expect(attrBar.value).to be_a Rbexy::Nodes::Text
     expect(attrBar.value.content).to eq "baz"
 
     attrThing = div.members[2]
-    expect(attrThing).to be_a Rbexy::Nodes::HTMLAttr
+    expect(attrThing).to be_a Rbexy::Nodes::XmlAttr
     expect(attrThing.name).to eq "thing"
     expect(attrThing.value).to be_a Rbexy::Nodes::ExpressionGroup
     expect(attrThing.value.statements.first.content).to eq "exprValue"
@@ -158,7 +158,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::HTMLElement
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.members.length).to eq 1
 
     attrFoo = div.members[0]
@@ -176,7 +176,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     input = subject.parse.children.first
-    expect(input).to be_a Rbexy::Nodes::HTMLElement
+    expect(input).to be_a Rbexy::Nodes::HTMLNode
     expect(input.children.length).to eq 0
   end
 
@@ -214,7 +214,7 @@ RSpec.describe Rbexy::Parser do
     ])
 
     div = subject.parse.children.first
-    expect(div).to be_a Rbexy::Nodes::HTMLElement
+    expect(div).to be_a Rbexy::Nodes::HTMLNode
     expect(div.name).to eq "div"
     expect(div.children.length).to eq 2
 

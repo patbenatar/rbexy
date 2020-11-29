@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class Text < AbstractNode
+    class Text < Base
       attr_reader :content
 
       def initialize(content)
@@ -8,7 +8,11 @@ module Rbexy
       end
 
       def precompile
-        [Raw.new(Util.escape_string(content))]
+        [Raw.new(content)]
+      end
+
+      def compile
+        "\"#{Util.safe_string(content)}\""
       end
     end
   end

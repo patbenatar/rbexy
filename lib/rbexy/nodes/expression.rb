@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class Expression < AbstractNode
+    class Expression < Base
       attr_reader :content
 
       def initialize(content)

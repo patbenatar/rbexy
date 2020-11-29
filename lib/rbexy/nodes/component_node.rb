@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class Component < XMLNode
+    class ComponentNode < XMLNode
       def compile
         base_tag = "rbexy_tag.#{Util.safe_tag_name(name)}(#{compile_members})"
         tag = if children.length > 0

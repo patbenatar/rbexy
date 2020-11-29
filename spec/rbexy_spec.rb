@@ -9,59 +9,6 @@ RSpec.describe Rbexy do
     expect(Rbexy::VERSION).not_to be nil
   end
 
-  context "focus", focus: true do
-    it "handles simple nested html" do
-      template_string = <<-RBX.strip_heredoc.strip
-        <div>
-          <h1>Hello world</h1>
-          <p>Welcome to Rbexy</p>
-        </div>
-      RBX
-
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
-
-      expected = <<-OUTPUT.strip_heredoc.strip
-        <div>
-          <h1>Hello world</h1>
-          <p>Welcome to Rbexy</p>
-        </div>
-      OUTPUT
-
-      expect(result).to eq expected
-    end
-
-    it "handles html with string attributes" do
-      template_string = <<-RBX.strip_heredoc.strip
-        <h1 class="my-class" id="the-id">Hello world</h1>
-      RBX
-
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
-
-      expected = <<-OUTPUT.strip_heredoc.strip
-        <h1 class="my-class" id="the-id">Hello world</h1>
-      OUTPUT
-
-      expect(result).to eq expected
-    end
-
-    it "handles html with expression attributes"
-
-    it "self-closes child-less tags" do
-      expect(Rbexy.evaluate("<div></div>", Rbexy::Runtime.new))
-        .to eq "<div />"
-    end
-
-    it "self-closes self-closing tags" do
-      expect(Rbexy.evaluate("<div />", Rbexy::Runtime.new))
-        .to eq "<div />"
-    end
-
-    it "does not self-close void tags" do
-      expect(Rbexy.evaluate("<br />", Rbexy::Runtime.new))
-        .to eq "<br>"
-    end
-  end
-
   it "handles a bunch of html" do
     template_string = <<-RBX.strip_heredoc.strip
       <!DOCTYPE html>

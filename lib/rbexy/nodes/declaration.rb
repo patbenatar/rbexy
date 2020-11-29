@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class Declaration < AbstractNode
+    class Declaration < Base
       attr_reader :content
 
       def initialize(content)
@@ -8,7 +8,6 @@ module Rbexy
       end
 
       def compile
-        # TODO
         "\"#{Util.safe_string(content)}\".html_safe"
       end
     end

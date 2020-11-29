@@ -12,7 +12,7 @@ module Rbexy
 
     def parse
       validate_tokens!
-      Nodes::Root.new(parse_tokens)
+      Nodes::Template.new(parse_tokens)
     end
 
     def parse_tokens
@@ -61,31 +61,29 @@ module Rbexy
       return unless take(:OPEN_TAG_DEF)
 
       details = take!(:TAG_DETAILS)[1]
-      attr_class = details[:type] == :component ? Nodes::ComponentProp : Nodes::HTMLAttr
-
       members = []
       members.concat(take_all(:SILENT_NEWLINE).map { Nodes::SilentNewline.new })
-      members.concat(parse_attrs(attr_class))
+      members.concat(parse_attrs)
 
       take!(:CLOSE_TAG_DEF)
 
       children = parse_children
 
       if details[:type] == :component
-        Nodes::Component.new(details[:component_class], members, children)
+        Nodes::ComponentNode.new(details[:component_class], members, children)
       else
-        Nodes::HTMLElement.new(details[:name], members, children)
+        Nodes::HTMLNode.new(details[:name], members, children)
       end
     end
 
-    def parse_attrs(attr_class)
+    def parse_attrs
       return [] unless take(:OPEN_ATTRS)
 
       attrs = []
 
       eventually!(:CLOSE_ATTRS)
       until take(:CLOSE_ATTRS)
-        attrs << (parse_splat_attr || parse_silent_newline || parse_attr(attr_class))
+        attrs << (parse_splat_attr || parse_silent_newline || parse_attr)
       end
 
       attrs
@@ -105,7 +103,7 @@ module Rbexy
       Nodes::SilentNewline.new
     end
 
-    def parse_attr(attr_class)
+    def parse_attr
       name = take!(:ATTR_NAME)[1]
       value = nil
 
@@ -117,7 +115,7 @@ module Rbexy
         value = default_empty_attr_value
       end
 
-      attr_class.new(name, value)
+      Nodes::XmlAttr.new(name, value)
     end
 
     def parse_children

@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class ExpressionGroup < AbstractNode
+    class ExpressionGroup < Base
       attr_reader :statements
 
       def initialize(statements)
