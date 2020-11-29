@@ -1,6 +1,6 @@
 require "active_support/core_ext/string/strip"
 
-RSpec.describe Rbexy::Lexer do
+RSpec.describe Rbexy::Lexer, focus: true do
   it "tokenizes text" do
     subject = Rbexy::Lexer.new("Hello world", Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [[:TEXT, "Hello world"]]
