@@ -41,7 +41,6 @@ module Rbexy
     private
 
     def find(name)
-      # TODO: how does this handle dot-notation??
       ActiveSupport::Inflector.constantize("#{name}Component")
     rescue NameError => e
       raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/

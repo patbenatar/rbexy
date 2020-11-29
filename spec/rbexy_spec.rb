@@ -73,67 +73,6 @@ RSpec.describe Rbexy do
         .to eq "<br>"
     end
 
-    it "handles custom components" do
-      class ButtonComponent
-        def initialize(context, **props)
-        end
-
-        def render
-          "<button>"
-        end
-      end
-
-      class Resolver
-        def component?(name)
-          name == "Button"
-        end
-
-        def component_class(name)
-          name == "Button" ? ButtonComponent : nil
-        end
-      end
-
-      expect(Rbexy.evaluate("<Button />", Rbexy::Runtime.new, Resolver.new))
-        .to eq "<button>"
-    end
-
-    it "handles custom components with html children" do
-      class ContainerComponent
-        def initialize(context, **props)
-        end
-
-        def render
-          "<div>#{yield}</div>"
-        end
-      end
-
-      class Resolver
-        def component?(name)
-          name == "Container"
-        end
-
-        def component_class(name)
-          name == "Container" ? ContainerComponent : nil
-        end
-      end
-
-      template_string = <<-RBX.strip_heredoc.strip
-        <Container>
-          <h1>Hello world</h1>
-        </Container>
-      RBX
-
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new, Resolver.new)
-
-      expected = <<-OUTPUT.strip_heredoc.strip
-        <div>
-          <h1>Hello world</h1>
-        </div>
-      OUTPUT
-
-      expect(result).to eq expected
-    end
-
     # TODO: test components
     # and test that children of components get turned into raws as children of Component
   end

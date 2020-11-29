@@ -27,14 +27,9 @@ module Rbexy
 
       def precompile_open_tag(close: false)
         nodes = [Raw.new("<#{name}")]
-        nodes.concat(precompile_members)
+        nodes.concat(members.map(&:precompile).flatten)
         nodes << Raw.new(close ? " />" : ">")
         nodes
-      end
-
-      def precompile_members
-        # TODO: how should HTMLElement handle splat attrs? silent newline? see Nodes::Component#compile_members
-        members.map(&:precompile).flatten
       end
     end
   end
