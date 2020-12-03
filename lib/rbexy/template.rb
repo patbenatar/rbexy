@@ -2,9 +2,9 @@ module Rbexy
   class Template
     attr_reader :source, :identifier
 
-    def initialize(source)
+    def initialize(source, identifier = nil)
       @source = source
-      @identifier = nil
+      @identifier = identifier
     end
   end
 end

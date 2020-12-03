@@ -19,7 +19,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes component tags" do
-    ButtonComponent = Class.new
+    redefine { ButtonComponent = Class.new }
 
     class Resolver
       def component?(name, template)

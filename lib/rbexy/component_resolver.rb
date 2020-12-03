@@ -25,7 +25,7 @@ module Rbexy
       # takes the shape:
       # {
       #   nil => {prefix-less cache},
-      #   prefix1 => {cache},
+      #   namespace => {cache},
       #   ...
       # }
       @resolution_cache = {}
@@ -38,13 +38,15 @@ module Rbexy
     # }
 
     def component?(name, template)
-      binding.pry
       return false if KNOWN_HTML_ELEMENTS.include?(name)
       return true if component_class(name, template)
       false
     end
 
     def component_class(name, template)
+      # does this template match a namespace? if so, check it's ns cache
+      # then check the default cache
+      # only then start resolving, starting with ns then default
       @resolution_cache[name] ||= find(name)
     end
 

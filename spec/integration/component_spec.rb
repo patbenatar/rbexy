@@ -84,7 +84,7 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  context "atomic design folder structure (via config.template_paths option)", focus: true do
+  context "atomic design folder structure (via config.template_paths option)" do
     it "allows components to exist in atomically organized dirs inside app/components/" do
       result = MoleculeWithAtomComponent.new(view_context).render
       expect(result).to have_tag("h1", text: "Hello molecule")
