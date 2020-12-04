@@ -47,7 +47,16 @@ module Rbexy
       # does this template match a namespace? if so, check it's ns cache
       # then check the default cache
       # only then start resolving, starting with ns then default
-      @resolution_cache[name] ||= find(name)
+
+      template_namespaces = component_namespaces
+        .select { |path, ns| template.identifier.start_with?(path) }
+        .values
+        .flatten
+        .uniq
+
+      find_first(template_namespaces, name) || find(name)
+
+      # @resolution_cache[name] ||= find(name)
     end
 
     private
@@ -56,6 +65,15 @@ module Rbexy
       find!(name)
     rescue NameError => e
       raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
+      nil
+    end
+
+    def find_first(namespaces, name)
+      namespaces.each do |ns|
+        match = find("#{ns}.#{name}")
+        return match if match
+      end
+
       nil
     end
 
