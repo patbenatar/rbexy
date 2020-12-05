@@ -173,6 +173,14 @@ Loops:
 </ul>
 ```
 
+Blocks:
+
+```jsx
+{link_to "/" do
+  <span>Click me</span>
+end}
+```
+
 As an attribute:
 
 ```jsx
@@ -187,6 +195,16 @@ Pass a lambda to a prop, that when called returns a tag:
 <Hero title={-> { <h1>Hello World</h1> }}>
   Content here...
 </Hero>
+```
+
+_Note that when using tags inside blocks, the block must evaluate to a single root element. Rbexy behaves similar to JSX in this way. E.g.:_
+
+```
+# Do
+-> { <span><i>Hello</i> World</span> }
+
+# Don't
+-> { <i>Hello</i> World }
 ```
 
 ### Tags
