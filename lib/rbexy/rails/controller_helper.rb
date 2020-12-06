@@ -1,5 +1,3 @@
-require "active_support/concern"
-
 module Rbexy
   module Rails
     module ControllerHelper

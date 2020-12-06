@@ -1,8 +1,3 @@
-require "active_support/all"
-require "action_view/helpers"
-require "action_view/context"
-require "action_view/buffers"
-
 module Rbexy
   class Runtime
     include ActionView::Context

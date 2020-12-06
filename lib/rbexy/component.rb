@@ -1,5 +1,4 @@
 require "action_view"
-require "active_support/core_ext/class/attribute"
 
 module Rbexy
   class Component < ActionView::Base

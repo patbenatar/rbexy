@@ -1,5 +1,3 @@
-require "action_view"
-
 module Rbexy
   module Rails
     class ComponentTemplateResolver < ActionView::FileSystemResolver
