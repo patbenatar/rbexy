@@ -22,9 +22,6 @@ module Rbexy
       @configuration ||= Configuration.new
     end
 
-    # TODO: modify this to receive an optional template: object
-    # also change the options args to be kwargs, including element_resolver
-    # maybe rename ComponentResolver to ElementResolver ??
     def compile(template, element_resolver = Rbexy.configuration.element_resolver)
       tokens = Lexer.new(template, element_resolver).tokenize
       root = Parser.new(tokens).parse
