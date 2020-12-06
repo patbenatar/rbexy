@@ -1,5 +1,3 @@
-# TODO: write a Rails integration test too, to ensure it works with ActionView::Template not just Rbexy::Template
-
 RSpec.describe Rbexy::ComponentResolver do
   describe "#component_class" do
     it "resolves strings to constants ending with Component" do

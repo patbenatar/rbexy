@@ -27,10 +27,14 @@ module Rbexy
       tspan tt u ul unknown use var video view wbr xmp
     ).to_set
 
-    attr_accessor :component_namespaces
+    attr_reader :component_namespaces
 
     def initialize
-      @component_namespaces = {}
+      self.component_namespaces = {}
+    end
+
+    def component_namespaces=(hash)
+      @component_namespaces = hash.transform_keys(&:to_s)
     end
 
     def component?(name, template)
