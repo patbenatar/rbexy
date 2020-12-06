@@ -1,5 +1,6 @@
+# TODO: write a Rails integration test too, to ensure it works with ActionView::Template not just Rbexy::Template
+
 RSpec.describe Rbexy::ComponentResolver do
-  # use template.identifier, which is the abs path to the template in Rails
   describe "#component_class" do
     it "resolves strings to constants ending with Component" do
       subject = Rbexy::ComponentResolver.new
@@ -26,19 +27,6 @@ RSpec.describe Rbexy::ComponentResolver do
 
       result = subject.component_class("Things.Button", Rbexy::Template.new(""))
       expect(result).to eq Things::ButtonComponent
-    end
-
-    context "caching" do
-      it "doesn't need to resolve the same name twice" do
-        subject = Rbexy::ComponentResolver.new
-        redefine { ButtonComponent = Class.new }
-
-        expect(subject).to receive(:find!).and_call_original
-        subject.component_class("Button", Rbexy::Template.new(""))
-
-        expect(subject).not_to receive(:find!)
-        subject.component_class("Button", Rbexy::Template.new(""))
-      end
     end
 
     context "namespaces" do

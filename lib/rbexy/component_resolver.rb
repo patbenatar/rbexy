@@ -1,5 +1,15 @@
 module Rbexy
+  module ArrayFindMap
+    refine Array do
+      def find_map
+        lazy.map { |i| yield(i) }.reject(&:nil?).first
+      end
+    end
+  end
+
   class ComponentResolver
+    using ArrayFindMap
+
     KNOWN_HTML_ELEMENTS = %w(
       a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
       bdi bdo bgsound big blink blockquote body br button canvas caption center circle cite clipPath code col colgroup
@@ -17,25 +27,11 @@ module Rbexy
       tspan tt u ul unknown use var video view wbr xmp
     ).to_set
 
-    attr_reader :resolution_cache
     attr_accessor :component_namespaces
 
     def initialize
-      # TODO: cache by prefix as well
-      # takes the shape:
-      # {
-      #   nil => {prefix-less cache},
-      #   namespace => {cache},
-      #   ...
-      # }
-      @resolution_cache = {}
       @component_namespaces = {}
     end
-
-    # config.element_resolver.component_namespaces = {
-    #   Rails.root.join("app", "views", "shopper") => "Shopper",
-    #   Rails.root.join("app", "components", "shopper") => "Shopper"
-    # }
 
     def component?(name, template)
       return false if KNOWN_HTML_ELEMENTS.include?(name)
@@ -44,19 +40,8 @@ module Rbexy
     end
 
     def component_class(name, template)
-      # does this template match a namespace? if so, check it's ns cache
-      # then check the default cache
-      # only then start resolving, starting with ns then default
-
-      template_namespaces = component_namespaces
-        .select { |path, ns| template.identifier.start_with?(path) }
-        .values
-        .flatten
-        .uniq
-
-      find_first(template_namespaces, name) || find(name)
-
-      # @resolution_cache[name] ||= find(name)
+      possible_names = matching_namespaces(template).map { |ns| "#{ns}.#{name}" } << name
+      possible_names.find_map(&method(:find))
     end
 
     private
@@ -68,13 +53,8 @@ module Rbexy
       nil
     end
 
-    def find_first(namespaces, name)
-      namespaces.each do |ns|
-        match = find("#{ns}.#{name}")
-        return match if match
-      end
-
-      nil
+    def matching_namespaces(template)
+      component_namespaces.select { |path, ns| template.identifier.start_with?(path) }.values.flatten.uniq
     end
 
     def find!(name)
