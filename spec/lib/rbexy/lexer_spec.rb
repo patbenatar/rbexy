@@ -2,12 +2,12 @@ require "active_support/core_ext/string/strip"
 
 RSpec.describe Rbexy::Lexer do
   it "tokenizes text" do
-    subject = Rbexy::Lexer.new("Hello world", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("Hello world"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [[:TEXT, "Hello world"]]
   end
 
   it "tokenizes html tags" do
-    subject = Rbexy::Lexer.new("<div></div>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<div></div>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -19,19 +19,19 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes component tags" do
-    ButtonComponent = Class.new
+    redefine { ButtonComponent = Class.new }
 
     class Resolver
-      def component?(name)
+      def component?(name, template)
         name == "Button"
       end
 
-      def component_class(name)
+      def component_class(name, template)
         name == "Button" ? ButtonComponent : nil
       end
     end
 
-    subject = Rbexy::Lexer.new("<Button></Button>", Resolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<Button></Button>"), Resolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "Button", type: :component, component_class: ButtonComponent }],
@@ -45,7 +45,7 @@ RSpec.describe Rbexy::Lexer do
   it "tokenizes self-closing html tags" do
     variants = ["<input />", "<input/>"]
     variants.each do |code|
-      subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:OPEN_TAG_DEF],
         [:TAG_DETAILS, { name: "input", type: :html }],
@@ -57,7 +57,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes html5 doctype declaration" do
-    subject = Rbexy::Lexer.new("<!DOCTYPE html>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<!DOCTYPE html>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:DECLARATION, "<!DOCTYPE html>"]
     ]
@@ -68,7 +68,7 @@ RSpec.describe Rbexy::Lexer do
       <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
     RBX
 
-    subject = Rbexy::Lexer.new(template, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [
         :DECLARATION,
@@ -78,7 +78,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes nested self-closing html tags" do
-    subject = Rbexy::Lexer.new("<div><br /></div>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<div><br /></div>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -97,7 +97,7 @@ RSpec.describe Rbexy::Lexer do
   it "tokenizes self-closing html tags with attributes" do
     variants = ['<input thing="value" />', '<input thing="value"/>']
     variants.each do |code|
-      subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:OPEN_TAG_DEF],
         [:TAG_DETAILS, { name: "input", type: :html }],
@@ -115,7 +115,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes text inside a tag" do
-    subject = Rbexy::Lexer.new("<div>Hello world</div>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<div>Hello world</div>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -128,7 +128,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes an expression inside a tag" do
-    subject = Rbexy::Lexer.new("<div>{aVar}</div>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<div>{aVar}</div>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -143,7 +143,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes two expressions next to one another" do
-    subject = Rbexy::Lexer.new("{aVar}{anotherVar}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{aVar}{anotherVar}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "aVar"],
@@ -155,7 +155,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes an expression along with text inside a tag" do
-    subject = Rbexy::Lexer.new("<div>Hello {aVar}!</div>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<div>Hello {aVar}!</div>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -172,14 +172,14 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it 'treats escaped \{ as text' do
-    subject = Rbexy::Lexer.new('Hey \{thing\}', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('Hey \{thing\}'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:TEXT, 'Hey \{thing\}']
     ]
   end
 
   it "allows for { ... } to exist within an expression (e.g. a Ruby hash)" do
-    subject = Rbexy::Lexer.new('{thing = { hashKey: "value" }; moreCode}', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('{thing = { hashKey: "value" }; moreCode}'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, 'thing = { hashKey: "value" }; moreCode'],
@@ -188,7 +188,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "allows for expressions to have arbitrary brackets inside quoted strings" do
-    subject = Rbexy::Lexer.new('{something "quoted {bracket}" \'{}\' "\'{\'" more}', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('{something "quoted {bracket}" \'{}\' "\'{\'" more}'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, 'something "quoted {bracket}" \'{}\' "\'{\'" more'],
@@ -197,7 +197,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "doesn't consider escaped quotes to end an expression quoted string" do
-    subject = Rbexy::Lexer.new('{"he said \"hello {there}\" loudly"}', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('{"he said \"hello {there}\" loudly"}'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, '"he said \"hello {there}\" loudly"'],
@@ -206,7 +206,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes an expression that starts with a tag" do
-    subject = Rbexy::Lexer.new("{<h1>Title</h1>}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{<h1>Title</h1>}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, ""],
@@ -223,7 +223,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes tags within a boolean expression" do
-    subject = Rbexy::Lexer.new("{true && <h1>Is true</h1>}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true && <h1>Is true</h1>}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && "],
@@ -244,7 +244,7 @@ RSpec.describe Rbexy::Lexer do
       {true && <br />}
     RBX
 
-    subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && "],
@@ -263,7 +263,7 @@ RSpec.describe Rbexy::Lexer do
       {true && <h1><span>Hey</span></h1>}
     RBX
 
-    subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && "],
@@ -286,7 +286,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "does not specially tokenize boolean expressions that aren't followed by a tag" do
-    subject = Rbexy::Lexer.new("{true && 'hey'}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true && 'hey'}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && 'hey'"],
@@ -295,7 +295,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "allows for sub-expressions within a boolean expression tag" do
-    subject = Rbexy::Lexer.new("{true && <h1>Is {'hello'.upcase}</h1>}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true && <h1>Is {'hello'.upcase}</h1>}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true && "],
@@ -315,7 +315,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes tags within a ternary expression" do
-    subject = Rbexy::Lexer.new("{true ? <h1>Yes</h1> : <h2>No</h2>}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true ? <h1>Yes</h1> : <h2>No</h2>}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true ? "],
@@ -340,7 +340,7 @@ RSpec.describe Rbexy::Lexer do
   end
 
   it "tokenizes self-closing tags within a ternary expression" do
-    subject = Rbexy::Lexer.new("{true ? <br /> : <input />}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true ? <br /> : <input />}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "true ? "],
@@ -366,7 +366,7 @@ RSpec.describe Rbexy::Lexer do
   <p>Hello</p>
 end}
 RBX
-    subject = Rbexy::Lexer.new(template, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "3.times do\n  "],
@@ -388,7 +388,7 @@ RBX
   <p>Hello</p>
 end}
 RBX
-    subject = Rbexy::Lexer.new(template, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "3.times do |n|\n  "],
@@ -405,7 +405,7 @@ RBX
   end
 
   it "tokenizes tags within a {..} block" do
-    subject = Rbexy::Lexer.new("{3.times { <p>Hello</p> }}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times { <p>Hello</p> }}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "3.times { "],
@@ -422,7 +422,7 @@ RBX
   end
 
   it "tokenizes tags within a {|var|..} block" do
-    subject = Rbexy::Lexer.new("{3.times { |n| <p>Hello</p> }}", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times { |n| <p>Hello</p> }}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
       [:EXPRESSION_BODY, "3.times { |n| "],
@@ -444,7 +444,7 @@ RBX
         <p>something</p>
       )} />
     RBX
-    subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -463,7 +463,7 @@ RBX
   end
 
   it "tokenizes value-less attributes" do
-    subject = Rbexy::Lexer.new("<button disabled>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<button disabled>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "button", type: :html }],
@@ -475,7 +475,7 @@ RBX
   end
 
   it "tokenizes attributes with double-quoted string values" do
-    subject = Rbexy::Lexer.new('<button type="submit">', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('<button type="submit">'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "button", type: :html }],
@@ -490,7 +490,7 @@ RBX
   end
 
   it "treats escaped \\\" as part of the attribute value" do
-    subject = Rbexy::Lexer.new('<input value="Some \"value\"">', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('<input value="Some \"value\"">'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "input", type: :html }],
@@ -505,7 +505,7 @@ RBX
   end
 
   it "tokenizes attributes with expression values" do
-    subject = Rbexy::Lexer.new("<input value={aVar}>", Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("<input value={aVar}>"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "input", type: :html }],
@@ -522,7 +522,7 @@ RBX
   end
 
   it "tokenizes a combination of types of attributes" do
-    subject = Rbexy::Lexer.new('<div foo bar="baz" thing={exprValue}>', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('<div foo bar="baz" thing={exprValue}>'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -544,7 +544,7 @@ RBX
   end
 
   it "tokenizes a kwarg splat attribute" do
-    subject = Rbexy::Lexer.new('<div {**the_attrs}>', Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new('<div {**the_attrs}>'), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -566,7 +566,7 @@ RBX
       </div>
     CODE
 
-    subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -592,7 +592,7 @@ RBX
       </div>
     CODE
 
-    subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -623,7 +623,7 @@ RBX
       />
     CODE
 
-    subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "input", type: :html }],
@@ -651,7 +651,7 @@ RBX
       <svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" />
     CODE
 
-    subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "svg", type: :html }],
@@ -682,7 +682,7 @@ RBX
       </div>
     CODE
 
-    subject = Rbexy::Lexer.new(code, Rbexy::ComponentResolver.new)
+    subject = Rbexy::Lexer.new(Rbexy::Template.new(code), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
@@ -759,7 +759,7 @@ RBX
         world
       RBX
 
-      subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello\n"],
         [:SILENT_NEWLINE],
@@ -773,7 +773,7 @@ RBX
         Hello world
       RBX
 
-      subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:SILENT_NEWLINE],
         [:TEXT, "Hello world"],
@@ -786,7 +786,7 @@ RBX
       # some comment
       RBX
 
-      subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello world\n"],
         [:SILENT_NEWLINE],
@@ -800,7 +800,7 @@ RBX
         Another text
       RBX
 
-      subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello world\n"],
         [:SILENT_NEWLINE],
@@ -815,7 +815,7 @@ RBX
         </div>
       RBX
 
-      subject = Rbexy::Lexer.new(template_string, Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:OPEN_TAG_DEF],
         [:TAG_DETAILS, { name: "div", type: :html }],
@@ -829,7 +829,7 @@ RBX
     end
 
     it "treats an escaped \\# as TEXT" do
-      subject = Rbexy::Lexer.new('\# not a comment', Rbexy::ComponentResolver.new)
+      subject = Rbexy::Lexer.new(Rbexy::Template.new('\# not a comment'), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, '\# not a comment']
       ]

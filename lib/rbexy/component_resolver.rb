@@ -1,5 +1,15 @@
 module Rbexy
+  module ArrayFindMap
+    refine Array do
+      def find_map
+        lazy.map { |i| yield(i) }.reject(&:nil?).first
+      end
+    end
+  end
+
   class ComponentResolver
+    using ArrayFindMap
+
     KNOWN_HTML_ELEMENTS = %w(
       a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
       bdi bdo bgsound big blink blockquote body br button canvas caption center circle cite clipPath code col colgroup
@@ -17,20 +27,25 @@ module Rbexy
       tspan tt u ul unknown use var video view wbr xmp
     ).to_set
 
-    attr_reader :resolution_cache
+    attr_reader :component_namespaces
 
     def initialize
-      @resolution_cache = {}
+      self.component_namespaces = {}
     end
 
-    def component?(name)
+    def component_namespaces=(hash)
+      @component_namespaces = hash.transform_keys(&:to_s)
+    end
+
+    def component?(name, template)
       return false if KNOWN_HTML_ELEMENTS.include?(name)
-      return true if component_class(name)
+      return true if component_class(name, template)
       false
     end
 
-    def component_class(name)
-      @resolution_cache[name] ||= find(name)
+    def component_class(name, template)
+      possible_names = matching_namespaces(template).map { |ns| "#{ns}.#{name}" } << name
+      possible_names.find_map(&method(:find))
     end
 
     private
@@ -40,6 +55,10 @@ module Rbexy
     rescue NameError => e
       raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
       nil
+    end
+
+    def matching_namespaces(template)
+      component_namespaces.select { |path, ns| template.identifier.start_with?(path) }.values.flatten.uniq
     end
 
     def find!(name)

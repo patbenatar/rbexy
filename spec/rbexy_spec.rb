@@ -82,17 +82,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    class Resolver
-      def component?(name)
-        name == "Button"
-      end
-
-      def component_class(name)
-        name == "Button" ? ButtonComponent : nil
-      end
-    end
-
-    expect(Rbexy.evaluate("<Button />", Rbexy::Runtime.new, Resolver.new))
+    expect(Rbexy.evaluate("<Button />", Rbexy::Runtime.new))
       .to eq "<button>"
   end
 
@@ -106,23 +96,13 @@ RSpec.describe Rbexy do
       end
     end
 
-    class Resolver
-      def component?(name)
-        name == "Container"
-      end
-
-      def component_class(name)
-        name == "Container" ? ContainerComponent : nil
-      end
-    end
-
     template_string = <<-RBX.strip_heredoc.strip
       <Container>
         <h1>Hello world</h1>
       </Container>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new, Resolver.new)
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div>
@@ -144,17 +124,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    class Resolver
-      def component?(name)
-        name == "Button"
-      end
-
-      def component_class(name)
-        name == "Button" ? ButtonComponent : nil
-      end
-    end
-
-    expect(Rbexy.evaluate('<Button the-class-name="foo" />', Rbexy::Runtime.new, Resolver.new))
+    expect(Rbexy.evaluate('<Button the-class-name="foo" />', Rbexy::Runtime.new))
       .to eq '<button class="foo">'
   end
 
@@ -222,7 +192,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    compiled = Rbexy.compile(template_string)
+    compiled = Rbexy.compile(Rbexy::Template.new(template_string))
     result = profile { Runtime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip
@@ -307,7 +277,7 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    compiled = Rbexy.compile(template_string)
+    compiled = Rbexy.compile(Rbexy::Template.new(template_string))
     result = profile { MyRuntime.new.evaluate(compiled) }
 
     expected = <<-OUTPUT.strip_heredoc.strip

@@ -3,6 +3,8 @@ require "action_view"
 module Rbexy
   module Rails
     class ComponentTemplateResolver < ActionView::FileSystemResolver
+      VIRTUAL_ROOT = "rbexy_component".freeze
+
       # Rails 6 requires us to override `_find_all` in order to hook
       def _find_all(name, prefix, partial, details, key, locals)
         find_templates(name, prefix, partial, details, locals)
@@ -19,7 +21,7 @@ module Rbexy
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           handler = ActionView::Template.handler_for_extension(File.extname(template_path)[1..-1])
-          virtual_path = ["rbexy_component", prefix, name].join("/")
+          virtual_path = File.join(VIRTUAL_ROOT, prefix, name)
 
           ActionView::Template.new(
             source,

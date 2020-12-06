@@ -53,6 +53,16 @@ module PerfHelpers
   end
 end
 
+module MockComponentHelpers
+  def redefine
+    _verbose = $VERBOSE
+    $VERBOSE = nil
+    yield
+  ensure
+    $VERBOSE = _verbose
+  end
+end
+
 RSpec.configure do |config|
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
@@ -60,6 +70,8 @@ RSpec.configure do |config|
 
   config.include PerfHelpers
   PerfHelpers.setup(config)
+
+  config.include MockComponentHelpers
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
