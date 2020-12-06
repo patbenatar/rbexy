@@ -5,7 +5,7 @@ module Rbexy
 
       OUTPUT_UNSAFE = "@output_buffer.concat(Rbexy::Runtime.expr_out(%s));"
       OUTPUT_SAFE = "@output_buffer.safe_concat(Rbexy::Runtime.expr_out(%s));"
-      SUB_EXPR = "%s"
+      SUB_EXPR = "(%s).to_s"
 
       def initialize(statements, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
         @statements = statements

@@ -409,6 +409,16 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
+    it "explicitly coerces expression values in attributes to strings" do
+      expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')} /> }}", Rbexy::Runtime.new))
+        .to eq '<div id="10.0" /><div id="10.0" />'
+    end
+
+    it "explicitly coerces expression values in children to strings" do
+      expect(Rbexy.evaluate("{[1, 2].map { <div>{BigDecimal('10')}</div> }}", Rbexy::Runtime.new))
+        .to eq '<div>10.0</div><div>10.0</div>'
+    end
+
     it "does not try to join arbitrary arrays" do
       template_string = <<-RBX.strip_heredoc.strip
         {["Hello", "world"]}
