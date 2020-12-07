@@ -16,6 +16,7 @@ module Rbexy
   autoload :Configuration, "rbexy/configuration"
   autoload :ComponentResolver, "rbexy/component_resolver"
   autoload :Template, "rbexy/template"
+  autoload :Refinements, "rbexy/refinements"
 
   ContextNotFound = Class.new(StandardError)
 

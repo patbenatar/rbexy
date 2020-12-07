@@ -1,11 +1,15 @@
 module Rbexy
   module Nodes
     class ExpressionGroup < AbstractNode
+      using Rbexy::Refinements::Array::MapTypeWhenNeighboringType
+      using Rbexy::Refinements::Array::InsertBetweenTypes
+
       attr_reader :statements, :outer_template, :inner_template
 
       OUTPUT_UNSAFE = "@output_buffer.concat(Rbexy::Runtime.expr_out(%s));"
       OUTPUT_SAFE = "@output_buffer.safe_concat(Rbexy::Runtime.expr_out(%s));"
-      SUB_EXPR = "(%s).to_s"
+      SUB_EXPR = "%s"
+      SUB_EXPR_EXPLICIT_TO_S = "(%s).to_s"
 
       def initialize(statements, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
         @statements = statements
@@ -35,9 +39,11 @@ module Rbexy
           else
             node
           end
+        end.map_type_when_neighboring_type(ExpressionGroup, Raw) do |node|
+          ExpressionGroup.new(node.statements, outer_template: SUB_EXPR_EXPLICIT_TO_S, inner_template: node.inner_template)
+        end.insert_between_types(ExpressionGroup, Raw) do
+          Expression.new("+")
         end
-
-        inject(transformed, builder: -> { Expression.new("+") }, between: [Raw, ExpressionGroup])
       end
     end
   end

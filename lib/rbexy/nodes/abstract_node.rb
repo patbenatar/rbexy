@@ -32,10 +32,6 @@ module Rbexy
 
         compacted
       end
-
-      def inject(nodes, builder:, between:)
-        Util.inject(nodes, builder: builder, between: between)
-      end
     end
   end
 end
