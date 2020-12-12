@@ -32,6 +32,7 @@ module Rbexy
     def compile(template, element_resolver = Rbexy.configuration.element_resolver)
       tokens = Lexer.new(template, element_resolver).tokenize
       root = Parser.new(tokens).parse
+      binding.pry
       root.precompile.compile
     end
 

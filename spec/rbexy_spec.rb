@@ -463,6 +463,51 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
+    it "allows loops within sub-expressions", focus: true do
+      template_string = <<-RBX.strip_heredoc.strip
+        {true && <ul>
+          {["Hello", "world"].map { |v| <li>{v}</li> }}
+        </ul>}
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li>Hello</li><li>world</li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "allows html>custom hierarchies within loops" do
+      class ButtonComponent
+        def initialize(*)
+        end
+
+        def render
+          "<button></button>"
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        {<ul>
+          {["Hello", "world"].map { |v| <li>{v} <Button /></li> }}
+        </ul>}
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li>Hello <button></button></li><li>world <button></button></li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
     it "explicitly coerces expression values in attributes to strings" do
       expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')}></div> }}", Rbexy::Runtime.new))
         .to eq '<div id="10.0"></div><div id="10.0"></div>'
