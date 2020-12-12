@@ -34,6 +34,8 @@ module Rbexy
           case node
           when Raw
             Raw.new(node.content, template: Raw::EXPR_STRING)
+          when ComponentElement
+            ComponentElement.new(node.name, node.members, node.children, template: ComponentElement::EXPR_STRING)
           when ExpressionGroup
             ExpressionGroup.new(node.statements, outer_template: SUB_EXPR, inner_template: node.inner_template)
           else
