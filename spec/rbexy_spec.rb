@@ -72,6 +72,26 @@ RSpec.describe Rbexy do
       .to eq "<br>"
   end
 
+  it "allows newlines in html tags" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div
+        class="foo"
+      >
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div
+       class="foo"
+      >
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "handles custom components" do
     class ButtonComponent
       def initialize(context, **props)
@@ -278,8 +298,12 @@ RSpec.describe Rbexy do
     result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
-      <div foo="" bar="baz" thing="heyyou">
-        <h1 class="myClass">Hello world</h1>
+      <div
+       foo=""
+       bar="baz"
+       thing="heyyou">
+        <h1
+       class="myClass">Hello world</h1>
       </div>
     OUTPUT
 
@@ -463,10 +487,72 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
+    it "allows newlines in loop html tags" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <ul>
+          {["Hello", "world"].map do |v|
+            <li
+              class="foo"
+            >
+              {v}
+            </li>
+          end}
+        </ul>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li
+         class="foo"
+        >
+              Hello
+            </li><li
+         class="foo"
+        >
+              world
+            </li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "allows newlines in loop custom component tags" do
+      class ButtonComponent
+        def initialize(*, **kwargs)
+          @class = kwargs[:class]
+        end
+
+        def render
+          "<button class=\"#{@class}\"></button>"
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        <div>
+          {["Hello", "world"].map { |v| <Button
+            class="foo"
+            /> }}
+        </div>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <div>
+          <button class="foo"></button><button class="foo"></button>
+        </div>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
     it "allows loops within sub-expressions" do
       template_string = <<-RBX.strip_heredoc.strip
         {true && <ul>
-          {["Hello", "world"].map { |v| <li>{v}</li> }}
+          {["Hello", "world"].map { |v| <li class="foo">{v}</li> }}
         </ul>}
       RBX
 
@@ -474,7 +560,7 @@ RSpec.describe Rbexy do
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <ul>
-          <li>Hello</li><li>world</li>
+          <li class="foo">Hello</li><li class="foo">world</li>
         </ul>
       OUTPUT
 
@@ -492,9 +578,9 @@ RSpec.describe Rbexy do
       end
 
       template_string = <<-RBX.strip_heredoc.strip
-        {<ul>
+        <ul>
           {["Hello", "world"].map { |v| <li>{v} <Button /></li> }}
-        </ul>}
+        </ul>
       RBX
 
       result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
