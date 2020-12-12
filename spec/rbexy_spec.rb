@@ -86,6 +86,21 @@ RSpec.describe Rbexy do
       .to eq "<button>"
   end
 
+  it "passes objects through to custom components" do
+    class AvatarComponent
+      def initialize(context, user:)
+        @user = user
+      end
+
+      def render
+        "<img src=\"#{@user.avatar_url}\">"
+      end
+    end
+
+    expect(Rbexy.evaluate("<Avatar user={Struct.new(:avatar_url).new('the_url')} />", Rbexy::Runtime.new))
+      .to eq '<img src="the_url">'
+  end
+
   it "handles custom components with html children" do
     class ContainerComponent
       def initialize(context, **props)

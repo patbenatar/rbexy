@@ -1,14 +1,6 @@
 module Rbexy
-  module ArrayFindMap
-    refine Array do
-      def find_map
-        lazy.map { |i| yield(i) }.reject(&:nil?).first
-      end
-    end
-  end
-
   class ComponentResolver
-    using ArrayFindMap
+    using Rbexy::Refinements::Array::FindMap
 
     KNOWN_HTML_ELEMENTS = %w(
       a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
