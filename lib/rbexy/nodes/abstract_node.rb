@@ -18,7 +18,7 @@ module Rbexy
         curr_raw = nil
 
         nodes.each do |node|
-          if node.is_a?(SilentNewline) && curr_raw
+          if node.is_a?(Newline) && curr_raw
             curr_raw.merge(Raw.new("\n"))
           elsif node.is_a?(Raw)
             if !curr_raw

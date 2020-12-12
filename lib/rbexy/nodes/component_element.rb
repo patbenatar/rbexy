@@ -37,7 +37,7 @@ module Rbexy
           case member
           when ExpressionGroup
             result << "**#{member.compile},"
-          when SilentNewline
+          when Newline
             result << member.compile
           else
             result << "#{member.compile},"

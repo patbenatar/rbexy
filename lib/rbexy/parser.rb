@@ -26,7 +26,7 @@ module Rbexy
     end
 
     def parse_token
-      parse_text || parse_silent_newline || parse_expression || parse_tag || parse_declaration
+      parse_text || parse_newline || parse_expression || parse_tag || parse_declaration
     end
 
     def parse_text
@@ -64,7 +64,7 @@ module Rbexy
       attr_class = details[:type] == :component ? Nodes::ComponentProp : Nodes::HTMLAttr
 
       members = []
-      members.concat(take_all(:SILENT_NEWLINE).map { Nodes::SilentNewline.new })
+      members.concat(take_all(:NEWLINE).map { Nodes::Newline.new })
       members.concat(parse_attrs(attr_class))
 
       take!(:CLOSE_TAG_DEF)
@@ -85,7 +85,7 @@ module Rbexy
 
       eventually!(:CLOSE_ATTRS)
       until take(:CLOSE_ATTRS)
-        attrs << (parse_splat_attr || parse_silent_newline || parse_attr(attr_class))
+        attrs << (parse_splat_attr || parse_newline || parse_attr(attr_class))
       end
 
       attrs
@@ -100,9 +100,9 @@ module Rbexy
       expression
     end
 
-    def parse_silent_newline
-      return unless take(:SILENT_NEWLINE)
-      Nodes::SilentNewline.new
+    def parse_newline
+      return unless take(:NEWLINE)
+      Nodes::Newline.new
     end
 
     def parse_attr(attr_class)

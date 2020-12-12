@@ -570,7 +570,7 @@ RBX
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "div", type: :html }],
-      [:SILENT_NEWLINE],
+      [:NEWLINE],
       [:OPEN_ATTRS],
       [:ATTR_NAME, "foo"],
       [:OPEN_ATTR_VALUE],
@@ -601,7 +601,7 @@ RBX
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bar"],
       [:CLOSE_ATTR_VALUE],
-      [:SILENT_NEWLINE],
+      [:NEWLINE],
       [:ATTR_NAME, "baz"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bip"],
@@ -627,18 +627,18 @@ RBX
     expect(subject.tokenize).to eq [
       [:OPEN_TAG_DEF],
       [:TAG_DETAILS, { name: "input", type: :html }],
-      [:SILENT_NEWLINE],
+      [:NEWLINE],
       [:OPEN_ATTRS],
       [:ATTR_NAME, "foo"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bar"],
       [:CLOSE_ATTR_VALUE],
-      [:SILENT_NEWLINE],
+      [:NEWLINE],
       [:ATTR_NAME, "baz"],
       [:OPEN_ATTR_VALUE],
       [:TEXT, "bip"],
       [:CLOSE_ATTR_VALUE],
-      [:SILENT_NEWLINE],
+      [:NEWLINE],
       [:CLOSE_ATTRS],
       [:CLOSE_TAG_DEF],
       [:OPEN_TAG_END],
@@ -752,7 +752,7 @@ RBX
   end
 
   context "comments" do
-    it "tokenizes lines starting with # as SILENT_NEWLINE" do
+    it "tokenizes lines starting with # as NEWLINE" do
       template_string = <<-RBX.strip_heredoc.strip
         Hello
         # some comment
@@ -762,12 +762,12 @@ RBX
       subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello\n"],
-        [:SILENT_NEWLINE],
+        [:NEWLINE],
         [:TEXT, "world"],
       ]
     end
 
-    it "tokenizes the first line if starting with # as SILENT_NEWLINE" do
+    it "tokenizes the first line if starting with # as NEWLINE" do
       template_string = <<-RBX.strip_heredoc.strip
         # some comment
         Hello world
@@ -775,12 +775,12 @@ RBX
 
       subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
-        [:SILENT_NEWLINE],
+        [:NEWLINE],
         [:TEXT, "Hello world"],
       ]
     end
 
-    it "tokenizes the last line if starting with # as SILENT_NEWLINE" do
+    it "tokenizes the last line if starting with # as NEWLINE" do
       template_string = <<-RBX.strip_heredoc.strip
       Hello world
       # some comment
@@ -789,7 +789,7 @@ RBX
       subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello world\n"],
-        [:SILENT_NEWLINE],
+        [:NEWLINE],
       ]
     end
 
@@ -803,7 +803,7 @@ RBX
       subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
       expect(subject.tokenize).to eq [
         [:TEXT, "Hello world\n"],
-        [:SILENT_NEWLINE],
+        [:NEWLINE],
         [:TEXT, "Another text"]
       ]
     end
@@ -821,7 +821,7 @@ RBX
         [:TAG_DETAILS, { name: "div", type: :html }],
         [:CLOSE_TAG_DEF],
         [:TEXT, "\n"],
-        [:SILENT_NEWLINE],
+        [:NEWLINE],
         [:OPEN_TAG_END],
         [:TAG_NAME, "div"],
         [:CLOSE_TAG_END],
