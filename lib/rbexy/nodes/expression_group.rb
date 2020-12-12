@@ -8,8 +8,8 @@ module Rbexy
 
       OUTPUT_UNSAFE = "@output_buffer.concat(Rbexy::Runtime.expr_out(%s));"
       OUTPUT_SAFE = "@output_buffer.safe_concat(Rbexy::Runtime.expr_out(%s));"
-      SUB_EXPR = "Rbexy::Runtime.expr_out(%s)"
-      SUB_EXPR_EXPLICIT_TO_S = "(%s).to_s"
+      SUB_EXPR = "%s"
+      SUB_EXPR_OUT = "Rbexy::Runtime.expr_out(%s)"
 
       def initialize(statements, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
         @statements = statements
@@ -42,8 +42,10 @@ module Rbexy
             node
           end
         end.map_type_when_neighboring_type(ExpressionGroup, Raw) do |node|
-          ExpressionGroup.new(node.statements, outer_template: SUB_EXPR_EXPLICIT_TO_S, inner_template: node.inner_template)
+          ExpressionGroup.new(node.statements, outer_template: SUB_EXPR_OUT, inner_template: node.inner_template)
         end.insert_between_types(ExpressionGroup, Raw) do
+          Expression.new("+")
+        end.insert_between_types(ComponentElement, Raw) do
           Expression.new("+")
         end
       end

@@ -463,7 +463,7 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
-    it "allows loops within sub-expressions", focus: true do
+    it "allows loops within sub-expressions" do
       template_string = <<-RBX.strip_heredoc.strip
         {true && <ul>
           {["Hello", "world"].map { |v| <li>{v}</li> }}
