@@ -1,7 +1,7 @@
 module Rbexy
   module Nodes
     class Root < AbstractNode
-      attr_reader :children
+      attr_accessor :children
 
       def initialize(children)
         @children = children

@@ -37,14 +37,14 @@ module Rbexy
     def parse_expression
       return unless take(:OPEN_EXPRESSION)
 
-      statements = []
+      members = []
 
       eventually!(:CLOSE_EXPRESSION)
       until take(:CLOSE_EXPRESSION)
-        statements << (parse_expression_body || parse_tag)
+        members << (parse_expression_body || parse_tag)
       end
 
-      Nodes::ExpressionGroup.new(statements)
+      Nodes::ExpressionGroup.new(members)
     end
 
     def parse_expression!

@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class ComponentProp < XMLAttr
+    class ComponentProp < AbstractAttr
       def precompile
         [ComponentProp.new(name, precompile_value)]
       end
@@ -19,7 +19,7 @@ module Rbexy
         when Raw
           Raw.new(node.content, template: Raw::EXPR_STRING)
         when ExpressionGroup
-          ExpressionGroup.new(node.statements, outer_template: ExpressionGroup::SUB_EXPR, inner_template: node.inner_template)
+          ExpressionGroup.new(node.members, outer_template: ExpressionGroup::SUB_EXPR, inner_template: node.inner_template)
         else
           node
         end

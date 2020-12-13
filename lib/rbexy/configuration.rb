@@ -5,6 +5,7 @@ module Rbexy
     attr_accessor :enable_context
     attr_accessor :debug
     attr_accessor :component_rendering_templates
+    attr_accessor :transforms
 
     def template_paths
       @template_paths ||= []
@@ -12,6 +13,10 @@ module Rbexy
 
     def element_resolver
       @element_resolver ||= ComponentResolver.new
+    end
+
+    def transforms
+      @transforms ||= ASTTransformer.new
     end
 
     def component_rendering_templates

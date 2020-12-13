@@ -34,7 +34,7 @@ module Rbexy
         members.map do |node|
           if node.is_a? ExpressionGroup
             ExpressionGroup.new(
-              node.statements,
+              node.members,
               inner_template: "Rbexy::Runtime.splat_attrs(%s)",
               outer_template: ExpressionGroup::OUTPUT_SAFE
             )

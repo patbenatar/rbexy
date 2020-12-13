@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class HTMLAttr < XMLAttr
+    class HTMLAttr < AbstractAttr
       def precompile
         [
           Raw.new(" #{name}=\""),

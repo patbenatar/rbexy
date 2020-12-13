@@ -11,12 +11,12 @@ module Rbexy
   autoload :Parser, "rbexy/parser"
   autoload :Nodes, "rbexy/nodes"
   autoload :Runtime, "rbexy/runtime"
-  autoload :HashMash, "rbexy/hash_mash"
   autoload :ComponentContext, "rbexy/component_context"
   autoload :Configuration, "rbexy/configuration"
   autoload :ComponentResolver, "rbexy/component_resolver"
   autoload :Template, "rbexy/template"
   autoload :Refinements, "rbexy/refinements"
+  autoload :ASTTransformer, "rbexy/ast_transformer"
 
   ContextNotFound = Class.new(StandardError)
 
@@ -29,14 +29,24 @@ module Rbexy
       @configuration ||= Configuration.new
     end
 
-    def compile(template, element_resolver = Rbexy.configuration.element_resolver)
-      tokens = Lexer.new(template, element_resolver).tokenize
+    def compile(template, context = build_default_compile_context(template))
+      tokens = Lexer.new(template, context.element_resolver).tokenize
       root = Parser.new(tokens).parse
+      root.inject_compile_context(context)
+      root.transform!
       root.precompile.compile
     end
 
-    def evaluate(template_string, runtime, element_resolver = Rbexy.configuration.element_resolver)
-      runtime.evaluate compile(Template.new(template_string), element_resolver)
+    def evaluate(template_string, runtime = Rbexy::Runtime.new)
+      runtime.evaluate compile(Template.new(template_string))
+    end
+
+    def build_default_compile_context(template)
+      OpenStruct.new(
+        template: template,
+        element_resolver: configuration.element_resolver,
+        ast_transformer: configuration.transforms
+      )
     end
   end
 end

@@ -10,7 +10,7 @@ module Rbexy
     autoload :AbstractElement, "rbexy/nodes/abstract_element"
     autoload :HTMLElement, "rbexy/nodes/html_element"
     autoload :ComponentElement, "rbexy/nodes/component_element"
-    autoload :XMLAttr, "rbexy/nodes/xml_attr"
+    autoload :AbstractAttr, "rbexy/nodes/abstract_attr"
     autoload :HTMLAttr, "rbexy/nodes/html_attr"
     autoload :ComponentProp, "rbexy/nodes/component_prop"
     autoload :Newline, "rbexy/nodes/newline"
