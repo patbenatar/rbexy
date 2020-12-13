@@ -6,14 +6,12 @@ module Rbexy
       def precompile
         nodes = []
 
-        if children.length > 0
+        if void? && children.length == 0
+          nodes.concat(precompile_open_tag)
+        else
           nodes.concat(precompile_open_tag)
           nodes.concat(children.map(&:precompile).flatten)
           nodes << Raw.new("</#{name}>")
-        elsif void?
-          nodes.concat(precompile_open_tag)
-        else
-          nodes.concat(precompile_open_tag(close: true))
         end
 
         nodes
@@ -25,10 +23,10 @@ module Rbexy
         KNOWN_VOID_ELEMENTS.include?(name)
       end
 
-      def precompile_open_tag(close: false)
+      def precompile_open_tag
         nodes = [Raw.new("<#{name}")]
         nodes.concat(precompile_members)
-        nodes << Raw.new(close ? " />" : ">")
+        nodes << Raw.new(">")
         nodes
       end
 

@@ -59,7 +59,7 @@ module Rbexy
           elsif scanner.scan(Patterns.open_expression)
             open_expression
           elsif scanner.scan(Patterns.comment)
-            tokens << [:SILENT_NEWLINE]
+            tokens << [:NEWLINE]
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
@@ -74,7 +74,7 @@ module Rbexy
           elsif scanner.scan(Patterns.open_expression)
             open_expression
           elsif scanner.scan(Patterns.comment)
-            tokens << [:SILENT_NEWLINE]
+            tokens << [:NEWLINE]
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
@@ -165,7 +165,7 @@ module Rbexy
           elsif scanner.scan(Patterns.tag_name)
             tokens << [:TAG_DETAILS, tag_details(scanner.matched)]
           elsif scanner.scan(Patterns.whitespace)
-            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
+            scanner.matched.count("\n").times { tokens << [:NEWLINE] }
             tokens << [:OPEN_ATTRS]
             stack.push(:tag_attrs)
           else
@@ -182,7 +182,7 @@ module Rbexy
           end
         when :tag_attrs
           if scanner.scan(Patterns.whitespace)
-            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
+            scanner.matched.count("\n").times { tokens << [:NEWLINE] }
           elsif scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTRS]
             stack.pop
@@ -205,7 +205,7 @@ module Rbexy
             open_expression
           elsif scanner.scan(Patterns.whitespace) || scanner.check(Patterns.close_tag)
             tokens << [:CLOSE_ATTR_VALUE]
-            scanner.matched.count("\n").times { tokens << [:SILENT_NEWLINE] }
+            scanner.matched.count("\n").times { tokens << [:NEWLINE] }
             stack.pop
           else
             raise SyntaxError, self

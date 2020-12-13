@@ -57,19 +57,39 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
-  it "self-closes child-less tags" do
+  it "does not self-close child-less tags" do
     expect(Rbexy.evaluate("<div></div>", Rbexy::Runtime.new))
-      .to eq "<div />"
+      .to eq "<div></div>"
   end
 
-  it "self-closes self-closing tags" do
+  it "explicitly closes non-void self-closing tags (valid as per JSX but invalid HTML)" do
     expect(Rbexy.evaluate("<div />", Rbexy::Runtime.new))
-      .to eq "<div />"
+      .to eq "<div></div>"
   end
 
-  it "does not self-close void tags" do
+  it "does not close void tags" do
     expect(Rbexy.evaluate("<br />", Rbexy::Runtime.new))
       .to eq "<br>"
+  end
+
+  it "allows newlines in html tags" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <div
+        class="foo"
+      >
+      </div>
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <div
+       class="foo"
+      >
+      </div>
+    OUTPUT
+
+    expect(result).to eq expected
   end
 
   it "handles custom components" do
@@ -149,33 +169,72 @@ RSpec.describe Rbexy do
   end
 
   it "handles splat attrs on html elements" do
-    expect(Rbexy.evaluate('<div {**{class: "my-class"}} />', Rbexy::Runtime.new))
-      .to eq '<div class="my-class" />'
+    expect(Rbexy.evaluate('<div {**{class: "my-class"}}></div>', Rbexy::Runtime.new))
+      .to eq '<div class="my-class"></div>'
+  end
+
+  it "handles splat attrs on custom components" do
+    class ButtonComponent
+      def initialize(context, attr1:, attr2:)
+        @attr1 = attr1
+        @attr2 = attr2
+      end
+
+      def render
+        "<button attr1=\"#{@attr1}\" attr2=\"#{@attr2}\"></button>"
+      end
+    end
+
+    MyRuntime = Class.new(Rbexy::Runtime) do
+      def splat_attrs
+        {
+          attr1: "val1",
+          attr2: "val2"
+        }
+      end
+    end
+
+    expect(Rbexy.evaluate('<Button {**splat_attrs} />', MyRuntime.new))
+      .to eq '<button attr1="val1" attr2="val2"></button>'
   end
 
   it "handles multi-word attrs on html elements" do
-    expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz" />', Rbexy::Runtime.new))
-      .to eq '<form accept-charset="utf-8" data-foo-bar="baz" />'
+    expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz"></form>', Rbexy::Runtime.new))
+      .to eq '<form accept-charset="utf-8" data-foo-bar="baz"></form>'
   end
 
   it "handles boolean attrs on html elements" do
-    expect(Rbexy.evaluate('<div disabled />', Rbexy::Runtime.new))
-      .to eq '<div disabled="" />'
+    expect(Rbexy.evaluate('<button disabled />', Rbexy::Runtime.new))
+      .to eq '<button disabled=""></button>'
   end
 
-  it "handles boolean expressions" do
-    expect(Rbexy.evaluate('{true && <div />}', Rbexy::Runtime.new))
-      .to eq '<div />'
+  it "handles boolean expressions with html elements" do
+    expect(Rbexy.evaluate('{true && <div></div>}', Rbexy::Runtime.new))
+      .to eq '<div></div>'
+  end
+
+  it "handles boolean expressions with custom components" do
+    class ButtonComponent
+      def initialize(*)
+      end
+
+      def render
+        "<button />"
+      end
+    end
+
+    expect(Rbexy.evaluate('{true && <Button />}', Rbexy::Runtime.new))
+      .to eq '<button />'
   end
 
   it "handles ternary expressions" do
-    expect(Rbexy.evaluate('{true ? <div /> : <span />}', Rbexy::Runtime.new))
-      .to eq '<div />'
+    expect(Rbexy.evaluate('{true ? <div></div> : <span></span>}', Rbexy::Runtime.new))
+      .to eq '<div></div>'
   end
 
   it "handles ternary expressions with sub-expressions" do
-    expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}} /> : <span />}', Rbexy::Runtime.new))
-      .to eq '<div class="the-class" />'
+    expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}}></div> : <span></span>}', Rbexy::Runtime.new))
+      .to eq '<div class="the-class"></div>'
   end
 
   it "handles a bunch of html" do
@@ -214,7 +273,7 @@ RSpec.describe Rbexy do
       <!DOCTYPE html>
       <div foo="" bar="baz" thing="heyyou">
         <h1 class="myClass" attr1="val1" attr2="val2">Hello world</h1>
-        <div class="myClass" />
+        <div class="myClass"></div>
         Some words
         <p>Lorem ipsum</p>
         <input type="submit" value="ivar value" disabled="">
@@ -239,8 +298,12 @@ RSpec.describe Rbexy do
     result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
 
     expected = <<-OUTPUT.strip_heredoc.strip
-      <div foo="" bar="baz" thing="heyyou">
-        <h1 class="myClass">Hello world</h1>
+      <div
+       foo=""
+       bar="baz"
+       thing="heyyou">
+        <h1
+       class="myClass">Hello world</h1>
       </div>
     OUTPUT
 
@@ -424,9 +487,116 @@ RSpec.describe Rbexy do
       expect(result).to eq expected
     end
 
+    it "allows newlines in loop html tags" do
+      template_string = <<-RBX.strip_heredoc.strip
+        <ul>
+          {["Hello", "world"].map do |v|
+            <li
+              class="foo"
+            >
+              {v}
+            </li>
+          end}
+        </ul>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li
+         class="foo"
+        >
+              Hello
+            </li><li
+         class="foo"
+        >
+              world
+            </li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "allows newlines in loop custom component tags" do
+      class ButtonComponent
+        def initialize(*, **kwargs)
+          @class = kwargs[:class]
+        end
+
+        def render
+          "<button class=\"#{@class}\"></button>"
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        <div>
+          {["Hello", "world"].map { |v| <Button
+            class="foo"
+            /> }}
+        </div>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <div>
+          <button class="foo"></button><button class="foo"></button>
+        </div>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "allows loops within sub-expressions" do
+      template_string = <<-RBX.strip_heredoc.strip
+        {true && <ul>
+          {["Hello", "world"].map { |v| <li class="foo">{v}</li> }}
+        </ul>}
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li class="foo">Hello</li><li class="foo">world</li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
+    it "allows html>custom hierarchies within loops" do
+      class ButtonComponent
+        def initialize(*)
+        end
+
+        def render
+          "<button></button>"
+        end
+      end
+
+      template_string = <<-RBX.strip_heredoc.strip
+        <ul>
+          {["Hello", "world"].map { |v| <li>{v} <Button /></li> }}
+        </ul>
+      RBX
+
+      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+      expected = <<-OUTPUT.strip_heredoc.strip
+        <ul>
+          <li>Hello <button></button></li><li>world <button></button></li>
+        </ul>
+      OUTPUT
+
+      expect(result).to eq expected
+    end
+
     it "explicitly coerces expression values in attributes to strings" do
-      expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')} /> }}", Rbexy::Runtime.new))
-        .to eq '<div id="10.0" /><div id="10.0" />'
+      expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')}></div> }}", Rbexy::Runtime.new))
+        .to eq '<div id="10.0"></div><div id="10.0"></div>'
     end
 
     it "explicitly coerces expression values in children to strings" do

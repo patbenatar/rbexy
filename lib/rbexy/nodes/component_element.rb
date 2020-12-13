@@ -1,6 +1,16 @@
 module Rbexy
   module Nodes
     class ComponentElement < AbstractElement
+      attr_reader :template
+
+      OUTPUT = "@output_buffer.safe_concat(%s);"
+      EXPR_STRING = "%s.html_safe"
+
+      def initialize(*args, template: OUTPUT)
+        super(*args)
+        @template = template
+      end
+
       def precompile
         [ComponentElement.new(name, precompile_members, precompile_children)]
       end
@@ -19,7 +29,7 @@ module Rbexy
           tag = "(rbexy_context.push({});#{tag}.tap{rbexy_context.pop})"
         end
 
-        "@output_buffer.safe_concat(#{tag});"
+        template % tag
       end
 
       def compile_members
@@ -27,7 +37,7 @@ module Rbexy
           case member
           when ExpressionGroup
             result << "**#{member.compile},"
-          when SilentNewline
+          when Newline
             result << member.compile
           else
             result << "#{member.compile},"
@@ -38,7 +48,17 @@ module Rbexy
       private
 
       def precompile_members
-        members.map(&:precompile).flatten
+        members.map do |node|
+          if node.is_a? ExpressionGroup
+            ExpressionGroup.new(
+              node.statements,
+              inner_template: ExpressionGroup::SUB_EXPR,
+              outer_template: ExpressionGroup::SUB_EXPR
+            )
+          else
+            node
+          end
+        end.map(&:precompile).flatten
       end
 
       def precompile_children

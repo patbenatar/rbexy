@@ -1,6 +1,6 @@
 module Rbexy
   module Nodes
-    class SilentNewline < AbstractNode
+    class Newline < AbstractNode
       def compile
         "\n"
       end

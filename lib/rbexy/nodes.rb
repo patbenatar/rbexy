@@ -13,7 +13,7 @@ module Rbexy
     autoload :XMLAttr, "rbexy/nodes/xml_attr"
     autoload :HTMLAttr, "rbexy/nodes/html_attr"
     autoload :ComponentProp, "rbexy/nodes/component_prop"
-    autoload :SilentNewline, "rbexy/nodes/silent_newline"
+    autoload :Newline, "rbexy/nodes/newline"
     autoload :Declaration, "rbexy/nodes/declaration"
   end
 end
