@@ -1,7 +1,7 @@
 module Rbexy
   module Nodes
     class Declaration < AbstractNode
-      attr_reader :content
+      attr_accessor :content
 
       def initialize(content)
         @content = content

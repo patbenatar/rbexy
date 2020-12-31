@@ -10,7 +10,7 @@ module Rbexy
       end
     end
 
-    Patterns = HashMash.new(
+    Patterns = OpenStruct.new(
       open_expression: /{/,
       close_expression: /}/,
       expression_content: /[^}{"'<]+/,

@@ -51,7 +51,7 @@ module Rbexy
         members.map do |node|
           if node.is_a? ExpressionGroup
             ExpressionGroup.new(
-              node.statements,
+              node.members,
               inner_template: ExpressionGroup::SUB_EXPR,
               outer_template: ExpressionGroup::SUB_EXPR
             )

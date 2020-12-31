@@ -17,7 +17,7 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div>
@@ -34,7 +34,7 @@ RSpec.describe Rbexy do
       <h1 class="my-class" id="the-id">Hello world</h1>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <h1 class="my-class" id="the-id">Hello world</h1>
@@ -48,7 +48,7 @@ RSpec.describe Rbexy do
       <h1 class={true && "my-class"} id={false ? "is-true" : "is-false"}>Hello world</h1>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <h1 class="my-class" id="is-false">Hello world</h1>
@@ -58,17 +58,17 @@ RSpec.describe Rbexy do
   end
 
   it "does not self-close child-less tags" do
-    expect(Rbexy.evaluate("<div></div>", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<div></div>"))
       .to eq "<div></div>"
   end
 
   it "explicitly closes non-void self-closing tags (valid as per JSX but invalid HTML)" do
-    expect(Rbexy.evaluate("<div />", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<div />"))
       .to eq "<div></div>"
   end
 
   it "does not close void tags" do
-    expect(Rbexy.evaluate("<br />", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<br />"))
       .to eq "<br>"
   end
 
@@ -80,7 +80,7 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div
@@ -102,7 +102,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    expect(Rbexy.evaluate("<Button />", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<Button />"))
       .to eq "<button>"
   end
 
@@ -117,7 +117,7 @@ RSpec.describe Rbexy do
       end
     end
 
-    expect(Rbexy.evaluate("<Avatar user={Struct.new(:avatar_url).new('the_url')} />", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<Avatar user={Struct.new(:avatar_url).new('the_url')} />"))
       .to eq '<img src="the_url">'
   end
 
@@ -137,7 +137,7 @@ RSpec.describe Rbexy do
       </Container>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div>
@@ -159,17 +159,17 @@ RSpec.describe Rbexy do
       end
     end
 
-    expect(Rbexy.evaluate('<Button the-class-name="foo" />', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('<Button the-class-name="foo" />'))
       .to eq '<button class="foo">'
   end
 
   it "handles declarations" do
-    expect(Rbexy.evaluate("<!DOCTYPE html>", Rbexy::Runtime.new))
+    expect(Rbexy.evaluate("<!DOCTYPE html>"))
       .to eq "<!DOCTYPE html>"
   end
 
   it "handles splat attrs on html elements" do
-    expect(Rbexy.evaluate('<div {**{class: "my-class"}}></div>', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('<div {**{class: "my-class"}}></div>'))
       .to eq '<div class="my-class"></div>'
   end
 
@@ -199,17 +199,17 @@ RSpec.describe Rbexy do
   end
 
   it "handles multi-word attrs on html elements" do
-    expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz"></form>', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz"></form>'))
       .to eq '<form accept-charset="utf-8" data-foo-bar="baz"></form>'
   end
 
   it "handles boolean attrs on html elements" do
-    expect(Rbexy.evaluate('<button disabled />', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('<button disabled />'))
       .to eq '<button disabled=""></button>'
   end
 
   it "handles boolean expressions with html elements" do
-    expect(Rbexy.evaluate('{true && <div></div>}', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('{true && <div></div>}'))
       .to eq '<div></div>'
   end
 
@@ -223,17 +223,17 @@ RSpec.describe Rbexy do
       end
     end
 
-    expect(Rbexy.evaluate('{true && <Button />}', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('{true && <Button />}'))
       .to eq '<button />'
   end
 
   it "handles ternary expressions" do
-    expect(Rbexy.evaluate('{true ? <div></div> : <span></span>}', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('{true ? <div></div> : <span></span>}'))
       .to eq '<div></div>'
   end
 
   it "handles ternary expressions with sub-expressions" do
-    expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}}></div> : <span></span>}', Rbexy::Runtime.new))
+    expect(Rbexy.evaluate('{true ? <div {**{class: "the-class"}}></div> : <span></span>}'))
       .to eq '<div class="the-class"></div>'
   end
 
@@ -295,7 +295,7 @@ RSpec.describe Rbexy do
       </div>
     RBX
 
-    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+    result = Rbexy.evaluate(template_string)
 
     expected = <<-OUTPUT.strip_heredoc.strip
       <div
@@ -381,7 +381,7 @@ RSpec.describe Rbexy do
 
     expect do
       Timeout::timeout(1) do
-        result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+        result = Rbexy.evaluate(template_string)
       end
     end.not_to raise_error
 
@@ -431,7 +431,7 @@ RSpec.describe Rbexy do
 
     examples.each do |(template_string, expected_line_number)|
       it "raises on line #{expected_line_number} for `#{template_string}`" do
-        expect { Rbexy.evaluate(template_string, Rbexy::Runtime.new) }
+        expect { Rbexy.evaluate(template_string) }
           .to raise_error do |error|
             expect(error).to be_a NameError
             expect(error.backtrace.first)
@@ -476,7 +476,7 @@ RSpec.describe Rbexy do
         </ul>
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <ul>
@@ -500,7 +500,7 @@ RSpec.describe Rbexy do
         </ul>
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <ul>
@@ -538,7 +538,7 @@ RSpec.describe Rbexy do
         </div>
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <div>
@@ -556,7 +556,7 @@ RSpec.describe Rbexy do
         </ul>}
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <ul>
@@ -583,7 +583,7 @@ RSpec.describe Rbexy do
         </ul>
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         <ul>
@@ -595,12 +595,12 @@ RSpec.describe Rbexy do
     end
 
     it "explicitly coerces expression values in attributes to strings" do
-      expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')}></div> }}", Rbexy::Runtime.new))
+      expect(Rbexy.evaluate("{[1, 2].map { <div id={BigDecimal('10')}></div> }}"))
         .to eq '<div id="10.0"></div><div id="10.0"></div>'
     end
 
     it "explicitly coerces expression values in children to strings" do
-      expect(Rbexy.evaluate("{[1, 2].map { <div>{BigDecimal('10')}</div> }}", Rbexy::Runtime.new))
+      expect(Rbexy.evaluate("{[1, 2].map { <div>{BigDecimal('10')}</div> }}"))
         .to eq '<div>10.0</div><div>10.0</div>'
     end
 
@@ -609,13 +609,49 @@ RSpec.describe Rbexy do
         {["Hello", "world"]}
       RBX
 
-      result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+      result = Rbexy.evaluate(template_string)
 
       expected = <<-OUTPUT.strip_heredoc.strip
         [&quot;Hello&quot;, &quot;world&quot;]
       OUTPUT
 
       expect(result).to eq expected
+    end
+  end
+
+  context "with AST transforms" do
+    after(:each) { Rbexy.configuration.transforms.clear! }
+
+    it "allows transforms to manipulate html attributes" do
+      Rbexy.configuration.transforms.register(Rbexy::Nodes::HTMLAttr) do |node, context|
+        if node.name == "class" && node.value.is_a?(Rbexy::Nodes::Text)
+          node.value.content = "#{node.value.content}-t"
+        end
+      end
+
+      expect(Rbexy.evaluate('<h1 class="myClass" id="myId">Hello transforms</h1>'))
+        .to eq '<h1 class="myClass-t" id="myId">Hello transforms</h1>'
+    end
+
+    it "allows transforms to manipulate component props" do
+      Rbexy.configuration.transforms.register(Rbexy::Nodes::ComponentProp) do |node, context|
+        if node.name == "id" && node.value.is_a?(Rbexy::Nodes::Text)
+          node.value.content = "#{node.value.content}-t"
+        end
+      end
+
+      class ButtonComponent
+        def initialize(context, id:)
+          @id = id
+        end
+
+        def render
+          "<button id=\"#{@id}\">"
+        end
+      end
+
+      expect(Rbexy.evaluate('<Button id="myId" />'))
+        .to eq '<button id="myId-t">'
     end
   end
 end

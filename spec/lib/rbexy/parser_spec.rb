@@ -24,8 +24,8 @@ RSpec.describe Rbexy::Parser do
     result = subject.parse.children
     expect(result.first).to be_a Rbexy::Nodes::ExpressionGroup
     group = result.first
-    expect(group.statements.first).to be_a Rbexy::Nodes::Expression
-    expect(group.statements.first.content).to eq "thing = 'bar'"
+    expect(group.members.first).to be_a Rbexy::Nodes::Expression
+    expect(group.members.first.content).to eq "thing = 'bar'"
   end
 
   it "parses tags within expressions" do
@@ -50,18 +50,18 @@ RSpec.describe Rbexy::Parser do
     expect(result.first).to be_a Rbexy::Nodes::ExpressionGroup
     group = result.first
 
-    expect(group.statements[0]).to be_a Rbexy::Nodes::Expression
-    expect(group.statements[0].content).to eq "true && "
+    expect(group.members[0]).to be_a Rbexy::Nodes::Expression
+    expect(group.members[0].content).to eq "true && "
 
-    expect(group.statements[1]).to be_a Rbexy::Nodes::HTMLElement
-    expect(group.statements[1].name).to eq "h1"
-    expect(group.statements[1].children[0]).to be_a Rbexy::Nodes::Text
-    expect(group.statements[1].children[0].content).to eq "Is "
-    expect(group.statements[1].children[1]).to be_a Rbexy::Nodes::ExpressionGroup
-    expect(group.statements[1].children[1].statements[0].content).to eq "'hello'.upcase"
+    expect(group.members[1]).to be_a Rbexy::Nodes::HTMLElement
+    expect(group.members[1].name).to eq "h1"
+    expect(group.members[1].children[0]).to be_a Rbexy::Nodes::Text
+    expect(group.members[1].children[0].content).to eq "Is "
+    expect(group.members[1].children[1]).to be_a Rbexy::Nodes::ExpressionGroup
+    expect(group.members[1].children[1].members[0].content).to eq "'hello'.upcase"
 
-    expect(group.statements[2]).to be_a Rbexy::Nodes::Expression
-    expect(group.statements[2].content).to eq ""
+    expect(group.members[2]).to be_a Rbexy::Nodes::Expression
+    expect(group.members[2].content).to eq ""
   end
 
   it "parses named tags" do
@@ -138,7 +138,7 @@ RSpec.describe Rbexy::Parser do
     expect(attrThing).to be_a Rbexy::Nodes::HTMLAttr
     expect(attrThing.name).to eq "thing"
     expect(attrThing.value).to be_a Rbexy::Nodes::ExpressionGroup
-    expect(attrThing.value.statements.first.content).to eq "exprValue"
+    expect(attrThing.value.members.first.content).to eq "exprValue"
   end
 
   it "parses splat attributes" do
@@ -163,7 +163,7 @@ RSpec.describe Rbexy::Parser do
 
     attrFoo = div.members[0]
     expect(attrFoo).to be_a Rbexy::Nodes::ExpressionGroup
-    expect(attrFoo.statements.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
+    expect(attrFoo.members.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
   end
 
   it "finds no children for self-closing tags" do
@@ -290,7 +290,7 @@ RSpec.describe Rbexy::Parser do
     div = subject.parse.children.first
     expr = div.children.first
     expect(expr).to be_a Rbexy::Nodes::ExpressionGroup
-    expect(expr.statements.first.content).to eq "thing = 'foo'"
+    expect(expr.members.first.content).to eq "thing = 'foo'"
   end
 
   it "raises an error when encountering tag that opens but never closes" do
