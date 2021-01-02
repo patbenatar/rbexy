@@ -10,12 +10,16 @@ module Rbexy
       end
     end
 
-    def self.component_name
-      name.underscore
+    def self.template_path
+      TemplatePath.new(component_name)
     end
 
-    def component_name
-      self.class.component_name
+    def self.call_component?
+      method_defined?(:call)
+    end
+
+    def self.component_name
+      name.underscore
     end
 
     def initialize(view_context, **props)
@@ -37,16 +41,7 @@ module Rbexy
 
     def render(&block)
       @content_block = block_given? ? block : nil
-      call
-    end
-
-    def call
-      path = TemplatePath.new(component_name)
-      template = view_context.lookup_context.find(path)
-      template.render(self, {})
-    rescue ActionView::Template::Error => error
-      error.set_backtrace clean_template_backtrace(error.backtrace)
-      raise error
+      self.class.call_component? ? call : _render
     end
 
     def content
@@ -60,6 +55,15 @@ module Rbexy
     private
 
     attr_reader :view_context, :content_block
+
+    def _render
+      path = self.class.template_path
+      template = view_context.lookup_context.find(path)
+      template.render(self, {})
+    rescue ActionView::Template::Error => error
+      error.set_backtrace clean_template_backtrace(error.backtrace)
+      raise error
+    end
 
     def method_missing(meth, *args, &block)
       view_context.send(meth, *args, &block)
