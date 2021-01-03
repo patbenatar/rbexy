@@ -1,4 +1,5 @@
 require "action_view"
+require "active_support/core_ext/class/attribute"
 
 module Rbexy
   class Component < ActionView::Base
@@ -8,6 +9,12 @@ module Rbexy
       def to_s
         self
       end
+    end
+
+    class_attribute :component_file_location
+
+    def self.inherited(klass)
+      klass.component_file_location = caller_locations(1, 10).reject { |l| l.label == "inherited" }[0].absolute_path
     end
 
     def self.template_path
