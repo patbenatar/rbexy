@@ -1,7 +1,4 @@
 class CachingController < ApplicationController
-  def self.heartbeat1; end
-  def self.heartbeat2; end
-
   def inline; end
   def component; end
 

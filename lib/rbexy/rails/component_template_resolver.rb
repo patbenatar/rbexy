@@ -29,8 +29,6 @@ module Rbexy
           component_name = prefix.present? ? File.join(prefix, name) : name
           virtual_path = Rbexy::Component::TemplatePath.new(component_name)
 
-          binding.pry
-
           ActionView::Template.new(
             "#{source}#{component_class_cachebuster(component_name, extension)}",
             template_path,

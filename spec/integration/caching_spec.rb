@@ -1,21 +1,19 @@
 RSpec.describe CachingController, type: :request do
-  before(:each) { @cleanup = -> {} }
-  after(:each) do
-    @cleanup.call
+  before(:each) do
+    @cleanup = -> {}
     Rails.cache.clear
+    Thread.current[:cache_misses] = 0
   end
+  after(:each) { @cleanup.call }
+  after(:all) { Rails.cache.clear }
 
   describe "fragment caching using `<Rbexy.Cache />` component" do
     it "caches template fragments" do
-      expect(described_class).to receive(:heartbeat1).twice
-      expect(described_class).to receive(:heartbeat2).once
       2.times { get "/caching/inline" }
+      expect(Thread.current[:cache_misses]).to eq 1
     end
 
     it "busts the cache if the template changes" do
-      expect(described_class).to receive(:heartbeat1).twice
-      expect(described_class).to receive(:heartbeat2).twice
-
       get "/caching/inline"
       expect(response.body).to have_tag("h2", text: "Hello outer cache")
 
@@ -27,18 +25,18 @@ RSpec.describe CachingController, type: :request do
 
       get "/caching/inline"
       expect(response.body).to have_tag("h2", text: "Goodbye outer cache")
+
+      expect(Thread.current[:cache_misses]).to eq 2
     end
   end
 
   describe "fragments including sub-components" do
-    it "caches the sub-component" do
-      expect(CachedThingComponent).to receive(:heartbeat).once
+    it "caches the fragment including the sub-component" do
       2.times { get "/caching/component" }
+      expect(Thread.current[:cache_misses]).to eq 1
     end
 
     it "busts the cache if the sub-component's template changes" do
-      expect(CachedThingComponent).to receive(:heartbeat).twice
-
       get "/caching/component"
       expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
 
@@ -50,11 +48,11 @@ RSpec.describe CachingController, type: :request do
 
       get "/caching/component"
       expect(response.body).to have_tag("h2", text: "Goodbye from Cached thing")
+
+      expect(Thread.current[:cache_misses]).to eq 2
     end
 
-    it "busts the cache if the sub-component's class source code changes", focus: true do
-      expect(CachedThingComponent).to receive(:heartbeat).twice
-
+    it "busts the cache if the sub-component's class source code changes" do
       get "/caching/component"
       expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
 
@@ -66,6 +64,8 @@ RSpec.describe CachingController, type: :request do
 
       get "/caching/component"
       expect(response.body).to have_tag("h2", text: "Hello from Updated thing")
+
+      expect(Thread.current[:cache_misses]).to eq 2
     end
   end
 end
