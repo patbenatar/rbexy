@@ -25,6 +25,8 @@ module Rbexy
         # TODO: if we don't find a matching .rbx template, look for a .rb component class (this might
         # be a template-less #call component), and if so return an empty template with just the cachebuster comment.
         # Then update RbxDependencyTracker to not filter out #call components, and they should _just work_.
+        # Verify that the matching component class is a #call_component? before doing this though.. as we should
+        # fail a missing template error if its a template-less non-call component.
 
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)

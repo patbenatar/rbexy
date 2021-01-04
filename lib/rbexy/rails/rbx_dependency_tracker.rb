@@ -14,8 +14,12 @@ module Rbexy
       end
 
       # TODO: how to handle #call components?
-      # Might need to use the comment approach that ActionView/ERB use
+      # See comment in ComponentTemplateResolver
       def dependencies
+        # TODO: concat the results from the Erb handler, as rbx templates can also make `view_context.render` calls
+        # (check if those regexes would match with the `view_context.` prefix though...)
+        # Related: consider renaming `Rbexy::Component#render` to something else (maybe `#render_in` for future
+        # compat with Rails 6.1+ object rendering?) to avoid the naming collision.
         Lexer.new(template, Rbexy.configuration.element_resolver).tokenize
           .select { |t| t[0] == :TAG_DETAILS && t[1][:type] == :component }
           .map { |t| t[1][:component_class] }

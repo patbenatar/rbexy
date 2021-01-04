@@ -30,7 +30,7 @@ RSpec.describe CachingController, type: :request do
     end
   end
 
-  describe "fragments including sub-components" do
+  describe "fragments including template sub-components" do
     it "caches the fragment including the sub-component" do
       2.times { get "/caching/component" }
       expect(Thread.current[:cache_misses]).to eq 1
@@ -68,4 +68,50 @@ RSpec.describe CachingController, type: :request do
       expect(Thread.current[:cache_misses]).to eq 2
     end
   end
+
+  describe "fragments including #call sub-components" do
+    it "caches the fragment including the sub-component" do
+      2.times { get "/caching/call_component" }
+      expect(Thread.current[:cache_misses]).to eq 1
+    end
+
+    it "busts the cache if the sub-component's class source code changes" do
+      get "/caching/call_component"
+      expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
+
+      class_source_path = Rails.root.join("app/components/cached_thing_call_component.rb")
+      original_source = File.read(class_source_path)
+      new_source = original_source.gsub("Cached thing", "Updated thing")
+      @cleanup = -> { File.write(class_source_path, original_source) }
+      File.write(class_source_path, new_source)
+
+      get "/caching/call_component"
+      expect(response.body).to have_tag("h2", text: "Hello from Updated thing")
+
+      expect(Thread.current[:cache_misses]).to eq 2
+    end
+  end
+
+  # describe "fragment including Rails partial renders with `view_context.render`" do
+  #   it "caches template fragments" do
+  #     2.times { get "/caching/partial_render" }
+  #     expect(Thread.current[:cache_misses]).to eq 1
+  #   end
+
+  #   it "busts the cache if the partial changes" do
+  #     get "/caching/partial_render"
+  #     expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
+
+  #     template_path = Rails.root.join("app/views/caching/_partial_render_partial.rbx")
+  #     original_source = File.read(template_path)
+  #     new_source = original_source.gsub("Cached thing", "Updated thing")
+  #     @cleanup = -> { File.write(template_path, original_source) }
+  #     File.write(template_path, new_source)
+
+  #     get "/caching/partial_render"
+  #     expect(response.body).to have_tag("h2", text: "Hello from Updated thing")
+
+  #     expect(Thread.current[:cache_misses]).to eq 2
+  #   end
+  # end
 end
