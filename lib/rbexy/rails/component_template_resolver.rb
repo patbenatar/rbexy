@@ -22,6 +22,10 @@ module Rbexy
         templates_path = File.join(@path, prefix, name)
         extensions = details[:handlers].join(",")
 
+        # TODO: if we don't find a matching .rbx template, look for a .rb component class (this might
+        # be a template-less #call component), and if so return an empty template with just the cachebuster comment.
+        # Then update RbxDependencyTracker to not filter out #call components, and they should _just work_.
+
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           extension = File.extname(template_path)[1..-1]
@@ -33,7 +37,7 @@ module Rbexy
             "#{source}#{component_class_cachebuster(component_name, extension)}",
             template_path,
             handler,
-            format: :rbx,
+            format: extension.to_sym,
             locals: [],
             virtual_path: virtual_path
           )
