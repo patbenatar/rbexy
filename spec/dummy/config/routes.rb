@@ -3,4 +3,6 @@ Rails.application.routes.draw do
   get "controller_context" => "context#index"
   get "perf_test", to: "perf_test#index"
   get "utf8", to: "rbx_view#utf8"
+  get "caching/inline", to: "caching#inline"
+  get "caching/component", to: "caching#component"
 end

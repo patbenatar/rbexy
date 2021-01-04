@@ -1,5 +1,6 @@
 module Rbexy
   autoload :Component, "rbexy/component"
+  autoload :CacheComponent, "rbexy/cache_component"
 
   module Rails
     autoload :Engine, "rbexy/rails/engine"
