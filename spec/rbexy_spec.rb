@@ -43,6 +43,22 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  it "supports the or operator" do
+    template_string = <<-RBX.strip_heredoc.strip
+      {true && <p>Is true</p> || <p>Is false</p>}
+      {false && <p>Is true</p> || <p>Is false</p>}
+    RBX
+
+    result = Rbexy.evaluate(template_string, Rbexy::Runtime.new)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <p>Is true</p>
+      <p>Is false</p>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "handles html with expression attributes" do
     template_string = <<-RBX.strip_heredoc.strip
       <h1 class={true && "my-class"} id={false ? "is-true" : "is-false"}>Hello world</h1>

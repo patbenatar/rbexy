@@ -29,7 +29,7 @@ module Rbexy
       single_quote: /'/,
       double_quoted_text_content: /[^"]+/,
       single_quoted_text_content: /[^']+/,
-      expression_internal_tag_prefixes: /(\s+(&&|\?|:|do|do\s*\|[^\|]+\||{|{\s*\|[^\|]+\|)\s+\z|\A\s*\z)/,
+      expression_internal_tag_prefixes: /(\s+(&&|\|\||\?|:|do|do\s*\|[^\|]+\||{|{\s*\|[^\|]+\|)\s+\z|\A\s*\z)/,
       declaration: /<![^>]*>/
     )
 

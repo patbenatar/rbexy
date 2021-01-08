@@ -360,6 +360,23 @@ RSpec.describe Rbexy::Lexer do
     ]
   end
 
+  it "tokenizes tags within a boolean expression including an OR operator" do
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{true || <p>Yes</p>}"), Rbexy::ComponentResolver.new)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "true || "],
+      [:OPEN_TAG_DEF],
+      [:TAG_DETAILS, { name: "p", type: :html }],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Yes"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, ""],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
   it "tokenizes tags within a do..end block" do
     template = <<-RBX.strip
 {3.times do
