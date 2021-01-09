@@ -23,9 +23,10 @@ module Rbexy
         Lexer.new(template, Rbexy.configuration.element_resolver).tokenize
           .select { |t| t[0] == :TAG_DETAILS && t[1][:type] == :component }
           .map { |t| t[1][:component_class] }
-          .reject(&:call_component?)
           .uniq
           .map(&:template_path)
+
+          # .reject(&:call_component?)
       end
 
       private

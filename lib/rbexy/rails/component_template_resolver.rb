@@ -28,6 +28,11 @@ module Rbexy
         # Verify that the matching component class is a #call_component? before doing this though.. as we should
         # fail a missing template error if its a template-less non-call component.
 
+        # templates = Dir["#{templates_path}.*{#{extensions}}"]
+
+        # if templates.none?
+        #   components = Dir["#{templates_path}.rb"]
+
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           extension = File.extname(template_path)[1..-1]
