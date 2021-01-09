@@ -65,6 +65,10 @@ module Rbexy
       view_context.send(meth, *args, &block)
     end
 
+    def respond_to_missing?(method_name, include_all)
+      view_context.respond_to?(method_name, include_all)
+    end
+
     def clean_template_backtrace(backtrace)
       return backtrace if Rbexy.configuration.debug
       BacktraceCleaner.new(backtrace).call
