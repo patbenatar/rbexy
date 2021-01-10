@@ -24,7 +24,7 @@ RSpec.describe Rbexy::Rails::RbxDependencyTracker do
       expect(result).to eq ["sub1_component"]
     end
 
-    it "doesn't return template paths for template-less (#call) components" do
+    it "does return template paths for template-less (#call) components, as we will digest the class contents" do
       redefine do
         Sub1Component = Class.new(Rbexy::Component) do
           def call; end
@@ -36,7 +36,7 @@ RSpec.describe Rbexy::Rails::RbxDependencyTracker do
       tracker = described_class.new("parent_template", template)
 
       result = tracker.dependencies
-      expect(result).to eq ["sub2_component"]
+      expect(result).to eq ["sub1_component", "sub2_component"]
     end
   end
 end

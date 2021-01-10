@@ -33,12 +33,13 @@ module Rbexy
         # if templates.none?
         #   components = Dir["#{templates_path}.rb"]
 
-        Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
+        component_name = prefix.present? ? File.join(prefix, name) : name
+        virtual_path = Rbexy::Component::TemplatePath.new(component_name)
+
+        templates = Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           extension = File.extname(template_path)[1..-1]
           handler = ActionView::Template.handler_for_extension(extension)
-          component_name = prefix.present? ? File.join(prefix, name) : name
-          virtual_path = Rbexy::Component::TemplatePath.new(component_name)
 
           ActionView::Template.new(
             "#{source}#{component_class_cachebuster(component_name, extension)}",
@@ -49,22 +50,48 @@ module Rbexy
             virtual_path: virtual_path
           )
         end
+
+        if templates.none? && (cachebuster = call_component_cachebuster(component_name))
+          templates = [
+            ActionView::Template.new(
+              cachebuster,
+              "#{templates_path}.rbexycall",
+              ActionView::Template.handler_for_extension(:rbx),
+              format: :rbx,
+              locals: [],
+              virtual_path: virtual_path
+            )
+          ]
+        end
+
+        templates
       end
 
       def component_class_cachebuster(component_name, template_format)
         component_class = find_component_class(component_name)
         return unless component_class
 
-        source = File.binread(component_class.component_file_location)
-        digest = ActiveSupport::Digest.hexdigest(source)
+        cachebuster_digest_as_comment(component_class.component_file_location, template_format)
+      end
 
-        comment_template = COMMENT_SYNTAX[template_format.to_sym] || COMMENT_SYNTAX[:html]
-        comment = comment_template % digest
-        "\n#{comment}"
+      def call_component_cachebuster(component_name)
+        component_class = find_component_class(component_name)
+        return unless component_class && component_class.call_component?
+
+        cachebuster_digest_as_comment(component_class.component_file_location, :rbx)
       end
 
       def find_component_class(component_name)
         Rbexy::ComponentResolver.try_constantize { component_name.classify.constantize }
+      end
+
+      def cachebuster_digest_as_comment(filename, format)
+        source = File.binread(filename)
+        digest = ActiveSupport::Digest.hexdigest(source)
+
+        comment_template = COMMENT_SYNTAX[format.to_sym] || COMMENT_SYNTAX[:html]
+        comment = comment_template % digest
+        "\n#{comment}"
       end
     end
   end

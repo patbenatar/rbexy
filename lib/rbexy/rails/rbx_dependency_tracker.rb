@@ -13,8 +13,6 @@ module Rbexy
         @name, @template, @view_paths = name, template, view_paths
       end
 
-      # TODO: how to handle #call components?
-      # See comment in ComponentTemplateResolver
       def dependencies
         # TODO: concat the results from the Erb handler, as rbx templates can also make `view_context.render` calls
         # (check if those regexes would match with the `view_context.` prefix though...)
@@ -25,8 +23,6 @@ module Rbexy
           .map { |t| t[1][:component_class] }
           .uniq
           .map(&:template_path)
-
-          # .reject(&:call_component?)
       end
 
       private
