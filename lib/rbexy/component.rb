@@ -27,7 +27,7 @@ module Rbexy
 
       @view_context = view_context
 
-      setup(**props)
+      after_initialize(**props)
     end
 
     # Override in your subclass to handle props, setup your component, etc.
@@ -72,6 +72,10 @@ module Rbexy
     def clean_template_backtrace(backtrace)
       return backtrace if Rbexy.configuration.debug
       BacktraceCleaner.new(backtrace).call
+    end
+
+    def after_initialize(**props)
+      setup(**props)
     end
   end
 end
