@@ -421,7 +421,7 @@ RBX
     ]
   end
 
-  it "tokenizes tags within a {..} block" do
+  it "tokenizes tags within a { .. } block" do
     subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times { <p>Hello</p> }}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
@@ -438,7 +438,24 @@ RBX
     ]
   end
 
-  it "tokenizes tags within a {|var|..} block" do
+  it "tokenizes tags within a {..} block (does not care about inner whitespace)" do
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times {<p>Hello</p>}}"), Rbexy::ComponentResolver.new)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times {"],
+      [:OPEN_TAG_DEF],
+      [:TAG_DETAILS, { name: "p", type: :html }],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, "}"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a { |var| .. } block" do
     subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times { |n| <p>Hello</p> }}"), Rbexy::ComponentResolver.new)
     expect(subject.tokenize).to eq [
       [:OPEN_EXPRESSION],
@@ -451,6 +468,23 @@ RBX
       [:TAG_NAME, "p"],
       [:CLOSE_TAG_END],
       [:EXPRESSION_BODY, " }"],
+      [:CLOSE_EXPRESSION],
+    ]
+  end
+
+  it "tokenizes tags within a {|var|..} block (does not care about inner whitespace)" do
+    subject = Rbexy::Lexer.new(Rbexy::Template.new("{3.times {|n|<p>Hello</p>}}"), Rbexy::ComponentResolver.new)
+    expect(subject.tokenize).to eq [
+      [:OPEN_EXPRESSION],
+      [:EXPRESSION_BODY, "3.times {|n|"],
+      [:OPEN_TAG_DEF],
+      [:TAG_DETAILS, { name: "p", type: :html }],
+      [:CLOSE_TAG_DEF],
+      [:TEXT, "Hello"],
+      [:OPEN_TAG_END],
+      [:TAG_NAME, "p"],
+      [:CLOSE_TAG_END],
+      [:EXPRESSION_BODY, "}"],
       [:CLOSE_EXPRESSION],
     ]
   end
