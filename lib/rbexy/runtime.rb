@@ -11,7 +11,7 @@ module Rbexy
     end
 
     def self.splat_attrs(attrs_hash)
-      tag_builder.tag_options(attrs_hash).html_safe
+      tag_builder.tag_options(attrs_hash)&.html_safe
     end
 
     def self.expr_out(*value)

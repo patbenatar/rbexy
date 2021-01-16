@@ -229,6 +229,10 @@ RSpec.describe Rbexy do
       .to eq '<button>hello</button>'
   end
 
+  it "supports splatting an empty hash" do
+    expect(Rbexy.evaluate('<div {**{}}></div>')).to eq '<div></div>'
+  end
+
   it "handles multi-word attrs on html elements" do
     expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz"></form>'))
       .to eq '<form accept-charset="utf-8" data-foo-bar="baz"></form>'
