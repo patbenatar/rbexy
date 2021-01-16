@@ -6,4 +6,5 @@ Rails.application.routes.draw do
   get "caching/inline", to: "caching#inline"
   get "caching/component", to: "caching#component"
   get "caching/call_component", to: "caching#call_component"
+  get "caching/partial_render", to: "caching#partial_render"
 end

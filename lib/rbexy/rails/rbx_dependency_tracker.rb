@@ -14,20 +14,24 @@ module Rbexy
       end
 
       def dependencies
-        # TODO: concat the results from the Erb handler, as rbx templates can also make `view_context.render` calls
-        # (check if those regexes would match with the `view_context.` prefix though...)
-        # Related: consider renaming `Rbexy::Component#render` to something else (maybe `#render_in` for future
-        # compat with Rails 6.1+ object rendering?) to avoid the naming collision.
+        rails_render_helper_dependencies + rbexy_dependencies
+      end
+
+      private
+
+      attr_reader :name, :template, :view_paths
+
+      def rails_render_helper_dependencies
+        ActionView::DependencyTracker::ERBTracker.call(name, template, view_paths)
+      end
+
+      def rbexy_dependencies
         Lexer.new(template, Rbexy.configuration.element_resolver).tokenize
           .select { |t| t[0] == :TAG_DETAILS && t[1][:type] == :component }
           .map { |t| t[1][:component_class] }
           .uniq
           .map(&:template_path)
       end
-
-      private
-
-      attr_reader :name, :template
 
       def source
         template.source

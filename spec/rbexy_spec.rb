@@ -113,7 +113,7 @@ RSpec.describe Rbexy do
       def initialize(context, **props)
       end
 
-      def render
+      def render_in
         "<button>"
       end
     end
@@ -128,7 +128,7 @@ RSpec.describe Rbexy do
         @user = user
       end
 
-      def render
+      def render_in
         "<img src=\"#{@user.avatar_url}\">"
       end
     end
@@ -142,7 +142,7 @@ RSpec.describe Rbexy do
       def initialize(context, **props)
       end
 
-      def render
+      def render_in
         "<div>#{yield}</div>"
       end
     end
@@ -170,7 +170,7 @@ RSpec.describe Rbexy do
         @the_class_name = the_class_name
       end
 
-      def render
+      def render_in
         "<button class=\"#{@the_class_name}\">"
       end
     end
@@ -196,7 +196,7 @@ RSpec.describe Rbexy do
         @attr2 = attr2
       end
 
-      def render
+      def render_in
         "<button attr1=\"#{@attr1}\" attr2=\"#{@attr2}\"></button>"
       end
     end
@@ -220,7 +220,7 @@ RSpec.describe Rbexy do
         @my_thing = my_thing
       end
 
-      def render
+      def render_in
         "<button>#{@my_thing}</button>"
       end
     end
@@ -253,7 +253,7 @@ RSpec.describe Rbexy do
       def initialize(*)
       end
 
-      def render
+      def render_in
         "<button />"
       end
     end
@@ -352,7 +352,7 @@ RSpec.describe Rbexy do
         @prop2 = prop2
       end
 
-      def render
+      def render_in
         "<button class=\"#{[@prop1, @prop2].join("-")}\">#{yield}</button>"
       end
     end
@@ -362,7 +362,7 @@ RSpec.describe Rbexy do
         def initialize(context, **props)
         end
 
-        def render
+        def render_in
           "<input type=\"text\" />"
         end
       end
@@ -560,7 +560,7 @@ RSpec.describe Rbexy do
           @class = kwargs[:class]
         end
 
-        def render
+        def render_in
           "<button class=\"#{@class}\"></button>"
         end
       end
@@ -607,7 +607,7 @@ RSpec.describe Rbexy do
         def initialize(*)
         end
 
-        def render
+        def render_in
           "<button></button>"
         end
       end
@@ -680,7 +680,7 @@ RSpec.describe Rbexy do
           @id = id
         end
 
-        def render
+        def render_in
           "<button id=\"#{@id}\">"
         end
       end

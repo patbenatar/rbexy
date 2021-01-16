@@ -46,7 +46,7 @@ module Rbexy
     # call super(view_context).
     def setup(**props); end
 
-    def render(&block)
+    def render_in(_context = view_context, &block)
       @content_block = block_given? ? block : nil
       self.class.call_component? ? call : _render
     end

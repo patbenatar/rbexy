@@ -92,26 +92,26 @@ RSpec.describe CachingController, type: :request do
     end
   end
 
-  # describe "fragment including Rails partial renders with `view_context.render`" do
-  #   it "caches template fragments" do
-  #     2.times { get "/caching/partial_render" }
-  #     expect(Thread.current[:cache_misses]).to eq 1
-  #   end
+  describe "fragment including Rails partial renders via `render` helper" do
+    it "caches template fragments" do
+      2.times { get "/caching/partial_render" }
+      expect(Thread.current[:cache_misses]).to eq 1
+    end
 
-  #   it "busts the cache if the partial changes" do
-  #     get "/caching/partial_render"
-  #     expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
+    it "busts the cache if the partial changes" do
+      get "/caching/partial_render"
+      expect(response.body).to have_tag("h2", text: "Hello from Cached partial")
 
-  #     template_path = Rails.root.join("app/views/caching/_partial_render_partial.rbx")
-  #     original_source = File.read(template_path)
-  #     new_source = original_source.gsub("Cached thing", "Updated thing")
-  #     @cleanup = -> { File.write(template_path, original_source) }
-  #     File.write(template_path, new_source)
+      template_path = Rails.root.join("app/views/caching/_partial_render_partial.rbx")
+      original_source = File.read(template_path)
+      new_source = original_source.gsub("Cached partial", "Updated partial")
+      @cleanup = -> { File.write(template_path, original_source) }
+      File.write(template_path, new_source)
 
-  #     get "/caching/partial_render"
-  #     expect(response.body).to have_tag("h2", text: "Hello from Updated thing")
+      get "/caching/partial_render"
+      expect(response.body).to have_tag("h2", text: "Hello from Updated partial")
 
-  #     expect(Thread.current[:cache_misses]).to eq 2
-  #   end
-  # end
+      expect(Thread.current[:cache_misses]).to eq 2
+    end
+  end
 end

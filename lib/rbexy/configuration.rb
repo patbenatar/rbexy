@@ -22,7 +22,7 @@ module Rbexy
     def component_rendering_templates
       @component_rendering_templates ||= {
         children: "{capture{%{children}}}",
-        component: "::%{component_class}.new(%{view_context},%{kwargs}).render%{children_block}"
+        component: "::%{component_class}.new(%{view_context},%{kwargs}).render_in%{children_block}"
       }
     end
   end
