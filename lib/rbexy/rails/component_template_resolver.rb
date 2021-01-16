@@ -20,23 +20,21 @@ module Rbexy
         return [] unless name.is_a? Rbexy::Component::TemplatePath
 
         templates_path = File.join(@path, prefix, name)
-        extensions = details[:handlers].join(",")
-
-        # TODO: if we don't find a matching .rbx template, look for a .rb component class (this might
-        # be a template-less #call component), and if so return an empty template with just the cachebuster comment.
-        # Then update RbxDependencyTracker to not filter out #call components, and they should _just work_.
-        # Verify that the matching component class is a #call_component? before doing this though.. as we should
-        # fail a missing template error if its a template-less non-call component.
-
-        # templates = Dir["#{templates_path}.*{#{extensions}}"]
-
-        # if templates.none?
-        #   components = Dir["#{templates_path}.rb"]
-
         component_name = prefix.present? ? File.join(prefix, name) : name
         virtual_path = Rbexy::Component::TemplatePath.new(component_name)
 
-        templates = Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
+        extensions = details[:handlers].join(",")
+        templates = find_rbx_templates(templates_path, extensions, component_name, virtual_path)
+
+        if templates.none?
+          templates = find_call_component_cachebuster_templates(templates_path, component_name, virtual_path)
+        end
+
+        templates
+      end
+
+      def find_rbx_templates(templates_path, extensions, component_name, virtual_path)
+        Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           extension = File.extname(template_path)[1..-1]
           handler = ActionView::Template.handler_for_extension(extension)
@@ -50,21 +48,22 @@ module Rbexy
             virtual_path: virtual_path
           )
         end
+      end
 
-        if templates.none? && (cachebuster = call_component_cachebuster(component_name))
-          templates = [
-            ActionView::Template.new(
-              cachebuster,
-              "#{templates_path}.rbexycall",
-              ActionView::Template.handler_for_extension(:rbx),
-              format: :rbx,
-              locals: [],
-              virtual_path: virtual_path
-            )
-          ]
-        end
+      def find_call_component_cachebuster_templates(templates_path, component_name, virtual_path)
+        component_class = find_component_class(component_name)
+        return [] unless component_class && component_class.call_component?
 
-        templates
+        [
+          ActionView::Template.new(
+            cachebuster_digest_as_comment(component_class.component_file_location, :rbx),
+            "#{templates_path}.rbexycall",
+            ActionView::Template.handler_for_extension(:rbx),
+            format: :rbx,
+            locals: [],
+            virtual_path: virtual_path
+          )
+        ]
       end
 
       def component_class_cachebuster(component_name, template_format)
@@ -72,13 +71,6 @@ module Rbexy
         return unless component_class
 
         cachebuster_digest_as_comment(component_class.component_file_location, template_format)
-      end
-
-      def call_component_cachebuster(component_name)
-        component_class = find_component_class(component_name)
-        return unless component_class && component_class.call_component?
-
-        cachebuster_digest_as_comment(component_class.component_file_location, :rbx)
       end
 
       def find_component_class(component_name)
