@@ -214,6 +214,21 @@ RSpec.describe Rbexy do
       .to eq '<button attr1="val1" attr2="val2"></button>'
   end
 
+  it "transforms dasherized splat keys on components to underscored" do
+    class ButtonComponent
+      def initialize(context, my_thing:)
+        @my_thing = my_thing
+      end
+
+      def render
+        "<button>#{@my_thing}</button>"
+      end
+    end
+
+    expect(Rbexy.evaluate('<Button {**{"my-thing" => "hello"}} />', Rbexy::Runtime.new))
+      .to eq '<button>hello</button>'
+  end
+
   it "handles multi-word attrs on html elements" do
     expect(Rbexy.evaluate('<form accept-charset="utf-8" data-foo-bar="baz"></form>'))
       .to eq '<form accept-charset="utf-8" data-foo-bar="baz"></form>'

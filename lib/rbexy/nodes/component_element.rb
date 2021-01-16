@@ -36,7 +36,7 @@ module Rbexy
         members.each_with_object("") do |member, result|
           case member
           when ExpressionGroup
-            result << "**#{member.compile},"
+            result << "**#{member.compile}.transform_keys { |k| ActiveSupport::Inflector.underscore(k).to_sym },"
           when Newline
             result << member.compile
           else
