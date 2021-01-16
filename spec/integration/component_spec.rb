@@ -9,6 +9,10 @@ RSpec.describe ApplicationController, type: :controller do
       .to have_tag("h1", text: "Hello basic template component")
   end
 
+  it "renders an rbx template that contains utf8 characters" do
+    expect(Utf8Component.new(view_context).render).to have_tag("p", text: "We’ll")
+  end
+
   it "renders an rbx template that includes child components" do
     result = BasicParentComponent.new(view_context).render
     expect(result).to have_tag("h1", text: "Parent")
