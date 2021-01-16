@@ -4,7 +4,7 @@ module Rbexy
   module Rails
     class Engine < ::Rails::Engine
       initializer "rbexy" do |app|
-        template_handler = proc { |template, source| Rbexy.compile(template) }
+        template_handler = proc { |template, source| Rbexy.compile(Rbexy::Template.new(source, template.identifier)) }
 
         ActionView::Template.register_template_handler(:rbx, template_handler)
 
