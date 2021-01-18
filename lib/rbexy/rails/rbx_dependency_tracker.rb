@@ -32,10 +32,6 @@ module Rbexy
           .uniq
           .map(&:template_path)
       end
-
-      def source
-        template.source
-      end
     end
   end
 end
