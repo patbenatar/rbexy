@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbexy (2.0.0.beta6)
+    rbexy (2.0.0.beta7)
       actionview (>= 6.0, < 7.0)
       activesupport (>= 6.0, < 7.0)
 
