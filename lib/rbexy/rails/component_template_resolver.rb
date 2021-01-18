@@ -6,7 +6,8 @@ module Rbexy
       COMMENT_SYNTAX = {
         rbx: "# %s",
         erb: "<%%# %s %%>",
-        html: "<!-- %s -->"
+        haml: "-# %s",
+        slim: "/ %s"
       }
 
       # Rails 6 requires us to override `_find_all` in order to hook
@@ -78,12 +79,13 @@ module Rbexy
       end
 
       def cachebuster_digest_as_comment(filename, format)
+        comment_template = COMMENT_SYNTAX[format.to_sym]
+        return "" unless comment_template
+
         source = File.binread(filename)
         digest = ActiveSupport::Digest.hexdigest(source)
 
-        comment_template = COMMENT_SYNTAX[format.to_sym] || COMMENT_SYNTAX[:html]
-        comment = comment_template % digest
-        "\n#{comment}"
+        "\n#{comment_template % digest}"
       end
     end
   end
