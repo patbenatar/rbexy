@@ -5,7 +5,7 @@ module Rbexy
     class ComponentTemplateResolver < ActionView::FileSystemResolver
       COMMENT_SYNTAX = {
         rbx: "# %s",
-        erb: "<%# %s %>",
+        erb: "<%%# %s %%>",
         html: "<!-- %s -->"
       }
 
