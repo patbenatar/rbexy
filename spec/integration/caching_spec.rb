@@ -5,10 +5,19 @@ RSpec.describe CachingController, type: :request do
   end
   after(:all) { Rails.cache.clear }
 
+  def wait_for_code_reload_timing_issue
+    # Hack to avoid intermittent test failures when we change the underlying source file while Rails is running.
+    # Not ideal, but acceptable IMO because the actual use case we're testing here is that you've made source changes
+    # and are re-deploying your application, which would result in the Rails server restarting. Since we don't want
+    # that kind of overhead in the test, this little hack workaround for runtime code reloading makes it so we can
+    # test that Rails does bust the cache based on source changes.
+    sleep 0.5
+  end
+
   describe "fragment caching using `<Rbexy.Cache />` component" do
     let(:template_path) { Rails.root.join("app/views/caching/inline.rbx") }
     before(:each) { FileUtils.cp(template_path, "#{template_path}.bak") }
-    after(:each) { FileUtils.mv("#{template_path}.bak", template_path) }
+    after(:each) { FileUtils.mv("#{template_path}.bak", template_path); wait_for_code_reload_timing_issue }
 
     it "caches template fragments" do
       2.times { get "/caching/inline" }
@@ -38,6 +47,7 @@ RSpec.describe CachingController, type: :request do
     after(:each) do
       FileUtils.mv("#{template_path}.bak", template_path)
       FileUtils.mv("#{class_path}.bak", class_path)
+      wait_for_code_reload_timing_issue
     end
 
     it "caches the fragment including the sub-component" do
@@ -73,7 +83,7 @@ RSpec.describe CachingController, type: :request do
   describe "fragments including #call sub-components" do
     let(:class_path) { Rails.root.join("app/components/cached_thing_call_component.rb") }
     before(:each) { FileUtils.cp(class_path, "#{class_path}.bak") }
-    after(:each) { FileUtils.mv("#{class_path}.bak", class_path) }
+    after(:each) { FileUtils.mv("#{class_path}.bak", class_path); wait_for_code_reload_timing_issue }
 
     it "caches the fragment including the sub-component" do
       2.times { get "/caching/call_component" }
@@ -96,7 +106,7 @@ RSpec.describe CachingController, type: :request do
   describe "fragment including Rails partial renders via `render` helper" do
     let(:template_path) { Rails.root.join("app/views/caching/_partial_render_partial.rbx") }
     before(:each) { FileUtils.cp(template_path, "#{template_path}.bak") }
-    after(:each) { FileUtils.mv("#{template_path}.bak", template_path) }
+    after(:each) { FileUtils.mv("#{template_path}.bak", template_path); wait_for_code_reload_timing_issue }
 
     it "caches template fragments" do
       2.times { get "/caching/partial_render" }
