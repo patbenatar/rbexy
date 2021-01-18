@@ -13,7 +13,7 @@ RSpec.describe ApplicationController, type: :controller do
   after { Rbexy.configuration.element_resolver.component_namespaces = {} }
 
   it "resolves component names in the configured namespace matching the template's location" do
-    expect(AutoNamespacing::WrappingComponent.new(view_context).render)
+    expect(AutoNamespacing::WrappingComponent.new(view_context).render_in)
       .to have_tag("h1", text: "Hello auto-namespaced component")
   end
 end

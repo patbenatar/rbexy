@@ -301,7 +301,7 @@ By default, we'll look for a template file in the same directory as the class an
 <h1>{@title}</h1>
 ```
 
-You can call this component from another `.rbx` template file (`<PageHeader title="Hello" />`)—either one rendered by another component class or a Rails view file like `app/views/products/index.rbx`. Or you can call it from ERB (or any other template language) like `PageHeaderComponent.new(self, title: "Hello").render`.
+You can call this component from another `.rbx` template file (`<PageHeader title="Hello" />`)—either one rendered by another component class or a Rails view file like `app/views/products/index.rbx`. Or you can call it from ERB (or any other template language) like `PageHeaderComponent.new(self, title: "Hello").render_in`.
 
 Your components and their templates run in the same context as traditional Rails views, so you have access to all of the view helpers you're used to as well as any custom helpers you've defined in `app/helpers/`.
 

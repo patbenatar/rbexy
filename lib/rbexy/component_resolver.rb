@@ -19,6 +19,13 @@ module Rbexy
       tspan tt u ul unknown use var video view wbr xmp
     ).to_set
 
+    def self.try_constantize
+      yield
+    rescue NameError => e
+      raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
+      nil
+    end
+
     attr_reader :component_namespaces
 
     def initialize
@@ -43,18 +50,11 @@ module Rbexy
     private
 
     def find(name)
-      find!(name)
-    rescue NameError => e
-      raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
-      nil
+      self.class.try_constantize { ActiveSupport::Inflector.constantize("#{name.gsub(".", "::")}Component") }
     end
 
     def matching_namespaces(template)
       component_namespaces.select { |path, ns| template.identifier.start_with?(path) }.values.flatten.uniq
-    end
-
-    def find!(name)
-      ActiveSupport::Inflector.constantize("#{name.gsub(".", "::")}Component")
     end
   end
 end
