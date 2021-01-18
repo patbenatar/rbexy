@@ -51,6 +51,12 @@ module Rbexy
       self.class.call_component? ? call : _render
     end
 
+    # Explicitly delegate `render` to the view_context rather than super,
+    # so `render partial: "..."` calls run in the expected context.
+    def render(*args)
+      view_context.render(*args)
+    end
+
     def content
       content_block ? content_block.call : ""
     end
