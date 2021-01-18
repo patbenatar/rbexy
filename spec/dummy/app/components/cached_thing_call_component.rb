@@ -5,6 +5,6 @@ class CachedThingCallComponent < Rbexy::Component
   end
 
   def name
-    "Updated thing"
+    "Cached thing"
   end
 end
