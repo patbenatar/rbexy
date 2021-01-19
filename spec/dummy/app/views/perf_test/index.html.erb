@@ -9,3 +9,5 @@
 <%= time do %>
   <% PerfTest::SimpleComponent.new(self).render_in %>
 <% end %>
+
+<% PerfTest::SimpleSubComponent.new(self).render_in %>

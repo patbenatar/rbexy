@@ -61,5 +61,17 @@ RSpec.describe Rbexy::Rails::ComponentTemplateResolver do
         end
       end
     end
+
+    context "component is a subclass of another component" do
+      it "returns the parent's template if the subclass doesn't implement its own" do
+
+      end
+
+      it "recursively climbs the class hierarchy until it finds a template"
+
+      it "returns an empty array if no parents provide a template"
+
+      # TODO: stuff about call components
+    end
   end
 end

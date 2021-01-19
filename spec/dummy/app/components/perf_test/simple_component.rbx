@@ -1,1 +1,1 @@
-<h2>Hello component</h2>
+<h2>Hello component {thing}</h2>
