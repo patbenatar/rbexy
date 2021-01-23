@@ -2,6 +2,26 @@
 
 [![Build Status](https://travis-ci.org/patbenatar/rbexy.svg?branch=master)](https://travis-ci.org/patbenatar/rbexy)
 
+* Getting Started
+* Template syntax
+  * Expressions
+    * As attributes
+      * Splatting attributes
+    * Tags within
+  * Components
+* Components
+  * `Rbexy::Component`
+    * Context
+  * Usage with any component library
+* Fragment caching in Rails
+* Advanced
+  * Component resolution
+    * Auto-namespacing
+  * AST Transforms
+* Usage outside of Rails
+
+## Manifesto
+
 Love JSX and component-based frontends, but sick of paying the costs of SPA development? Rbexy brings the elegance of JSX—operating on HTML elements and custom components with an interchangeable syntax—to the world of Rails server-rendered apps.
 
 Combine this with CSS Modules in your Webpacker PostCSS pipeline and you'll have a first-class frontend development experience while maintaining the development efficiency of Rails.
