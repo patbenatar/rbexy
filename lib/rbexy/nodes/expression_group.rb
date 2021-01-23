@@ -7,19 +7,27 @@ module Rbexy
       attr_accessor :members
       attr_reader :outer_template, :inner_template
 
+      DEBUGGERS = %w[debugger binding.pry]
+
       OUTPUT_UNSAFE = "@output_buffer.concat(Rbexy::Runtime.expr_out(%s));"
       OUTPUT_SAFE = "@output_buffer.safe_concat(Rbexy::Runtime.expr_out(%s));"
-      SUB_EXPR = "%s"
+      RAW = "%s"
+      DEBUGGER = "#{RAW}\n"
+      SUB_EXPR = RAW
       SUB_EXPR_OUT = "Rbexy::Runtime.expr_out(%s)"
 
-      def initialize(members, outer_template: OUTPUT_UNSAFE, inner_template: "%s")
+      def initialize(members, outer_template: OUTPUT_UNSAFE, inner_template: RAW)
         @members = members
         @outer_template = outer_template
         @inner_template = inner_template
       end
 
       def precompile
-        [ExpressionGroup.new(precompile_members, outer_template: outer_template, inner_template: inner_template)]
+        [if debugger?
+          ExpressionGroup.new(precompile_members, outer_template: DEBUGGER, inner_template: RAW)
+        else
+          ExpressionGroup.new(precompile_members, outer_template: outer_template, inner_template: inner_template)
+        end]
       end
 
       def compile
@@ -49,6 +57,12 @@ module Rbexy
         end.insert_between_types(ComponentElement, Raw) do
           Expression.new("+")
         end
+      end
+
+      def debugger?
+        members.length == 1 &&
+          members.first.is_a?(Expression) &&
+          DEBUGGERS.include?(members.first.content.strip)
       end
     end
   end
