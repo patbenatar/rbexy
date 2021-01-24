@@ -6,13 +6,10 @@
 * Template syntax
 * Components
   * `Rbexy::Component`
-    * Context
-    * Usage with ERB
   * Usage with any component library
 * Fragment caching in Rails
 * Advanced
   * Component resolution
-    * Auto-namespacing
   * AST Transforms
   * Usage outside of Rails
 
