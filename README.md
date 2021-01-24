@@ -2,16 +2,16 @@
 
 [![Build Status](https://travis-ci.org/patbenatar/rbexy.svg?branch=master)](https://travis-ci.org/patbenatar/rbexy)
 
-* Getting Started
-* Template syntax
-* Components
-  * `Rbexy::Component`
-  * Usage with any component library
-* Fragment caching in Rails
-* Advanced
-  * Component resolution
-  * AST Transforms
-  * Usage outside of Rails
+* [Getting Started](#getting-started)
+* [Template Syntax](#template-syntax)
+* [Components](#components)
+  * [`Rbexy::Component`](#rbexycomponent)
+  * [Usage with any component library](#usage-with-any-component-library)
+* [Fragment caching in Rails](#fragment-caching-in-rails)
+* [Advanced](#advanced)
+  * [Component resolution](#component-resolution)
+  * [AST Transforms](#ast-transforms)
+  * [Usage outside of Rails](#usage-outside-of-rails)
 
 ## Manifesto
 
