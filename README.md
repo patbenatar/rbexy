@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/patbenatar/rbexy.svg?branch=master)](https://travis-ci.org/patbenatar/rbexy)
 
-* [Getting Started](#getting-started)
+* [Getting Started](#getting-started-with-rails)
 * [Template Syntax](#template-syntax)
 * [Components](#components)
   * [`Rbexy::Component`](#rbexycomponent)
