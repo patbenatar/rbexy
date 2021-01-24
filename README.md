@@ -361,10 +361,13 @@ You can hook into Rbexy's compilation process to mutate the abstract syntax tree
 An example use case is automatically scoping CSS class names if you're using something like CSS Modules. Here's an oversimplified example of this:
 
 ```ruby
-config.transforms.register(Rbexy::Nodes::HTMLAttr) do |node, context|
-  if node.name == "class"
-    class_list = node.value.split(" ")
-    node.value.content = scope_names(class_list, scope: context.template.identifier)
+# config/initializers/rbexy.rb
+Rbexy.configure do |config|
+  config.transforms.register(Rbexy::Nodes::HTMLAttr) do |node, context|
+    if node.name == "class"
+      class_list = node.value.split(" ")
+      node.value.content = scope_names(class_list, scope: context.template.identifier)
+    end
   end
 end
 ```
