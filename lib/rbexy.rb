@@ -1,5 +1,6 @@
 require "rbexy/version"
 require "active_support/inflector"
+require "active_support/core_ext/enumerable"
 require "active_support/concern"
 require "action_view/helpers/output_safety_helper"
 require "action_view/helpers/capture_helper"
