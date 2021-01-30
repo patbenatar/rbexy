@@ -9,6 +9,10 @@ module Rbexy
       def to_s
         self
       end
+
+      def split(*args)
+        super.map { |s| TemplatePath.new(s) }
+      end
     end
 
     class_attribute :component_file_location
