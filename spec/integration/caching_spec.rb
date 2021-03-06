@@ -1,4 +1,4 @@
-RSpec.describe CachingController, type: :request do
+RSpec.describe CachingController, type: :request, retry: 5 do
   before(:each) do
     Rails.cache.clear
     Thread.current[:cache_misses] = 0
