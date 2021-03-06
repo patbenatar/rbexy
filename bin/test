@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+echo "Running main suite..."
+
+rspec
+
+echo "Running initial caching specs to test cold cache behavior..."
+
+rspec spec/integration/caching/before_changes_spec.rb
+
+echo "Making template source changes to allow testing of cache-busting..."
+
+# TODO: split out the second component test, can only test changes to a template once
+# templates=( "inline" "component" "call_component" "partial_render" )
+templates=( "inline" )
+for i in "${templates[@]}"
+do
+  mv spec/dummy/app/views/caching/$i.rbx spec/dummy/app/views/caching/$i.rbx.original
+  mv spec/dummy/app/views/caching/$i.rbx.changed spec/dummy/app/views/caching/$i.rbx
+done
+
+echo "Running subsequent caching specs to test cache-busting of warm cache..."
+
+rspec spec/integration/caching/after_changes_spec.rb
+
+echo "Cleaning up..."
+
+for i in "${templates[@]}"
+do
+  mv spec/dummy/app/views/caching/$i.rbx spec/dummy/app/views/caching/$i.rbx.changed
+  mv spec/dummy/app/views/caching/$i.rbx.original spec/dummy/app/views/caching/$i.rbx
+done
