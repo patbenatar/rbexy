@@ -12,11 +12,11 @@ echo "Making template source changes to allow testing of cache-busting..."
 
 # TODO: split out the second component test, can only test changes to a template once
 # templates=( "inline" "component" "call_component" "partial_render" )
-templates=( "inline" )
+templates=( "spec/dummy/app/views/caching/inline.rbx" "spec/dummy/app/components/cached_thing_component.rbx" )
 for i in "${templates[@]}"
 do
-  mv spec/dummy/app/views/caching/$i.rbx spec/dummy/app/views/caching/$i.rbx.original
-  mv spec/dummy/app/views/caching/$i.rbx.changed spec/dummy/app/views/caching/$i.rbx
+  mv $i $i.original
+  mv $i.changed $i
 done
 
 echo "Running subsequent caching specs to test cache-busting of warm cache..."
@@ -27,6 +27,6 @@ echo "Cleaning up..."
 
 for i in "${templates[@]}"
 do
-  mv spec/dummy/app/views/caching/$i.rbx spec/dummy/app/views/caching/$i.rbx.changed
-  mv spec/dummy/app/views/caching/$i.rbx.original spec/dummy/app/views/caching/$i.rbx
+  mv $i $i.changed
+  mv $i.original $i
 done

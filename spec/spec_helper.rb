@@ -1,5 +1,5 @@
 require "bundler/setup"
-require "pry"
+# require "pry"
 require "rspec-html-matchers"
 require "rspec/retry"
 require "rbexy"

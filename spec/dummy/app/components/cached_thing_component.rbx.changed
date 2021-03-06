@@ -1,0 +1,2 @@
+{Thread.current[:cache_misses] += 1}
+<h2>Goodbye from {name}</h2>

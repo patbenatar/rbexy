@@ -3,15 +3,6 @@ RSpec.describe CachingController, type: :request, retry: 5 do
   after(:all) { Rails.cache.clear }
 
   describe "fragment caching using `<Rbexy.Cache />` component" do
-    # let(:template_path) { Rails.root.join("app/views/caching/inline.rbx") }
-    # before(:each) { FileUtils.cp(template_path, "#{template_path}.bak") }
-    # after(:each) { FileUtils.mv("#{template_path}.bak", template_path); wait_for_code_reload_timing_issue }
-
-    # it "caches template fragments" do
-    #   2.times { get "/caching/inline" }
-    #   expect(Thread.current[:cache_misses]).to eq 1
-    # end
-
     it "busts the cache when the template changes" do
       get "/caching/inline"
       expect(response.body).to have_tag("h2", text: "Goodbye outer cache")
@@ -19,7 +10,7 @@ RSpec.describe CachingController, type: :request, retry: 5 do
     end
   end
 
-  # describe "fragments including template sub-components" do
+  describe "fragments including template sub-components" do
   #   # let(:template_path) { Rails.root.join("app/components/cached_thing_component.rbx") }
   #   # let(:class_path) { Rails.root.join("app/components/cached_thing_component.rb") }
   #   # before(:each) do
@@ -37,17 +28,12 @@ RSpec.describe CachingController, type: :request, retry: 5 do
   #     expect(Thread.current[:cache_misses]).to eq 1
   #   end
 
-  #   # it "busts the cache if the sub-component's template changes" do
-  #   #   get "/caching/component"
-  #   #   expect(response.body).to have_tag("h2", text: "Hello from Cached thing")
-
-  #   #   File.write(template_path, File.read(template_path).gsub("Hello", "Goodbye"))
-
-  #   #   get "/caching/component"
-  #   #   expect(response.body).to have_tag("h2", text: "Goodbye from Cached thing")
-
-  #   #   expect(Thread.current[:cache_misses]).to eq 2
-  #   # end
+    it "busts the cache when the sub-component's template changes" do
+      get "/caching/component"
+      expect(response.body).to have_tag("h2", text: "Goodbye from Cached thing")
+      expect(Thread.current[:cache_misses]).to eq 1
+    end
+  end
 
   #   # it "busts the cache if the sub-component's class source code changes" do
   #   #   get "/caching/component"
