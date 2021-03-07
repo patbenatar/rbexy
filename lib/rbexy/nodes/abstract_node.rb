@@ -17,6 +17,7 @@ module Rbexy
         @compile_context = context
         children.each { |c| c.inject_compile_context(context) } if respond_to?(:children)
         members.each { |c| c.inject_compile_context(context) } if respond_to?(:members)
+        value.inject_compile_context(context) if respond_to?(:value)
       end
 
       def transform!
@@ -24,6 +25,7 @@ module Rbexy
         ast_transformer.transform(self, compile_context)
         children.each(&:transform!) if respond_to?(:children)
         members.each(&:transform!) if respond_to?(:members)
+        value.transform! if respond_to?(:value)
       end
 
       private

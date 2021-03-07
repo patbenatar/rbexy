@@ -688,5 +688,57 @@ RSpec.describe Rbexy do
       expect(Rbexy.evaluate('<Button id="myId" />'))
         .to eq '<button id="myId-t">'
     end
+
+    it "allows transforms to manipulate the props of a component that itself is passed as a prop" do
+      Rbexy.configuration.transforms.register(Rbexy::Nodes::ComponentProp) do |node, context|
+        if node.name == "name" && node.value.is_a?(Rbexy::Nodes::Text)
+          node.value.content = "#{node.value.content}-t"
+        end
+      end
+
+      class IconComponent
+        def initialize(context, name:)
+          @name = name
+        end
+
+        def render_in
+          "<i>#{@name}</i>"
+        end
+      end
+
+      class ButtonComponent
+        def initialize(context, icon:)
+          @icon = icon
+        end
+
+        def render_in
+          "<button>#{@icon}</button>"
+        end
+      end
+
+      expect(Rbexy.evaluate('<Button icon={<Icon name="my-icon" />} />'))
+        .to eq '<button><i>my-icon-t</i></button>'
+    end
+
+    it "allows transforms to manipulate the props of an html tag that itself is passed as a prop" do
+      Rbexy.configuration.transforms.register(Rbexy::Nodes::HTMLAttr) do |node, context|
+        if node.name == "id" && node.value.is_a?(Rbexy::Nodes::Text)
+          node.value.content = "#{node.value.content}-t"
+        end
+      end
+
+      class ButtonComponent
+        def initialize(context, icon:)
+          @icon = icon
+        end
+
+        def render_in
+          "<button>#{@icon}</button>"
+        end
+      end
+
+      expect(Rbexy.evaluate('<Button icon={<i id="my-icon" />} />'))
+        .to eq '<button><i id="my-icon-t"></i></button>'
+    end
   end
 end
