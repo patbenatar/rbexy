@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+declare -i RESULT=0
+
+echo "Running main suite..."
+
+bundle exec rspec
+RESULT+=$?
+
+echo "Running initial caching specs to test cold cache behavior..."
+
+bundle exec rspec spec/integration/caching/before_changes_spec.rb
+RESULT+=$?
+
+echo "Making template source changes to allow testing of cache-busting..."
+
+templates=(
+  "spec/dummy/app/views/caching/inline.rbx"
+  "spec/dummy/app/components/cached_thing_component.rbx"
+  "spec/dummy/app/components/cached_class_thing_component.rb"
+  "spec/dummy/app/components/cached_thing_call_component.rb"
+  "spec/dummy/app/views/caching/_partial_render_partial.rbx"
+)
+for i in "${templates[@]}"
+do
+  mv $i $i.original
+  mv $i.changed $i
+done
+
+echo "Running subsequent caching specs to test cache-busting of warm cache..."
+
+bundle exec rspec spec/integration/caching/after_changes_spec.rb
+RESULT+=$?
+
+echo "Cleaning up..."
+
+for i in "${templates[@]}"
+do
+  mv $i $i.changed
+  mv $i.original $i
+done
+
+exit $RESULT

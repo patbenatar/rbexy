@@ -395,7 +395,7 @@ Rbexy.evaluate("<p class={a_method}>{@an_ivar}</p>", MyRuntime.new)
 
 ```
 docker-compose build
-docker-compose run rbexy rspec
+docker-compose run rbexy bin/test
 ```
 
 Or auto-run tests with guard if you prefer:

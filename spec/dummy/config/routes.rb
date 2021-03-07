@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get "utf8", to: "rbx_view#utf8"
   get "caching/inline", to: "caching#inline"
   get "caching/component", to: "caching#component"
+  get "caching/component_class", to: "caching#component_class"
   get "caching/call_component", to: "caching#call_component"
   get "caching/partial_render", to: "caching#partial_render"
 end
