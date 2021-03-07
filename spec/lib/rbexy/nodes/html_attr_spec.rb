@@ -5,7 +5,7 @@ RSpec.describe Rbexy::Nodes::HTMLAttr do
       transformer.register(Rbexy::Nodes::HTMLAttr) { |node, context| node.name = "#{node.name}-t1" }
       transformer.register(Rbexy::Nodes::HTMLAttr) { |node, context| node.name = "#{node.name}-t2" }
 
-      subject = Rbexy::Nodes::HTMLAttr.new("name", "value")
+      subject = Rbexy::Nodes::HTMLAttr.new("name", Rbexy::Nodes::Text.new("value"))
       subject.inject_compile_context(OpenStruct.new(ast_transformer: transformer))
 
       expect { subject.transform! }
