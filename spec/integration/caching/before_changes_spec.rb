@@ -4,6 +4,7 @@
 
 RSpec.describe CachingController, type: :request, retry: 5 do
   before(:each) { Thread.current[:cache_misses] = 0 }
+  before(:all) { Rails.cache.clear }
 
   describe "fragment caching using `<Rbexy.Cache />` component" do
     it "caches template fragments" do
