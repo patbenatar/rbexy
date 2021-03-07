@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
+declare -i RESULT=0
+
 echo "Running main suite..."
 
 rspec
+RESULT+=$?
 
 echo "Running initial caching specs to test cold cache behavior..."
 
 rspec spec/integration/caching/before_changes_spec.rb
+RESULT+=$?
 
 echo "Making template source changes to allow testing of cache-busting..."
 
@@ -22,6 +26,7 @@ done
 echo "Running subsequent caching specs to test cache-busting of warm cache..."
 
 rspec spec/integration/caching/after_changes_spec.rb
+RESULT+=$?
 
 echo "Cleaning up..."
 
@@ -30,3 +35,5 @@ do
   mv $i $i.changed
   mv $i.original $i
 done
+
+exit $RESULT
