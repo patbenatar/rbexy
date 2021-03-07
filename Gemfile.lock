@@ -176,8 +176,6 @@ GEM
       rspec-expectations (~> 3.9)
       rspec-mocks (~> 3.9)
       rspec-support (~> 3.9)
-    rspec-retry (0.6.2)
-      rspec-core (> 3.3)
     rspec-support (3.9.3)
     shellany (0.0.1)
     sprockets (4.0.2)
@@ -210,7 +208,6 @@ DEPENDENCIES
   rspec (~> 3.9)
   rspec-html-matchers (~> 0.9.3)
   rspec-rails (~> 4.0, >= 4.0.1)
-  rspec-retry (~> 0.6.2)
   sqlite3
 
 BUNDLED WITH

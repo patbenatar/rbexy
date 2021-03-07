@@ -33,7 +33,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "guard-rspec", "~> 4.7", ">= 4.7.3"
   spec.add_development_dependency "rspec-rails", "~> 4.0", ">= 4.0.1"
   spec.add_development_dependency "rspec-html-matchers", "~> 0.9.3"
-  spec.add_development_dependency "rspec-retry", "~> 0.6.2"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "sqlite3"

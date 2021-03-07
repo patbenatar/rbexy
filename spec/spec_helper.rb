@@ -1,7 +1,6 @@
 require "bundler/setup"
 require "pry"
 require "rspec-html-matchers"
-require "rspec/retry"
 require "rbexy"
 require "memory_profiler"
 
