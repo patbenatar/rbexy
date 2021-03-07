@@ -1,0 +1,5 @@
+class CachedClassThingComponent < Rbexy::Component
+  def name
+    "Updated thing"
+  end
+end

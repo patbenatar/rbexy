@@ -14,9 +14,13 @@ RESULT+=$?
 
 echo "Making template source changes to allow testing of cache-busting..."
 
-# TODO: split out the second component test, can only test changes to a template once
-# templates=( "inline" "component" "call_component" "partial_render" )
-templates=( "spec/dummy/app/views/caching/inline.rbx" "spec/dummy/app/components/cached_thing_component.rbx" )
+templates=(
+  "spec/dummy/app/views/caching/inline.rbx"
+  "spec/dummy/app/components/cached_thing_component.rbx"
+  "spec/dummy/app/components/cached_class_thing_component.rb"
+  "spec/dummy/app/components/cached_thing_call_component.rb"
+  "spec/dummy/app/views/caching/_partial_render_partial.rbx"
+)
 for i in "${templates[@]}"
 do
   mv $i $i.original
