@@ -86,8 +86,8 @@ module Rbexy
       raise error
     end
 
-    def method_missing(meth, *args, &block)
-      view_context.send(meth, *args, &block)
+    def method_missing(meth, *args, **kwargs, &block)
+      view_context.send(meth, *args, **kwargs, &block)
     end
 
     def respond_to_missing?(method_name, include_all)

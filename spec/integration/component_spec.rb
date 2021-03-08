@@ -29,6 +29,11 @@ RSpec.describe ApplicationController, type: :controller do
       .to have_tag("h1", text: "ivar value")
   end
 
+  it "correctly uses methods from the context with keywords" do
+    expect(MethodMissingComponent.new(view_context).render_in)
+      .to have_tag("h1", text: "1 2 3")
+  end
+
   it "passes props to #setup" do
     expect(PropsComponent.new(view_context, my_prop: "prop value").render_in)
       .to have_tag("h1", text: "prop value after setup")
