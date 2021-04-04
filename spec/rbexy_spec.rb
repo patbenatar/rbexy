@@ -43,6 +43,20 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  it "handles single quotes inside string attributes" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <h1 data-confirm="You're cool, eh?">Hello world</h1>
+    RBX
+
+    result = Rbexy.evaluate(template_string)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <h1 data-confirm="You're cool, eh?">Hello world</h1>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   it "supports the or operator" do
     template_string = <<-RBX.strip_heredoc.strip
       {true && <p>Is true</p> || <p>Is false</p>}
