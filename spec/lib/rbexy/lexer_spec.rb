@@ -784,6 +784,17 @@ RBX
       ]
     end
 
+    it "does not treat pound signs in the middle of a line as a comment" do
+      template_string = <<-RBX.strip_heredoc.strip
+        Hello # pound sign
+      RBX
+
+      subject = Rbexy::Lexer.new(Rbexy::Template.new(template_string), Rbexy::ComponentResolver.new)
+      expect(subject.tokenize).to eq [
+        [:TEXT, "Hello # pound sign\n"]
+      ]
+    end
+
     it "tokenizes the first line if starting with # as NEWLINE" do
       template_string = <<-RBX.strip_heredoc.strip
         # some comment

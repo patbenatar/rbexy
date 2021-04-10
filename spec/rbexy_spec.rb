@@ -503,6 +503,38 @@ RSpec.describe Rbexy do
     expect(result).to eq expected
   end
 
+  it "compiles out comments, keeping the line numbers intact" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <h1>Here it comes</h1>
+      # A comment
+      <p>A paragraph</p>
+    RBX
+
+    result = Rbexy.evaluate(template_string)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <h1>Here it comes</h1>
+
+      <p>A paragraph</p>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
+  it "does not treat pound signs in the middle of a line as a comment" do
+    template_string = <<-RBX.strip_heredoc.strip
+      <p>A paragraph with a # pound sign</p>
+    RBX
+
+    result = Rbexy.evaluate(template_string)
+
+    expected = <<-OUTPUT.strip_heredoc.strip
+      <p>A paragraph with a # pound sign</p>
+    OUTPUT
+
+    expect(result).to eq expected
+  end
+
   describe "array expressions" do
     it "compiles and joins rbx returned from loops like `map`" do
       template_string = <<-RBX.strip_heredoc.strip
