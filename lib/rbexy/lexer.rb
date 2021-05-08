@@ -58,8 +58,12 @@ module Rbexy
             open_tag_def
           elsif scanner.scan(Patterns.open_expression)
             open_expression
-          elsif scanner.scan(Patterns.comment)
-            tokens << [:NEWLINE]
+          elsif scanner.check(Patterns.comment)
+            if scanner.beginning_of_line? && scanner.scan(Patterns.comment)
+              tokens << [:NEWLINE]
+            else
+              stack.push(:default_text)
+            end
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
@@ -73,8 +77,12 @@ module Rbexy
             stack.push(:tag_end)
           elsif scanner.scan(Patterns.open_expression)
             open_expression
-          elsif scanner.scan(Patterns.comment)
-            tokens << [:NEWLINE]
+          elsif scanner.check(Patterns.comment)
+            if scanner.beginning_of_line? && scanner.scan(Patterns.comment)
+              tokens << [:NEWLINE]
+            else
+              stack.push(:default_text)
+            end
           elsif scanner.check(Patterns.text_content)
             stack.push(:default_text)
           else
