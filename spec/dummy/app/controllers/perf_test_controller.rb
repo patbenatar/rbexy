@@ -13,7 +13,7 @@ class PerfTestController < ActionController::Base
       (Time.now.to_f - start.to_f) * 1000
     end
 
-    avg_duration = (times.sum.to_f / times.count).round(2)
+    avg_duration = (times.sum.to_f / times.count).round(5)
 
     "<div>Avg time (ms): #{avg_duration}</div>".html_safe
   end

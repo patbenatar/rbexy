@@ -5,12 +5,24 @@
   <% render "simple_partial" %>
 <% end %>
 
-<h1>Rbexy component w/ template</h1>
+<h1>Inline HTML</h1>
 <%= time do %>
-  <% PerfTest::SimpleComponent.new(self).render_in %>
+  <!-- <h1>Hello inline</h1> -->
 <% end %>
 
 <h1>Rbexy component w/ call</h1>
 <%= time do %>
   <% PerfTest::CallComponent.new(self).render_in %>
 <% end %>
+
+<h1>Rbexy::Component</h1>
+<%= time do %>
+  <!-- <% PerfTest::SimpleComponent.new(self).render_in %> -->
+<% end %>
+
+<h1>Rbexy::FastComponent</h1>
+<%= time do %>
+  <!-- <% PerfTest::FastComponent.new(self).render_in %> -->
+<% end %>
+
+<% PerfTest::FastComponent.new(self).render_in %>
