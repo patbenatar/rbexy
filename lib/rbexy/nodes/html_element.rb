@@ -1,7 +1,11 @@
 module Rbexy
   module Nodes
     class HTMLElement < AbstractElement
-      KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::VOID_ELEMENTS.map(&:to_s).to_set
+      if ActionView.version >= Gem::Version.new("7.0.0")
+        KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::HTML_VOID_ELEMENTS.map(&:to_s).to_set
+      else
+        KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::VOID_ELEMENTS.map(&:to_s).to_set
+      end
 
       def precompile
         nodes = []
