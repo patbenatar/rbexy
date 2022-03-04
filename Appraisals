@@ -1,5 +1,6 @@
 appraise 'rails-6-1' do
   gem 'rails', '~> 6.1.4'
+  gem 'net-smtp', require: false
 end
 
 appraise 'rails-7-0' do
