@@ -404,6 +404,26 @@ Or auto-run tests with guard if you prefer:
 docker-compose run rbexy guard
 ```
 
+If you want to run against the supported versions of Rails, use
+Appraisal:
+
+```
+docker-compose run rbexy appraisal bin/test
+```
+
+## Debugging TemplatePath methods being called
+When a new version of Rails is released, we need to check what methods are being
+called on `Rbexy::Component::TemplatePath` to make sure we always return
+a TemplatePath, not a string due to how we handle `TemplatePath`s
+internally.
+
+To list all methods being called, enable `RBEXY_TEMPLATE_PATH_DEBUG` and
+run tests:
+
+```
+docker-compose run -e RBEXY_TEMPLATE_PATH_DEBUG=1 rbexy appraisal bin/test
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/patbenatar/rbexy. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/patbenatar/rbexy/blob/master/CODE_OF_CONDUCT.md).

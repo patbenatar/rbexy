@@ -2,3 +2,4 @@ spec/dummy/log/*
 pkg/
 spec/dummy/tmp/*
 spec/dummy/db/*
+.bundle

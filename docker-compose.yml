@@ -2,7 +2,6 @@ version: '3'
 
 volumes:
   bundle:
-  bundle_ruby2:
 
 services:
   rbexy:
@@ -14,14 +13,6 @@ services:
       - $HOME/.ssh:/root/.ssh:ro
       - $HOME/.gitconfig:/root/.gitconfig:ro
       - $HOME/.gem/credentials:/root/.gem/credentials
-    working_dir: /app
-  rbexy_ruby2:
-    build:
-      context: .
-      dockerfile: Dockerfile-ruby2
-    volumes:
-      - .:/app
-      - bundle_ruby2:/usr/local/bundle
     working_dir: /app
   dummy:
     image: rbexy
