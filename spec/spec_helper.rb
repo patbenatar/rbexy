@@ -79,3 +79,12 @@ RSpec.configure do |config|
 
   config.filter_run_when_matching :focus
 end
+
+if ENV["RBEXY_TEMPLATE_PATH_DEBUG"] == "1"
+  trace = TracePoint.new(:call) do |tp|
+    if tp.self.class == Rbexy::Component::TemplatePath
+      puts "#{tp.self.class}##{tp.method_id}"
+    end
+  end
+  trace.enable
+end
