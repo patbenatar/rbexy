@@ -4,4 +4,5 @@ RUN apt-get update -qq
 WORKDIR /app
 
 COPY . .
-RUN bundle install
+RUN bundle
+RUN bundle exec appraisal bundle 
