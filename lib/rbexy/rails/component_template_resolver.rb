@@ -10,9 +10,21 @@ module Rbexy
         slim: "/ %s"
       }
 
-      # Rails 6 requires us to override `_find_all` in order to hook
-      def _find_all(name, prefix, partial, details, key, locals)
-        find_templates(name, prefix, partial, details, locals)
+      # Rails 6 and 7 require us to override `_find_all` in order to hook
+      if ActionView.version >= Gem::Version.new("7.0.0")
+        # Rails 7 implements caching internally to _find_all
+        def _find_all(name, prefix, partial, details, key, locals)
+          cache = key ? @unbound_templates : Concurrent::Map.new
+
+          cache.compute_if_absent(ActionView::TemplatePath.virtual(name, prefix, partial)) do
+            find_templates(name, prefix, partial, details, locals)
+          end
+        end
+      else
+        # Rails 6 implements caching at the call-site (find_all)
+        def _find_all(name, prefix, partial, details, key, locals)
+          find_templates(name, prefix, partial, details, locals)
+        end
       end
 
       # Rails 5 only requires `find_templates` (which tbh is the proper way

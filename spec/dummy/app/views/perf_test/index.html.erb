@@ -9,3 +9,8 @@
 <%= time do %>
   <% PerfTest::SimpleComponent.new(self).render_in %>
 <% end %>
+
+<h1>Rbexy component w/ call</h1>
+<%= time do %>
+  <% PerfTest::CallComponent.new(self).render_in %>
+<% end %>
