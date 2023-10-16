@@ -87,6 +87,7 @@ module Rbexy
       template.render(self, {})
     rescue ActionView::Template::Error => error
       error.set_backtrace clean_template_backtrace(error.backtrace)
+      error.cause.set_backtrace clean_template_backtrace(error.cause.backtrace)
       raise error
     end
 
