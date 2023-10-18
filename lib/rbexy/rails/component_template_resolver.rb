@@ -18,12 +18,12 @@ module Rbexy
 
           cache.compute_if_absent(ActionView::TemplatePath.virtual(name, prefix, partial)) do
             find_templates(name, prefix, partial, details, locals)
-          end
+          end.map { |t| t.bind_locals(locals) }
         end
       else
         # Rails 6 implements caching at the call-site (find_all)
         def _find_all(name, prefix, partial, details, key, locals)
-          find_templates(name, prefix, partial, details, locals)
+          find_templates(name, prefix, partial, details, locals).map { |t| t.bind_locals(locals) }
         end
       end
 
@@ -81,7 +81,7 @@ module Rbexy
             template_path,
             details: ActionView::TemplateDetails.new(nil, extension, extension, nil),
             virtual_path: virtual_path
-          ).bind_locals([])
+          )
         end
       else
         def build_template(source:, template_path:, extension:, virtual_path:)
@@ -91,7 +91,7 @@ module Rbexy
             ActionView::Template.handler_for_extension(extension),
             format: extension.to_sym,
             virtual_path: virtual_path
-          ).bind_locals([])
+          )
         end
       end
 
