@@ -408,7 +408,7 @@ If you want to run against the supported versions of Rails, use
 Appraisal:
 
 ```
-docker-compose run rbexy appraisal bin/test
+docker-compose run rbexy bundle exec appraisal bin/test
 ```
 
 ## Debugging TemplatePath methods being called
