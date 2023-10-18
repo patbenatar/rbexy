@@ -421,7 +421,7 @@ To list all methods being called, enable `RBEXY_TEMPLATE_PATH_DEBUG` and
 run tests:
 
 ```
-docker-compose run -e RBEXY_TEMPLATE_PATH_DEBUG=1 rbexy appraisal bin/test
+docker-compose run -e RBEXY_TEMPLATE_PATH_DEBUG=1 rbexy bundle exec appraisal bin/test
 ```
 
 ## Contributing
