@@ -45,6 +45,11 @@ RSpec.describe ApplicationController, type: :controller do
     expect(result).to have_tag("h1", text: "Text in a child")
   end
 
+  it "renders empty parent components when they have no children" do
+    result = WithChildren::EmptyChildrenComponent.new(view_context).render_in
+    expect(result.gsub(/\s{2,}/, "")).to eq '<div class="parent"><h1>Here come the children...</h1><h1>Text in a child</h1></div><div class="parent"><h1>Here come the children...</h1></div>'
+  end
+
   it "allows the component to implement #call instead of a template" do
     class MyCallComponent < Rbexy::Component
       def call

@@ -5,7 +5,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gemfile: [rails_6_1, rails_7_0, rails_master]
+        gemfile: [rails_6_1, rails_7_0, rails_7_1, rails_master]
         # Due to https://github.com/actions/runner/issues/849, we have to use quotes for '3.0'
         ruby: [2.7, '3.0', 3.1]
     runs-on: ubuntu-latest

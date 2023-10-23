@@ -18,12 +18,12 @@ module Rbexy
 
           cache.compute_if_absent(ActionView::TemplatePath.virtual(name, prefix, partial)) do
             find_templates(name, prefix, partial, details, locals)
-          end
+          end.map { |t| t.bind_locals(locals) }
         end
       else
         # Rails 6 implements caching at the call-site (find_all)
         def _find_all(name, prefix, partial, details, key, locals)
-          find_templates(name, prefix, partial, details, locals)
+          find_templates(name, prefix, partial, details, locals).map { |t| t.bind_locals(locals) }
         end
       end
 
@@ -50,14 +50,11 @@ module Rbexy
         Dir["#{templates_path}.*{#{extensions}}"].map do |template_path|
           source = File.binread(template_path)
           extension = File.extname(template_path)[1..-1]
-          handler = ActionView::Template.handler_for_extension(extension)
 
-          ActionView::Template.new(
-            "#{source}#{component_class_cachebuster(component_name, extension)}",
-            template_path,
-            handler,
-            format: extension.to_sym,
-            locals: [],
+          build_template(
+            source: "#{source}#{component_class_cachebuster(component_name, extension)}",
+            template_path: template_path,
+            extension: extension.to_sym,
             virtual_path: virtual_path
           )
         end
@@ -68,15 +65,34 @@ module Rbexy
         return [] unless component_class && component_class.call_component?
 
         [
-          ActionView::Template.new(
-            cachebuster_digest_as_comment(component_class.component_file_location, :rbx),
-            "#{templates_path}.rbexycall",
-            ActionView::Template.handler_for_extension(:rbx),
-            format: :rbx,
-            locals: [],
+          build_template(
+            source: cachebuster_digest_as_comment(component_class.component_file_location, :rbx),
+            template_path: "#{templates_path}.rbexycall",
+            extension: :rbx,
             virtual_path: virtual_path
           )
         ]
+      end
+
+      if ActionView.version >= Gem::Version.new("7.0.0")
+        def build_template(source:, template_path:, extension:, virtual_path:)
+          ActionView::UnboundTemplate.new(
+            source,
+            template_path,
+            details: ActionView::TemplateDetails.new(nil, extension, extension, nil),
+            virtual_path: virtual_path
+          )
+        end
+      else
+        def build_template(source:, template_path:, extension:, virtual_path:)
+          ActionView::UnboundTemplate.new(
+            source,
+            template_path,
+            ActionView::Template.handler_for_extension(extension),
+            format: extension.to_sym,
+            virtual_path: virtual_path
+          )
+        end
       end
 
       def component_class_cachebuster(component_name, template_format)

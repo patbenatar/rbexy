@@ -408,7 +408,7 @@ If you want to run against the supported versions of Rails, use
 Appraisal:
 
 ```
-docker-compose run rbexy appraisal bin/test
+docker-compose run rbexy bundle exec appraisal bin/test
 ```
 
 ## Debugging TemplatePath methods being called
@@ -421,7 +421,7 @@ To list all methods being called, enable `RBEXY_TEMPLATE_PATH_DEBUG` and
 run tests:
 
 ```
-docker-compose run -e RBEXY_TEMPLATE_PATH_DEBUG=1 rbexy appraisal bin/test
+docker-compose run -e RBEXY_TEMPLATE_PATH_DEBUG=1 rbexy bundle exec appraisal bin/test
 ```
 
 ## Contributing
