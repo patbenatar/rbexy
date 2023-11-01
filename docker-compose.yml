@@ -25,3 +25,5 @@ services:
       - 3000:3000
     environment:
       - RAILS_LOG_STDOUT=1
+    tty: true
+    stdin_open: true
