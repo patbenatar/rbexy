@@ -1,4 +1,4 @@
-require_relative 'boot'
+require_relative "boot"
 
 require "rails"
 # Pick the frameworks you want:
@@ -36,4 +36,3 @@ module Dummy
     config.eager_load_paths.concat(ATOMIC_COMPONENT_PATHS)
   end
 end
-
