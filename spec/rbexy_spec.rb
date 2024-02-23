@@ -1,8 +1,6 @@
 require "active_support/core_ext/string/strip"
 require "active_support/all"
-require "action_view/helpers"
-require "action_view/context"
-require "action_view/buffers"
+require "action_view"
 
 RSpec.describe Rbexy do
   it "has a version number" do

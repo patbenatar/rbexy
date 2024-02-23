@@ -63,12 +63,6 @@ gem "rbexy"
 
 _From 1.0 onward, we only support Rails 6. If you're using Rails 5, use the 0.x releases._
 
-In `config/application.rb`:
-
-```ruby
-require "rbexy/rails/engine"
-```
-
 _Not using Rails? See "Usage outside of Rails" below._
 
 Create your first component at `app/components/hello_world_component.rb`:
