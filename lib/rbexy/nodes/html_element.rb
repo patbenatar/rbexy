@@ -1,11 +1,8 @@
 module Rbexy
   module Nodes
     class HTMLElement < AbstractElement
-      if ActionView.version >= Gem::Version.new("7.0.0")
-        KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::HTML_VOID_ELEMENTS.map(&:to_s).to_set
-      else
-        KNOWN_VOID_ELEMENTS = ActionView::Helpers::TagHelper::TagBuilder::VOID_ELEMENTS.map(&:to_s).to_set
-      end
+      # Referenced from https://html.spec.whatwg.org/#void-elements
+      HTML_VOID_ELEMENTS = %w(area base br col embed hr img input link meta source track wbr)
 
       def precompile
         nodes = []
@@ -24,7 +21,7 @@ module Rbexy
       private
 
       def void?
-        KNOWN_VOID_ELEMENTS.include?(name)
+        HTML_VOID_ELEMENTS.include?(name)
       end
 
       def precompile_open_tag
