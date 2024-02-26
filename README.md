@@ -1,6 +1,6 @@
 # A Ruby template language inspired by JSX
 
-[![Build Status](https://travis-ci.org/patbenatar/rbexy.svg?branch=master)](https://travis-ci.org/patbenatar/rbexy)
+[![Build Status](https://github.com/patbenatar/rbexy/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/patbenatar/rbexy/actions?query=branch%3Amaster)
 
 * [Getting Started](#getting-started-with-rails)
 * [Template Syntax](#template-syntax)
