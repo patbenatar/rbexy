@@ -405,6 +405,12 @@ Appraisal:
 docker-compose run rbexy bundle exec appraisal bin/test
 ```
 
+When updating dependency versions in gemspec, you also need to regenerate the appraisal gemspecs with:
+
+```
+docker-compose run rbexy bundle exec appraisal install
+```
+
 ## Debugging TemplatePath methods being called
 When a new version of Rails is released, we need to check what methods are being
 called on `Rbexy::Component::TemplatePath` to make sure we always return
