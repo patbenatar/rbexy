@@ -1,9 +1,9 @@
 PATH
   remote: ..
   specs:
-    rbexy (2.0.0.rc4)
-      actionview (>= 6, < 7.2)
-      activesupport (>= 6, < 7.2)
+    rbexy (2.0.0.rc5)
+      actionview (>= 6, < 7.3)
+      activesupport (>= 6, < 7.3)
 
 GEM
   remote: https://rubygems.org/
