@@ -13,4 +13,10 @@ RSpec.describe RbxViewController, type: :controller do
     get :utf8
     expect(response.body).to have_tag("p", text: "We’ll")
   end
+
+  it "renders nested components with splat attributes through a full request" do
+    get :nested_splat
+    expect(response.body).to have_tag("a", with: { href: "/foo", class: "child-link" }, text: /Link One/)
+    expect(response.body).to have_tag("a", with: { href: "/bar", class: "child-link" }, text: /Link Two/)
+  end
 end

@@ -5,9 +5,7 @@ module Rbexy
     include ComponentContext
 
     def self.tag_builder
-      # TagBuilder requires a view_context arg, but it's only used in #tag_string.
-      # Since all we need is #tag_options, we pass in a nil view_context.
-      @tag_builder ||= TagBuilder.new(nil)
+      @tag_builder ||= TagBuilder.new(new)
     end
 
     def self.splat_attrs(attrs_hash)
