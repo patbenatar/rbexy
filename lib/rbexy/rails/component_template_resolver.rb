@@ -18,8 +18,6 @@ module Rbexy
         end.map { |t| t.bind_locals(locals) }
       end
 
-      # Rails 5 only requires `find_templates` (which tbh is the proper way
-      # to implement subclasses of ActionView::Resolver)
       def find_templates(name, prefix, partial, details, locals = [])
         return [] unless name.is_a? Rbexy::Component::TemplatePath
 
