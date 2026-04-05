@@ -1,31 +1,30 @@
 module Rbexy
   module Rails
-    class RbxDependencyTracker
-      def self.supports_view_paths?
-        true
-      end
-
-      def self.call(name, template, view_paths = nil)
-        new(name, template, view_paths).dependencies
-      end
-
-      def initialize(name, template, view_paths = nil)
-        @name, @template, @view_paths = name, template, view_paths
-      end
-
+    class RbxDependencyTracker < ActionView::DependencyTracker::ERBTracker
       def dependencies
-        rails_render_helper_dependencies + rbexy_dependencies
+        super + rbexy_component_dependencies
       end
 
       private
 
-      attr_reader :name, :template, :view_paths
+      def render_dependencies
+        dependencies = []
 
-      def rails_render_helper_dependencies
-        ActionView::DependencyTracker::ERBTracker.call(name, template, view_paths)
+        # Scan for render calls inside Rbexy {expr} expressions
+        render_calls = source.scan(/\{(?:(?:(?!\{).)*?\brender\b((?:(?!\}).)*?))\}/m).flatten
+
+        # Also scan for ERB-style render calls (in case of mixed syntax)
+        render_calls += source.scan(/<%(?:(?:(?!<%).)*?\brender\b((?:(?!%>).)*?))%>/m).flatten
+
+        render_calls.each do |arguments|
+          add_dependencies(dependencies, arguments, LAYOUT_DEPENDENCY)
+          add_dependencies(dependencies, arguments, RENDER_ARGUMENTS)
+        end
+
+        dependencies
       end
 
-      def rbexy_dependencies
+      def rbexy_component_dependencies
         Lexer.new(template, Rbexy.configuration.element_resolver).tokenize
           .select { |t| t[0] == :TAG_DETAILS && t[1][:type] == :component }
           .map { |t| t[1][:component_class] }
