@@ -104,8 +104,8 @@ PATH
   remote: ..
   specs:
     rbexy (2.0.0.rc5)
-      actionview (>= 6, < 8.2)
-      activesupport (>= 6, < 8.2)
+      actionview (>= 7.0, < 8.2)
+      activesupport (>= 7.0, < 8.2)
 
 GEM
   remote: https://rubygems.org/
@@ -136,6 +136,8 @@ GEM
     ffi (1.17.4-arm-linux-gnu)
     ffi (1.17.4-arm-linux-musl)
     ffi (1.17.4-arm64-darwin)
+    ffi (1.17.4-x86-linux-gnu)
+    ffi (1.17.4-x86-linux-musl)
     ffi (1.17.4-x86_64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     ffi (1.17.4-x86_64-linux-musl)
@@ -306,6 +308,8 @@ GEM
     sqlite3 (2.9.2-arm-linux-gnu)
     sqlite3 (2.9.2-arm-linux-musl)
     sqlite3 (2.9.2-arm64-darwin)
+    sqlite3 (2.9.2-x86-linux-gnu)
+    sqlite3 (2.9.2-x86-linux-musl)
     sqlite3 (2.9.2-x86_64-darwin)
     sqlite3 (2.9.2-x86_64-linux-gnu)
     sqlite3 (2.9.2-x86_64-linux-musl)
@@ -330,6 +334,8 @@ PLATFORMS
   arm-linux-musl
   arm64-darwin
   ruby
+  x86-linux-gnu
+  x86-linux-musl
   x86_64-darwin
   x86_64-linux
   x86_64-linux-gnu

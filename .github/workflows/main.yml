@@ -5,9 +5,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gemfile: [rails_6_1, rails_7_0, rails_7_1, rails_7_2, rails_8_1, rails_master]
+        gemfile: [rails_7_0, rails_7_1, rails_7_2, rails_8_1, rails_master]
         # quote version numbers, they are not "numbers"
-        ruby: ['3.1', '3.2', '3.3']
+        ruby: ['3.2', '3.3']
     runs-on: ubuntu-latest
     env: # $BUNDLE_GEMFILE must be set at the job level, so it is set for all steps
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile

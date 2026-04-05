@@ -10,21 +10,12 @@ module Rbexy
         slim: "/ %s"
       }
 
-      # Rails 6 and 7 require us to override `_find_all` in order to hook
-      if ActionView.version >= Gem::Version.new("7.0.0")
-        # Rails 7 implements caching internally to _find_all
-        def _find_all(name, prefix, partial, details, key, locals)
-          cache = key ? @unbound_templates : Concurrent::Map.new
+      def _find_all(name, prefix, partial, details, key, locals)
+        cache = key ? @unbound_templates : Concurrent::Map.new
 
-          cache.compute_if_absent(ActionView::TemplatePath.virtual(name, prefix, partial)) do
-            find_templates(name, prefix, partial, details, locals)
-          end.map { |t| t.bind_locals(locals) }
-        end
-      else
-        # Rails 6 implements caching at the call-site (find_all)
-        def _find_all(name, prefix, partial, details, key, locals)
-          find_templates(name, prefix, partial, details, locals).map { |t| t.bind_locals(locals) }
-        end
+        cache.compute_if_absent(ActionView::TemplatePath.virtual(name, prefix, partial)) do
+          find_templates(name, prefix, partial, details, locals)
+        end.map { |t| t.bind_locals(locals) }
       end
 
       # Rails 5 only requires `find_templates` (which tbh is the proper way
@@ -74,25 +65,13 @@ module Rbexy
         ]
       end
 
-      if ActionView.version >= Gem::Version.new("7.0.0")
-        def build_template(source:, template_path:, extension:, virtual_path:)
-          ActionView::UnboundTemplate.new(
-            source,
-            template_path,
-            details: ActionView::TemplateDetails.new(nil, extension, extension, nil),
-            virtual_path: virtual_path
-          )
-        end
-      else
-        def build_template(source:, template_path:, extension:, virtual_path:)
-          ActionView::UnboundTemplate.new(
-            source,
-            template_path,
-            ActionView::Template.handler_for_extension(extension),
-            format: extension.to_sym,
-            virtual_path: virtual_path
-          )
-        end
+      def build_template(source:, template_path:, extension:, virtual_path:)
+        ActionView::UnboundTemplate.new(
+          source,
+          template_path,
+          details: ActionView::TemplateDetails.new(nil, extension, extension, nil),
+          virtual_path: virtual_path
+        )
       end
 
       def component_class_cachebuster(component_name, template_format)
