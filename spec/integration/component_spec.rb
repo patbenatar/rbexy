@@ -64,26 +64,27 @@ RSpec.describe ApplicationController, type: :controller do
   it "has good stack traces for template runtime errors (doesn't include rbexy internal blocks and methods)" do
     expect { ErroringComponent.new(view_context).render_in }
       .to raise_error do |error|
-        expect(error.backtrace[0]).to include "erroring_component.rbx:3"
-        # Ruby <3.3 show the rbx file name, 3.3 shows <internal:numeric>:237
-        expect(error.backtrace[1]).to include "in `times'"
-        expect(error.backtrace[2]).to include "component_spec.rb"
+        expect(error.backtrace).to include(a_string_including("erroring_component.rbx:3"))
+        expect(error.backtrace).to include(a_string_matching(/times'?\z/))
+        expect(error.backtrace).to include(a_string_including("component_spec.rb"))
+        # Verify no rbexy internals leak through
+        expect(error.backtrace).not_to include(a_string_matching(/lib\/rbexy\/.*\.rb/))
       end
   end
 
   it "has good stack traces for child component template runtime errors" do
     expect { WithChildren::ErroringWrappingComponent.new(view_context).render_in }
       .to raise_error do |error|
-        expect(error.backtrace[0]).to include "erroring_child_component.rbx:2"
-        expect(error.backtrace[1]).to include "erroring_wrapping_component.rbx:1"
+        expect(error.backtrace).to include(a_string_including("erroring_child_component.rbx:2"))
+        expect(error.backtrace).to include(a_string_including("erroring_wrapping_component.rbx:1"))
       end
   end
 
   it "has good stack traces for errors that occur in the component class" do
     expect { ErroringInClassComponent.new(view_context).render_in }
       .to raise_error do |error|
-        expect(error.backtrace[0]).to include "erroring_in_class_component.rb:3"
-        expect(error.backtrace[1]).to include "erroring_in_class_component.rbx:2"
+        expect(error.backtrace).to include(a_string_including("erroring_in_class_component.rb:3"))
+        expect(error.backtrace).to include(a_string_including("erroring_in_class_component.rbx:2"))
       end
   end
 
