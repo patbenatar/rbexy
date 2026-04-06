@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "activesupport", ">= 7.0", "< 8.2"
   spec.add_dependency "actionview", ">= 7.0", "< 8.2"
+  spec.add_dependency "ostruct"
 
   spec.add_development_dependency "appraisal", "~> 2.2"
   spec.add_development_dependency "rails", ">= 7.0", "< 8.2"
