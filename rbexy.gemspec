@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "A Ruby template language inspired by JSX"
   spec.homepage      = "https://github.com/patbenatar/rbexy"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.3.0")
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
@@ -25,11 +25,11 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activesupport", ">= 6", "< 7.3"
-  spec.add_dependency "actionview", ">= 6", "< 7.3"
+  spec.add_dependency "activesupport", ">= 7.0", "< 8.2"
+  spec.add_dependency "actionview", ">= 7.0", "< 8.2"
 
   spec.add_development_dependency "appraisal", "~> 2.2"
-  spec.add_development_dependency "rails", ">= 6", "< 7.3"
+  spec.add_development_dependency "rails", ">= 7.0", "< 8.2"
   spec.add_development_dependency "sprockets-rails", ">= 2", "< 4"
   spec.add_development_dependency "rspec", "~> 3.12"
   spec.add_development_dependency "guard-rspec", "~> 4.7", ">= 4.7.3"

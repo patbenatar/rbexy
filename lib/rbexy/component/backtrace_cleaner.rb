@@ -29,7 +29,8 @@ module Rbexy
       def internal_method_call?(line)
         line =~ /lib\/rbexy\/.*\.rb/ ||
           line =~ /lib\/action_view\/.*\.rb/ ||
-          line =~ /lib\/active_support\/notifications\.rb/
+          line =~ /lib\/active_support\/notifications\.rb/ ||
+          line =~ /lib\/rails\/engine\/lazy_route_set\.rb/
       end
 
       def redundant_internal_block?(line, template)

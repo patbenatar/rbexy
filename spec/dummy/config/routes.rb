@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   get "controller_context" => "context#index"
   get "perf_test", to: "perf_test#index"
   get "utf8", to: "rbx_view#utf8"
+  get "nested_splat", to: "rbx_view#nested_splat"
   get "caching/inline", to: "caching#inline"
   get "caching/component", to: "caching#component"
   get "caching/component_class", to: "caching#component_class"

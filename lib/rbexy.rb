@@ -1,4 +1,5 @@
 require "rbexy/version"
+require "ostruct"
 require "active_support/inflector"
 require "active_support/concern"
 require "active_support/core_ext/enumerable"

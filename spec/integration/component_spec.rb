@@ -87,6 +87,22 @@ RSpec.describe ApplicationController, type: :controller do
       end
   end
 
+  it "allows child components to access ActionView helpers like safe_join" do
+    result = HelperAccessParentComponent.new(view_context).render_in
+    expect(result).to have_tag("p", text: "one, two, three")
+  end
+
+  it "allows directly rendered components to access ActionView helpers like safe_join" do
+    result = HelperAccessChildComponent.new(view_context).render_in
+    expect(result).to have_tag("p", text: "one, two, three")
+  end
+
+  it "renders nested components with splat attributes" do
+    result = SplatParentComponent.new(view_context).render_in
+    expect(result).to have_tag("a", with: { href: "/foo", class: "child-link" }, text: /Link One/)
+    expect(result).to have_tag("a", with: { href: "/bar", class: "child-link" }, text: /Link Two/)
+  end
+
   context "Context API" do
     it "allows parent to pass data to child via context" do
       result = Context::WrappingComponent.new(view_context).render_in
